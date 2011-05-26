@@ -31,20 +31,17 @@ int main(int argc, char **argv) try
 {
     // set the simulation domain ////////////////////////////////////////////////////////////////////////////
     DEM::Domain dom;
-    dom.CamPos = Vec3_t(0.0,20.0,3.0); 
+    dom.CamPos = Vec3_t(0.0,30.0,6.0); 
     dom.GenSpheres  (-1, 10, 10, 3.0, "HCP", 1000, 0.9,1.0);
-    dom.GenOpenBox (-2,15.0,15.0,10.0,0.1,1.0);
+    dom.Center();
+    dom.AddCylinder (-2, /*X0*/Vec3_t(0.0,0.0,-6.0), /*R0*/10.0, /*X1*/Vec3_t(0.0,0.0,4.0), /*R1*/10.0, 0.1, 3.0);
+    dom.AddPlane    (-3, Vec3_t(0.0,0.0,-6.0), 0.1, 20.0, 20.0, 1.0);
     dom.GetParticle(-2)->FixVeloc();
     dom.GetParticle(-3)->FixVeloc();
-    dom.GetParticle(-4)->FixVeloc();
-    dom.GetParticle(-5)->FixVeloc();
-    dom.GetParticle(-6)->FixVeloc();
 
-    Vec3_t pos(0.0,0.0,10.0);
-    dom.AddDrill (-7,pos,0.1,5.0,10.0,3.0);
-    dom.GetParticle(-7)->FixVeloc();
-
-    dom.WriteBPY("drill");
+    //dom.AddCylinder (-4, /*X0*/Vec3_t(0.0,0.0,11.0), /*R0*/3.0, /*X1*/Vec3_t(0.0,0.0,6.0), /*R1*/0.001, 0.2, 1.0);
+    //dom.GetParticle(-4)->FixVeloc();
+    //dom.GetParticle(-4)->vzf=false;
 
     for (size_t i=0;i<dom.Particles.Size();i++)
     {
@@ -52,11 +49,33 @@ int main(int argc, char **argv) try
         dom.Particles[i]->Ff = 0.0,0.0,-dom.Particles[i]->Props.m*9.8;
     }
 
-    dom.Solve(10.0,1.0e-3,0.1,NULL,NULL,"drilla",true);
+    // properties of particles prior the triaxial test
+    double dt = 1.0e-3;
+    double Kn = 1.0e5;
+    double Kt = 5.0e4;
+    double Gn = 16.0;
+    double Gt = 8.0;
+    double Mu = 0.4;
+    Dict B;
+    B.Set(-1,"Kn Kt Mu Gn Gt",Kn,Kt,Mu,Gn,Gt);
+    B.Set(-2,"Kn Kt Mu Gn Gt",Kn,Kt,Mu,Gn,Gt);
+    B.Set(-3,"Kn Kt Mu Gn Gt",Kn,Kt,Mu,Gn,Gt);
+    B.Set(-4,"Kn Kt Mu Gn Gt",Kn,Kt,Mu,Gn,Gt);
+    dom.SetProps(B);
 
-    dom.GetParticle(-7)->vzf=false;
+    dom.Solve(10.0,dt,0.1,NULL,NULL,"drilla",true);
     
-    dom.Solve(20.0,1.0e-3,0.1,NULL,NULL,"drillb",true);
+    Vec3_t Xmin,Xmax;
+    dom.BoundingBox(Xmin,Xmax);
+    dom.AddCylinder(-4, /*X0*/Vec3_t(0.0,0.0,Xmax(2)+3.0+0.2), /*R0*/2.0, /*X1*/Vec3_t(0.0,0.0,Xmax(2)+0.2), /*R1*/0.001, 0.2, 3.0);
+    dom.GetParticle(-4)->Initialize(dom.Particles.Size()-1);
+    dom.GetParticle(-4)->InitializeVelocity(dt);
+    dom.GetParticle(-4)->Ff = 0.0,0.0,-dom.GetParticle(-4)->Props.m*9.8;
+    dom.GetParticle(-4)->FixVeloc();
+    dom.GetParticle(-4)->vzf=false;
+
+    
+    dom.Solve(20.0,dt,0.1,NULL,NULL,"drillb",true);
     return 0;
 }
 MECHSYS_CATCH

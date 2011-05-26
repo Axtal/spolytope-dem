@@ -16,6 +16,9 @@ SUFFIXES =
 
 .SUFFIXES: .hpux_make_needs_suffix_list
 
+# Produce verbose output by default.
+VERBOSE = 1
+
 # Suppress display of executed commands.
 $(VERBOSE).SILENT:
 
@@ -97,6 +100,20 @@ preinstall/fast:
 depend:
 	cd /home/sergio/spolytope-dem && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
+
+# Convenience name for target.
+dem/CMakeFiles/cone.dir/rule:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/cone.dir/rule
+.PHONY : dem/CMakeFiles/cone.dir/rule
+
+# Convenience name for target.
+cone: dem/CMakeFiles/cone.dir/rule
+.PHONY : cone
+
+# fast build rule for target.
+cone/fast:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/cone.dir/build.make dem/CMakeFiles/cone.dir/build
+.PHONY : cone/fast
 
 # Convenience name for target.
 dem/CMakeFiles/david.dir/rule:
@@ -209,6 +226,30 @@ torus: dem/CMakeFiles/torus.dir/rule
 torus/fast:
 	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/torus.dir/build.make dem/CMakeFiles/torus.dir/build
 .PHONY : torus/fast
+
+cone.o: cone.cpp.o
+.PHONY : cone.o
+
+# target to build an object file
+cone.cpp.o:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/cone.dir/build.make dem/CMakeFiles/cone.dir/cone.cpp.o
+.PHONY : cone.cpp.o
+
+cone.i: cone.cpp.i
+.PHONY : cone.i
+
+# target to preprocess a source file
+cone.cpp.i:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/cone.dir/build.make dem/CMakeFiles/cone.dir/cone.cpp.i
+.PHONY : cone.cpp.i
+
+cone.s: cone.cpp.s
+.PHONY : cone.s
+
+# target to generate assembly for a file
+cone.cpp.s:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/cone.dir/build.make dem/CMakeFiles/cone.dir/cone.cpp.s
+.PHONY : cone.cpp.s
 
 david.o: david.cpp.o
 .PHONY : david.o
@@ -408,6 +449,7 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... cone"
 	@echo "... david"
 	@echo "... drill"
 	@echo "... edit_cache"
@@ -418,6 +460,9 @@ help:
 	@echo "... soniattt"
 	@echo "... testvoro"
 	@echo "... torus"
+	@echo "... cone.o"
+	@echo "... cone.i"
+	@echo "... cone.s"
 	@echo "... david.o"
 	@echo "... david.i"
 	@echo "... david.s"

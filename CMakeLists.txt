@@ -67,3 +67,4 @@ endif(MECHSYS_FOUND)
 ### SUB DIRECTORIES #####################################################################################
 
 SUBDIRS(dem)
+SUBDIRS(lbm)

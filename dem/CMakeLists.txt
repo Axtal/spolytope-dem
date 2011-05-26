@@ -24,7 +24,8 @@ SET(PROGS
     fracture
     david
     drill
-    torus)
+    torus
+    cone)
 
 FOREACH(var ${PROGS})
     ADD_EXECUTABLE        (${var} "${var}.cpp")

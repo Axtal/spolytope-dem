@@ -1,0 +1,6 @@
+400   = nx;
+400   = nx;
+1.0   = rhomin;
+1.0  = rhomax;
+10000 = Tf;
+50    = dtOut;
