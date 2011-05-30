@@ -161,11 +161,18 @@ int main(int argc, char **argv) try
         double DX = nx*dx/2.0;
         for (size_t j=0;j<2;j++)
         {
-            for (size_t k=0;k<2;k++)
+            //for (size_t k=0;k<2;k++)
+            //{
+		        //double xc = grains["Xc"][i]*DX+j*DX;
+		        //double yc = grains["Yc"][i]*DX+(k+1)*DX;
+		        //double r  = grains["R" ][i]*DX*0.9;
+                //Dom.Lat.SolidDisk(Vec3_t(xc,yc,0.0),r);
+            //}
+            for (size_t k=0;k<3;k++)
             {
 		        double xc = grains["Xc"][i]*DX+j*DX;
-		        double yc = grains["Yc"][i]*DX+(k+1)*DX;
-		        double r  = grains["R" ][i]*DX*0.9;
+		        double yc = grains["Yc"][i]*DX+k*DX;
+		        double r  = grains["R" ][i]*DX*0.8;
                 Dom.Lat.SolidDisk(Vec3_t(xc,yc,0.0),r);
             }
         }

@@ -78,8 +78,8 @@ void Setup (Domain & dom, void * UD)
     dat.Npl = 0;
     for (size_t i=0;i<dom.Particles.Size();i++)
     {
-        if (dom.Particles[i]->X(0) > dat.Xmax(0)) dat.Npr++;
-        if (dom.Particles[i]->X(0) > dat.xlim)    dat.Npl++;
+        if (dom.Particles[i]->X(0) > dat.Xmax(0) && dom.Particles[i]->IsFree()) dat.Npr++;
+        if (dom.Particles[i]->X(0) > dat.xlim    && dom.Particles[i]->IsFree()) dat.Npl++;
         dom.Particles[i]->Ff = 0.0,0.0,0.0;
         double delta;
         delta =   dat.Xmin(0) - dom.Particles[i]->X(0) + dom.Particles[i]->R;
@@ -116,22 +116,45 @@ void Report(Domain & dom, void * UD)
         String fs;
         fs.Printf("colloid_n_particles.res");
         dat.oss_ss.open(fs.CStr(),std::ios::out);
-        dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "Npl" << Util::_8s << "Npr" <<"\n";
+        dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "Npl" << Util::_8s << "Npr" <<std::endl;
     }
-    dat.oss_ss << dom.Time << Util::_8s << dat.Npl << Util::_8s << dat.Npr << std::endl << std::flush;
+    dat.oss_ss << dom.Time << Util::_8s << dat.Npl << Util::_8s << dat.Npr << std::endl;
 }
 
 int main(int argc, char **argv) try
 {
+    String filekey  (argv[1]);
+    String filename (filekey+".inp");
+    if (!Util::FileExists(filename)) throw new Fatal("File <%s> not found",filename.CStr());
+    std::ifstream infile(filename.CStr());
+
+    bool   Render = true;
     size_t nx     = 400;
     size_t ny     = 400;
     double nu     = 0.1;
     double dx     = 1.0;
     double dt     = 1.0;    
-    double vb     = 0.01;
+    double vb     = 0.1;
     double rc     = 5.0;
-    double xlim   = 1.1*rc;
     double Kn     = 1.0e2;
+    double Tf     = 1.0e6;
+    double dtOut  = 1.0e4;
+    {
+        infile >> Render;    infile.ignore(200,'\n');
+        infile >> nx    ;    infile.ignore(200,'\n');
+        infile >> ny    ;    infile.ignore(200,'\n');  
+        infile >> nu    ;    infile.ignore(200,'\n');  
+        infile >> dx    ;    infile.ignore(200,'\n');  
+        infile >> dt    ;    infile.ignore(200,'\n');  
+        infile >> vb    ;    infile.ignore(200,'\n');  
+        infile >> rc    ;    infile.ignore(200,'\n');  
+        infile >> Kn    ;    infile.ignore(200,'\n');  
+        infile >> Tf    ;    infile.ignore(200,'\n');  
+        infile >> dtOut ;    infile.ignore(200,'\n');  
+    }               
+
+
+    double xlim   = 1.1*rc;
     Domain Dom(D2Q9, nu, iVec3_t(nx,ny,1), dx, dt);
     UserData dat;
     Dom.UserData = &dat;
@@ -143,6 +166,8 @@ int main(int argc, char **argv) try
     dat.vp       = 0.0*vb;
     dat.alt      = 1;
     dat.Kn       = Kn;
+    dat.Npr      = 0;
+    dat.Npl      = 0;
 
     //Assigning the left and right cells
     for (size_t i=0;i<ny;i++)
@@ -173,7 +198,7 @@ int main(int argc, char **argv) try
 	{
 		double xc = grains["Xc"][i]*nx+0.1*nx;
 		double yc = grains["Yc"][i]*ny;
-		double r  = grains["R" ][i]*nx*0.9;
+		double r  = grains["R" ][i]*nx*0.8;
         Dom.AddDisk(0,Vec3_t(xc,yc,0.0),OrthoSys::O,OrthoSys::O,3.0,r,1.0);
         Dom.Particles[Dom.Particles.Size()-1]->FixVelocity();
         Dom.Particles[Dom.Particles.Size()-1]->Kn = Kn;
@@ -199,7 +224,7 @@ int main(int argc, char **argv) try
     //Solving
     Dom.Time = 0.0;
 
-    Dom.Solve(100000.0,1000.0,Setup,Report,"colloid");
+    Dom.Solve(Tf,dtOut,Setup,Report,"colloid",Render);
     dat.oss_ss.close();
  
 }
