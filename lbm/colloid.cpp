@@ -129,24 +129,28 @@ int main(int argc, char **argv) try
     std::ifstream infile(filename.CStr());
 
     bool   Render = true;
+    size_t seed   = 1000;
     size_t nx     = 400;
     size_t ny     = 400;
     double nu     = 0.1;
     double dx     = 1.0;
     double dt     = 1.0;    
     double vb     = 0.1;
+    double por    = 0.5;
     double rc     = 5.0;
     double Kn     = 1.0e2;
     double Tf     = 1.0e6;
     double dtOut  = 1.0e4;
     {
         infile >> Render;    infile.ignore(200,'\n');
+        infile >> seed  ;    infile.ignore(200,'\n');
         infile >> nx    ;    infile.ignore(200,'\n');
         infile >> ny    ;    infile.ignore(200,'\n');  
         infile >> nu    ;    infile.ignore(200,'\n');  
         infile >> dx    ;    infile.ignore(200,'\n');  
         infile >> dt    ;    infile.ignore(200,'\n');  
         infile >> vb    ;    infile.ignore(200,'\n');  
+        infile >> por   ;    infile.ignore(200,'\n');  
         infile >> rc    ;    infile.ignore(200,'\n');  
         infile >> Kn    ;    infile.ignore(200,'\n');  
         infile >> Tf    ;    infile.ignore(200,'\n');  
@@ -192,17 +196,44 @@ int main(int argc, char **argv) try
     }
 
 	// Set grains
-	Table grains;
-	grains.Read("circles.out");
-	for (size_t i=0; i<grains["Xc"].Size(); ++i)
-	{
-		double xc = grains["Xc"][i]*nx+0.1*nx;
-		double yc = grains["Yc"][i]*ny;
-		double r  = grains["R" ][i]*nx*0.8;
+	//Table grains;
+	//grains.Read("circles.out");
+	//for (size_t i=0; i<grains["Xc"].Size(); ++i)
+	//{
+		//double xc = grains["Xc"][i]*nx+0.1*nx;
+		//double yc = grains["Yc"][i]*ny;
+		//double r  = grains["R" ][i]*nx*0.8;
+        //Dom.AddDisk(0,Vec3_t(xc,yc,0.0),OrthoSys::O,OrthoSys::O,3.0,r,1.0);
+        //Dom.Particles[Dom.Particles.Size()-1]->FixVelocity();
+        //Dom.Particles[Dom.Particles.Size()-1]->Kn = Kn;
+        //Dom.Particles[Dom.Particles.Size()-1]->ImprintDisk(Dom.Lat);
+	//}
+    srand(seed);
+    while (1-Dom.Lat.SolidFraction()>por)
+    {
+        double xc = 0.1*nx*dx + (nx*dx - 0.1*nx*dx)*double(rand())/RAND_MAX;
+        double yc = 0.0*ny*dx + (ny*dx - 0.0*ny*dx)*double(rand())/RAND_MAX;
+        double r  = 0.05*nx*dx;
+        Vec3_t X(xc,yc,0.0);
+        bool invalid = false;
+        for (size_t i=0;i<Dom.Particles.Size();i++)
+        {
+            if (norm(Dom.Particles[i]->X - X) < r)
+            {
+                invalid = true;
+                break;
+            }
+        }
+        if (invalid) continue;
         Dom.AddDisk(0,Vec3_t(xc,yc,0.0),OrthoSys::O,OrthoSys::O,3.0,r,1.0);
         Dom.Particles[Dom.Particles.Size()-1]->FixVelocity();
         Dom.Particles[Dom.Particles.Size()-1]->Kn = Kn;
-	}
+        Dom.Particles[Dom.Particles.Size()-1]->ImprintDisk(Dom.Lat);
+    }
+
+    
+
+    std::cout << 1-Dom.Lat.SolidFraction() << std::endl;
 
     for (double y=0.05*dat.Xmax(1);y<0.95*dat.Xmax(1);y+=4.0*rc)
     {
