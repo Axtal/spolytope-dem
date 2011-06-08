@@ -213,12 +213,15 @@ int main(int argc, char **argv) try
     {
         double xc = 0.1*nx*dx + (nx*dx - 0.1*nx*dx)*double(rand())/RAND_MAX;
         double yc = 0.0*ny*dx + (ny*dx - 0.0*ny*dx)*double(rand())/RAND_MAX;
-        double r  = 0.05*nx*dx;
+        double Rmin = 0.02;
+        double Rmax = 0.07;
+        double r  = ((Rmin*Rmax/(Rmax - double(rand())/RAND_MAX*(Rmax - Rmin))))*nx*dx;
         Vec3_t X(xc,yc,0.0);
         bool invalid = false;
         for (size_t i=0;i<Dom.Particles.Size();i++)
         {
-            if (norm(Dom.Particles[i]->X - X) < r)
+            //if (norm(Dom.Particles[i]->X - X) < std::min(r,Dom.Particles[i]->R))
+            if (norm(Dom.Particles[i]->X - X) < r + Dom.Particles[i]->R)
             {
                 invalid = true;
                 break;
@@ -230,8 +233,6 @@ int main(int argc, char **argv) try
         Dom.Particles[Dom.Particles.Size()-1]->Kn = Kn;
         Dom.Particles[Dom.Particles.Size()-1]->ImprintDisk(Dom.Lat);
     }
-
-    
 
     std::cout << 1-Dom.Lat.SolidFraction() << std::endl;
 

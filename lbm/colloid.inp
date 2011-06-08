@@ -5,9 +5,9 @@
 0.1     nu   
 1.0     dx   
 1.0     dt    
-0.1     vb   
+0.02    vb   
 0.6     por   
 5.0     rc   
 1.0e2   Kn
-1.0e6   Tf
-1.0e4   dtOut
+1.0e4   Tf
+1.0e2   dtOut
