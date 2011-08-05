@@ -33,6 +33,7 @@ struct UserData
     size_t         alt;
     size_t         Npr;
     size_t         Npl;
+    size_t          nr;
     double        vmax; 
     double          Kn; 
     double        xlim;
@@ -116,9 +117,29 @@ void Report(Domain & dom, void * UD)
         String fs;
         fs.Printf("colloid_n_particles.res");
         dat.oss_ss.open(fs.CStr(),std::ios::out);
-        dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "Npl" << Util::_8s << "Npr" <<std::endl;
+        dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "Npl" << Util::_8s << "Npr" << Util::_8s << "PGrad" << Util::_8s << "MassFlux" << Util::_8s << "Porosity" << std::endl;
     }
-    dat.oss_ss << dom.Time << Util::_8s << dat.Npl << Util::_8s << dat.Npr << std::endl;
+    double MassFlux = 0.0;
+    double Density  = 0.0;
+    for (size_t i = 0;i < dom.Lat.Ndim(1) ; i++)
+    {
+        Vec3_t V;
+        double rho = dom.Lat.GetCell(iVec3_t(0,i,0))->VelDen(V);
+        Density  += rho;
+        MassFlux += rho*norm(V);
+    }
+    Density /=dom.Lat.Ndim(1);
+    MassFlux/=dom.Lat.Ndim(1);
+
+    double As = 0.0;
+    for (size_t i=0;i<dom.Particles.Size();i++)
+    {
+        double r = dom.Particles[i]->R;
+        if (dom.Particles[i]->X(0) - r > dat.nr*dat.rc) As += M_PI*r*r;
+    }
+    double porosity = 1.0 - As/((dat.Xmax(0) - dat.nr*dat.rc)*dat.Xmax(1));
+
+    dat.oss_ss << dom.Time << Util::_8s << dat.Npl << Util::_8s << dat.Npr << Util::_8s << fabs(Density - 1.0) << Util::_8s << MassFlux << Util::_8s << porosity << std::endl;
 }
 
 int main(int argc, char **argv) try
@@ -158,7 +179,7 @@ int main(int argc, char **argv) try
     }               
 
 
-    double xlim   = 1.1*rc;
+    double xlim   = 2.0*rc;
     Domain Dom(D2Q9, nu, iVec3_t(nx,ny,1), dx, dt);
     UserData dat;
     Dom.UserData = &dat;
@@ -172,6 +193,7 @@ int main(int argc, char **argv) try
     dat.Kn       = Kn;
     dat.Npr      = 0;
     dat.Npl      = 0;
+    dat.nr       = 10;
 
     //Assigning the left and right cells
     for (size_t i=0;i<ny;i++)
@@ -209,19 +231,24 @@ int main(int argc, char **argv) try
         //Dom.Particles[Dom.Particles.Size()-1]->ImprintDisk(Dom.Lat);
 	//}
     srand(seed);
-    while (1-Dom.Lat.SolidFraction()>por)
+    size_t ntries = 0;
+    double n      = (nx*dx - dat.nr*rc)/(nx*dx);
+    while (1-Dom.Lat.SolidFraction()/n>por)
     {
-        double xc = 0.1*nx*dx + (nx*dx - 0.1*nx*dx)*double(rand())/RAND_MAX;
-        double yc = 0.0*ny*dx + (ny*dx - 0.0*ny*dx)*double(rand())/RAND_MAX;
+        ntries++;
+        if (ntries>1.0e4) throw new Fatal("Too many tries to achieved requested porosity, please increase it");
         double Rmin = 0.02;
-        double Rmax = 0.07;
+        double Rmax = 0.10;
         double r  = ((Rmin*Rmax/(Rmax - double(rand())/RAND_MAX*(Rmax - Rmin))))*nx*dx;
+        double DX = dat.nr*rc + r;
+        double xc = DX + (nx*dx - DX)*double(rand())/RAND_MAX;
+        double yc = 0.0*ny*dx + (ny*dx - 0.0*ny*dx)*double(rand())/RAND_MAX;
         Vec3_t X(xc,yc,0.0);
         bool invalid = false;
         for (size_t i=0;i<Dom.Particles.Size();i++)
         {
             //if (norm(Dom.Particles[i]->X - X) < std::min(r,Dom.Particles[i]->R))
-            if (norm(Dom.Particles[i]->X - X) < r + Dom.Particles[i]->R)
+            if (norm(Dom.Particles[i]->X - X) < r + Dom.Particles[i]->R + rc)
             {
                 invalid = true;
                 break;
@@ -234,11 +261,32 @@ int main(int argc, char **argv) try
         Dom.Particles[Dom.Particles.Size()-1]->ImprintDisk(Dom.Lat);
     }
 
-    std::cout << 1-Dom.Lat.SolidFraction() << std::endl;
+    std::cout << 1-Dom.Lat.SolidFraction()/n << std::endl;
+
+    //Writing correlation information
+    String fs;
+    fs.Printf("constriction.res");
+    std::ofstream os;
+    os.open(fs.CStr(),std::ios::out);
+    os << Util::_10_6  << "CR" << Util::_8s << "X" << Util::_8s << "Y" <<std::endl;
+    for (size_t i=0;i<Dom.Particles.Size()-1;i++)
+    {
+        for (size_t j=i+1;j<Dom.Particles.Size();j++)
+        {
+            double dist = norm(Dom.Particles[i]->X - Dom.Particles[j]->X);
+            double r1   = Dom.Particles[i]->R;
+            double r2   = Dom.Particles[j]->R;
+            double cons = dist - r1 - r2;
+            if (cons > 4*rc) continue;
+            Vec3_t ri   = (r1 + 0.5*cons)*(Dom.Particles[j]->X - Dom.Particles[i]->X)/dist + Dom.Particles[i]->X;
+            os << cons << Util::_8s << ri(0) << Util::_8s << ri(1) << std::endl;
+        }
+    }
+    os.close();
 
     for (double y=0.05*dat.Xmax(1);y<0.95*dat.Xmax(1);y+=4.0*rc)
     {
-        Dom.AddDisk(0,Vec3_t(xlim, y,0.0),Vec3_t(0.1*vb,0.0,0.0),OrthoSys::O,3.0,rc,1.0);
+        Dom.AddDisk(0,Vec3_t(xlim, y,0.0),Vec3_t(0.0,0.0,0.0),OrthoSys::O,3.0,rc,1.0);
         Dom.Particles[Dom.Particles.Size()-1]->Kn = Kn;
     }
 

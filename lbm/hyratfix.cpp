@@ -30,7 +30,9 @@ struct UserData
 {
     Vec3_t             g;
     Array<Cell *> Bottom;
+    Array<Cell *>    Top;
     double          Head;       ///< Current hydraulic head
+    double          Orig;       ///< Original hydraulic head
     double            Tf;
     double            Kn;
     double           ome;
@@ -44,9 +46,10 @@ struct UserData
 void Setup(Domain & dom, void * UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
-    for (size_t i=0;i<dom.Lat.Cells.Size();i++)
+    for (size_t j=0;j<dom.Lat.Size();j++)
+    for (size_t i=0;i<dom.Lat[j].Cells.Size();i++)
     {
-        Cell * c = dom.Lat.Cells[i];
+        Cell * c = dom.Lat[j].Cells[i];
         c->BForcef = c->Density()*dat.g;
     }
     if (dom.Time>dat.time)
@@ -54,12 +57,21 @@ void Setup(Domain & dom, void * UD)
         dat.time += dat.dtOut;
     }
     //double rho = dat.Head*fabs(sin(dat.ome*dom.Time))+54.0;
-    double rho = dat.Head*fabs(sin(dat.ome*dat.time))+54.0;
+    double rho = dat.Head*fabs(sin(dat.ome*dat.time))+dat.Orig;
     for (size_t i=0;i<dat.Bottom.Size();i++)
     {
         dat.Bottom[i]->Initialize(rho,OrthoSys::O);
     }
-
+	// Cells with prescribed density
+	for (size_t i=0; i<dat.Top.Size(); ++i)
+	{
+		Cell * c = dat.Top[i];
+		if (c->IsSolid) continue;
+		double vy = -1.0 + (c->F[0]+c->F[1]+c->F[3] + 2.0*(c->F[2]+c->F[5]+c->F[6]))/c->RhoBC;
+		c->F[4] = c->F[2] - (2.0/3.0)*c->RhoBC*vy; 
+		c->F[8] = c->F[6] - (1.0/6.0)*c->RhoBC*vy + 0.5*(c->F[3]-c->F[1]);
+		c->F[7] = c->F[5] - (1.0/6.0)*c->RhoBC*vy - 0.5*(c->F[3]-c->F[1]);
+    }
 }
 
 void Report(Domain & dom, void * UD)
@@ -67,20 +79,20 @@ void Report(Domain & dom, void * UD)
     UserData & dat = (*static_cast<UserData *>(UD));
     double water = 0.0;
     double Sr    = 0.0;
-    for (size_t i=0;i<dom.Lat.Cells.Size();i++)
+    for (size_t i=0;i<dom.Lat[0].Cells.Size();i++)
     {
-        Cell * c = dom.Lat.Cells[i];
+        Cell * c = dom.Lat[0].Cells[i];
         water   += c->Density();
         if (c->Density()>500.0) Sr+=1.0;
     }
-    Sr/=(dom.Lat.Cells.Size()*(1-dom.Lat.SolidFraction()));
+    Sr/=(dom.Lat[0].Cells.Size()*(1-dom.Lat[0].SolidFraction()));
     double head = 0.0;
-    for (size_t i=0;i<dom.Lat.Ndim(0);i++)
+    for (size_t i=0;i<dom.Lat[0].Ndim(0);i++)
     {
-        head += dom.Lat.GetCell(iVec3_t(i,1,0))->Density();
+        head += dom.Lat[0].GetCell(iVec3_t(i,1,0))->Density();
     }
-    head/=dom.Lat.Ndim(0);
-    double rho = dat.Head*fabs(sin(dat.ome*dom.Time))+54.0;
+    head/=dom.Lat[0].Ndim(0);
+    double rho = dat.Head*fabs(sin(dat.ome*dom.Time))+dat.Orig;
     dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << head << Util::_8s << water << Util::_8s << Sr << std::endl;
 }
 
@@ -91,10 +103,11 @@ int main(int argc, char **argv) try
     if (!Util::FileExists(filename)) throw new Fatal("File <%s> not found",filename.CStr());
     std::ifstream infile(filename.CStr());
 
+    bool   Render = true;
     size_t nx   = 200;
     size_t ny   = 200;
     double Gs   =-200;
-    double nu   = 0.01;
+    double nu   = 0.05;
     double dx   = 1.0;
     double dt   = 1.0;
     double Tf   = 10000.0;
@@ -102,26 +115,36 @@ int main(int argc, char **argv) try
     double rho  = 200.0;
     double ome  = 2.0;
     double Head = 500.0;
+    double Orig = 54.0;
+    double por  = 0.6;
+    double seed = 1000;
 
     {
-        infile >> nx;    infile.ignore(200,'\n');
-        infile >> ny;    infile.ignore(200,'\n');
-        infile >> Gs;    infile.ignore(200,'\n');
-        infile >> nu;    infile.ignore(200,'\n');
-        infile >> dx;    infile.ignore(200,'\n');
-        infile >> dt;    infile.ignore(200,'\n');
-        infile >> Tf;    infile.ignore(200,'\n');
-        infile >> dtOut; infile.ignore(200,'\n');
-        infile >> rho;   infile.ignore(200,'\n'); 
-        infile >> ome;   infile.ignore(200,'\n');
-        infile >> Head;  infile.ignore(200,'\n');
+        infile >> Render;    infile.ignore(200,'\n');
+        infile >> nx;        infile.ignore(200,'\n');
+        infile >> ny;        infile.ignore(200,'\n');
+        infile >> Gs;        infile.ignore(200,'\n');
+        infile >> nu;        infile.ignore(200,'\n');
+        infile >> dx;        infile.ignore(200,'\n');
+        infile >> dt;        infile.ignore(200,'\n');
+        infile >> Tf;        infile.ignore(200,'\n');
+        infile >> dtOut;     infile.ignore(200,'\n');
+        infile >> rho;       infile.ignore(200,'\n'); 
+        infile >> ome;       infile.ignore(200,'\n');
+        infile >> Head;      infile.ignore(200,'\n');
+        infile >> Orig;      infile.ignore(200,'\n');
+        infile >> por;       infile.ignore(200,'\n');
+        infile >> seed;      infile.ignore(200,'\n');
     }
+    Array<double> nua(2);
+    nua[0] = nu;
+    nua[1] = nu;
 
-    Domain Dom(D2Q9, nu, iVec3_t(nx,ny,1), dx, dt);
+    Domain Dom(D2Q9, nua, iVec3_t(nx,ny,1), dx, dt);
     UserData dat;
     Dom.UserData = &dat;
-    Dom.Lat.G    = -200.0;
-    Dom.Lat.Gs   =  Gs;
+    Dom.Lat[0].G    = -200.0;
+    Dom.Lat[0].Gs   =  Gs;
     dat.g        = 0.0,-0.001,0.0;
     dat.Tf       = Tf;
     dat.Xmin     = 0.0,0.0,0.0;
@@ -129,65 +152,113 @@ int main(int argc, char **argv) try
     dat.Kn       = 1.0e4*rho/500.0;
     dat.ome      = 2*M_PI*ome/Tf;
     dat.Head     = Head;
+    dat.Orig     = Orig;
     dat.dtOut    = dtOut;
     dat.time     = 0.0;
+
+    Dom.Lat[1].G = 0.0;
+    Dom.Lat[1].Gs= 0.0;
+    Dom.Gmix     = 0.001;
+
 
     //Set solid boundaries
     for (size_t i=0;i<nx;i++)
     {
-        dat.Bottom.Push(Dom.Lat.GetCell(iVec3_t(i,0   ,0)));
-        Dom.Lat.GetCell(iVec3_t(i,ny-1,0))->IsSolid = true;
+        dat.Bottom.Push(Dom.Lat[0].GetCell(iVec3_t(i,0   ,0)));
+        Dom.Lat[0].GetCell(iVec3_t(i,ny-1,0))->IsSolid = true;
+        Dom.Lat[1].GetCell(iVec3_t(i,0   ,0))->IsSolid = true;
+        dat.Top.Push   (Dom.Lat[1].GetCell(iVec3_t(i,ny-1,0)));
+        dat.Top[i]->RhoBC = 100.0;
     }
     for (size_t i=0;i<ny;i++)
     {
-        Dom.Lat.GetCell(iVec3_t(0   ,i,0))->IsSolid = true;
-        Dom.Lat.GetCell(iVec3_t(nx-1,i,0))->IsSolid = true;
+        Dom.Lat[0].GetCell(iVec3_t(0   ,i,0))->IsSolid = true;
+        Dom.Lat[0].GetCell(iVec3_t(nx-1,i,0))->IsSolid = true;
+        Dom.Lat[1].GetCell(iVec3_t(0   ,i,0))->IsSolid = true;
+        Dom.Lat[1].GetCell(iVec3_t(nx-1,i,0))->IsSolid = true;
     }
 
     for (int i=0;i<nx;i++)
     for (int j=0;j<ny;j++)
     {
         Vec3_t v0(0.0,0.0,0.0);
-        Dom.Lat.GetCell(iVec3_t(i,j,0))->Initialize(  54.0,v0);
-        //if (j<ny/8.0) Dom.Lat.GetCell(iVec3_t(i,j,0))->Initialize(1300.0,v0);
+        Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(  0.1,v0);
+        Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(  100.0,v0);
+        //if (j==1||j==2) Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(1300.0,v0);
         //else          Dom.Lat.GetCell(iVec3_t(i,j,0))->Initialize( 54.0,v0);
     }
 
-	// Set grains
-	Table grains;
-	grains.Read("circles.out");
-	for (size_t i=0; i<grains["Xc"].Size(); ++i)
-	{
-        double DX = nx*dx/2.0;
-        for (size_t j=0;j<2;j++)
+    srand(seed);
+    size_t ntries = 0;
+    double n      = 1.0/6.0;
+    Array<double> Radii;
+    Array<Vec3_t> Xs;
+    double        rc = 0.0;
+    while (1-Dom.Lat[0].SolidFraction()/n>por)
+    {
+        ntries++;
+        if (ntries>1.0e4) throw new Fatal("Too many tries to achieved requested porosity, please increase it");
+        double Rmax = 0.02;
+        double Rmin = 0.5*Rmax;
+        double r  = ((Rmin*Rmax/(Rmax - double(rand())/RAND_MAX*(Rmax - Rmin))))*nx*dx;
+        double DY = 1.0/6.0*ny*dx;
+        double yc = DY + (ny*dx/3.0 - DY)*double(rand())/RAND_MAX;
+        double xc = nx*dx*double(rand())/RAND_MAX;
+        Vec3_t X(xc,yc,0.0);
+        bool invalid = false;
+        for (size_t i=0;i<Radii.Size();i++)
         {
-            //for (size_t k=0;k<2;k++)
-            //{
-		        //double xc = grains["Xc"][i]*DX+j*DX;
-		        //double yc = grains["Yc"][i]*DX+(k+1)*DX;
-		        //double r  = grains["R" ][i]*DX*0.9;
-                //Dom.Lat.SolidDisk(Vec3_t(xc,yc,0.0),r);
-            //}
-            for (size_t k=0;k<3;k++)
+            if (norm(Xs[i] - X) < r + Radii[i] + rc)
             {
-		        double xc = grains["Xc"][i]*DX+j*DX;
-		        double yc = grains["Yc"][i]*DX+k*DX;
-		        double r  = grains["R" ][i]*DX*0.8;
-                Dom.Lat.SolidDisk(Vec3_t(xc,yc,0.0),r);
+                invalid = true;
+                break;
             }
         }
-		//double xc = grains["Xc"][i]*nx*dx;
-		//double yc = grains["Yc"][i]*nx*dx+2.0*DX;
-		//double r  = grains["R" ][i]*nx*dx*0.9;
-        //Dom.Lat.SolidDisk(Vec3_t(xc,yc,0.0),r);
-	}
+        if (invalid) continue;
+        Dom.Lat[0].SolidDisk(Vec3_t(xc,yc,0.0),r);
+        Dom.Lat[1].SolidDisk(Vec3_t(xc,yc,0.0),r);
+        Radii.Push(r);
+        Xs.Push(Vec3_t(xc,yc,0.0));
+    }
+
+    ntries = 0;
+    n      = 2.0/3.0;
+    Radii.Resize(0);
+    Xs.Resize(0);
+
+    while (1-Dom.Lat[0].SolidFraction()/n>por)
+    {
+        ntries++;
+        if (ntries>1.0e4) throw new Fatal("Too many tries to achieved requested porosity, please increase it");
+        double Rmax = 0.03;
+        double Rmin = 0.3*Rmax;
+        double r  = ((Rmin*Rmax/(Rmax - double(rand())/RAND_MAX*(Rmax - Rmin))))*nx*dx;
+        double DY = 1.0/3.0*ny*dx;
+        double yc = DY + (ny*dx - DY)*double(rand())/RAND_MAX;
+        double xc = nx*dx*double(rand())/RAND_MAX;
+        Vec3_t X(xc,yc,0.0);
+        bool invalid = false;
+        for (size_t i=0;i<Radii.Size();i++)
+        {
+            if (norm(Xs[i] - X) < r + Radii[i] + rc)
+            {
+                invalid = true;
+                break;
+            }
+        }
+        if (invalid) continue;
+        Dom.Lat[0].SolidDisk(Vec3_t(xc,yc,0.0),r);
+        Dom.Lat[1].SolidDisk(Vec3_t(xc,yc,0.0),r);
+        Radii.Push(r);
+        Xs.Push(Vec3_t(xc,yc,0.0));
+    }
 
     //Solving
     String fs;
     fs.Printf("water_retention.res");
     dat.oss_ss.open(fs.CStr(),std::ios::out);
     dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "PDen" << Util::_8s << "Head" << Util::_8s << "Water" << Util::_8s << "Sr" <<std::endl;
-    Dom.Solve(Tf,dtOut,Setup,Report,"hyratfix");
+    Dom.Solve(Tf,dtOut,Setup,Report,"hyratfix",Render);
     dat.oss_ss.close();
 }
 MECHSYS_CATCH
