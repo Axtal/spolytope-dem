@@ -58,6 +58,7 @@ void Setup(Domain & dom, void * UD)
     }
     //double rho = dat.Head*fabs(sin(dat.ome*dom.Time))+54.0;
     double rho = dat.Head*fabs(sin(dat.ome*dat.time))+dat.Orig;
+    //std::cout << rho << std::endl;
     for (size_t i=0;i<dat.Bottom.Size();i++)
     {
         dat.Bottom[i]->Initialize(rho,OrthoSys::O);
@@ -92,7 +93,8 @@ void Report(Domain & dom, void * UD)
         head += dom.Lat[0].GetCell(iVec3_t(i,1,0))->Density();
     }
     head/=dom.Lat[0].Ndim(0);
-    double rho = dat.Head*fabs(sin(dat.ome*dom.Time))+dat.Orig;
+    double rho = dat.Head*fabs(sin(dat.ome*dat.time))+dat.Orig;
+    //std::cout << rho << " ";
     dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << head << Util::_8s << water << Util::_8s << Sr << std::endl;
 }
 
@@ -103,21 +105,22 @@ int main(int argc, char **argv) try
     if (!Util::FileExists(filename)) throw new Fatal("File <%s> not found",filename.CStr());
     std::ifstream infile(filename.CStr());
 
-    bool   Render = true;
-    size_t nx   = 200;
-    size_t ny   = 200;
-    double Gs   =-200;
-    double nu   = 0.05;
-    double dx   = 1.0;
-    double dt   = 1.0;
-    double Tf   = 10000.0;
-    double dtOut= 50.0;
-    double rho  = 200.0;
-    double ome  = 2.0;
-    double Head = 500.0;
-    double Orig = 54.0;
-    double por  = 0.6;
-    double seed = 1000;
+    bool   Render   = true;
+    size_t nx       = 200;
+    size_t ny       = 200;
+    double Gs       = -200;
+    double nu       = 0.05;
+    double dx       = 1.0;
+    double dt       = 1.0;
+    double Tf       = 10000.0;
+    double dtOut    = 50.0;
+    double HeadStep = 1000.0;
+    double rho      = 200.0;
+    double ome      = 2.0;
+    double Head     = 500.0;
+    double Orig     = 54.0;
+    double por      = 0.6;
+    double seed     = 1000;
 
     {
         infile >> Render;    infile.ignore(200,'\n');
@@ -129,6 +132,7 @@ int main(int argc, char **argv) try
         infile >> dt;        infile.ignore(200,'\n');
         infile >> Tf;        infile.ignore(200,'\n');
         infile >> dtOut;     infile.ignore(200,'\n');
+        infile >> HeadStep;  infile.ignore(200,'\n');
         infile >> rho;       infile.ignore(200,'\n'); 
         infile >> ome;       infile.ignore(200,'\n');
         infile >> Head;      infile.ignore(200,'\n');
@@ -153,7 +157,7 @@ int main(int argc, char **argv) try
     dat.ome      = 2*M_PI*ome/Tf;
     dat.Head     = Head;
     dat.Orig     = Orig;
-    dat.dtOut    = dtOut;
+    dat.dtOut    = HeadStep;
     dat.time     = 0.0;
 
     Dom.Lat[1].G = 0.0;
@@ -201,8 +205,8 @@ int main(int argc, char **argv) try
         double Rmax = 0.02;
         double Rmin = 0.5*Rmax;
         double r  = ((Rmin*Rmax/(Rmax - double(rand())/RAND_MAX*(Rmax - Rmin))))*nx*dx;
-        double DY = 1.0/6.0*ny*dx;
-        double yc = DY + (ny*dx/3.0 - DY)*double(rand())/RAND_MAX;
+        double DY = 0.0;
+        double yc = DY + (ny*dx/6.0 - DY)*double(rand())/RAND_MAX;
         double xc = nx*dx*double(rand())/RAND_MAX;
         Vec3_t X(xc,yc,0.0);
         bool invalid = false;
@@ -222,7 +226,7 @@ int main(int argc, char **argv) try
     }
 
     ntries = 0;
-    n      = 2.0/3.0;
+    n      = 1.0;
     Radii.Resize(0);
     Xs.Resize(0);
 
@@ -230,10 +234,10 @@ int main(int argc, char **argv) try
     {
         ntries++;
         if (ntries>1.0e4) throw new Fatal("Too many tries to achieved requested porosity, please increase it");
-        double Rmax = 0.03;
+        double Rmax = 0.04;
         double Rmin = 0.3*Rmax;
         double r  = ((Rmin*Rmax/(Rmax - double(rand())/RAND_MAX*(Rmax - Rmin))))*nx*dx;
-        double DY = 1.0/3.0*ny*dx;
+        double DY = 1.0/6.0*ny*dx;
         double yc = DY + (ny*dx - DY)*double(rand())/RAND_MAX;
         double xc = nx*dx*double(rand())/RAND_MAX;
         Vec3_t X(xc,yc,0.0);
@@ -252,6 +256,7 @@ int main(int argc, char **argv) try
         Radii.Push(r);
         Xs.Push(Vec3_t(xc,yc,0.0));
     }
+    std::cout << 1-Dom.Lat[0].SolidFraction() << std::endl;
 
     //Solving
     String fs;
