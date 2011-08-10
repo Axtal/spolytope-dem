@@ -182,15 +182,6 @@ int main(int argc, char **argv) try
         Dom.Lat[1].GetCell(iVec3_t(nx-1,i,0))->IsSolid = true;
     }
 
-    for (int i=0;i<nx;i++)
-    for (int j=0;j<ny;j++)
-    {
-        Vec3_t v0(0.0,0.0,0.0);
-        Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(  0.1,v0);
-        Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(  100.0,v0);
-        //if (j==1||j==2) Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(1300.0,v0);
-        //else          Dom.Lat.GetCell(iVec3_t(i,j,0))->Initialize( 54.0,v0);
-    }
 
     srand(seed);
     size_t ntries = 0;
@@ -206,7 +197,7 @@ int main(int argc, char **argv) try
         double Rmin = 0.5*Rmax;
         double r  = ((Rmin*Rmax/(Rmax - double(rand())/RAND_MAX*(Rmax - Rmin))))*nx*dx;
         double DY = 0.0;
-        double yc = DY + (ny*dx/6.0 - DY)*double(rand())/RAND_MAX;
+        double yc = DY + (ny*dx/6.0 - DY)*double(rand())/RAND_MAX+r+dx;
         double xc = nx*dx*double(rand())/RAND_MAX;
         Vec3_t X(xc,yc,0.0);
         bool invalid = false;
@@ -257,6 +248,14 @@ int main(int argc, char **argv) try
         Xs.Push(Vec3_t(xc,yc,0.0));
     }
     std::cout << 1-Dom.Lat[0].SolidFraction() << std::endl;
+
+    for (int i=0;i<nx;i++)
+    for (int j=0;j<ny;j++)
+    {
+        Vec3_t v0(0.0,0.0,0.0);
+        Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(  0.1,v0);
+        Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(  100.0,v0);
+    }
 
     //Solving
     String fs;
