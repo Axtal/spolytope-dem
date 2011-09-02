@@ -1,0 +1,8 @@
+1   Render;
+100    N;    
+0.1   nu;    
+1.0e3   Tf;    
+1.0e1   dtOut; 
+1.0    Giso;  
+3.0    G;    
+0.0    th;    

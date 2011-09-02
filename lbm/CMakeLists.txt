@@ -20,7 +20,8 @@ SET(PROGS
     colloid
     hyrat
     hyratfix
-    test_write)
+    test_write
+    graflow)
 
 FOREACH(var ${PROGS})
     ADD_EXECUTABLE        (${var} "${var}.cpp")

@@ -13,8 +13,9 @@ struct UserData
 {
     Particle         * p1;  // Upper plane
     Particle         * p2;  // Lower plane
+    Array<Vec3_t *>    vm;  // pointer to the selected vertices
+    Vec3_t             L0;
     Vec3_t          force;  // Force on planes
-    double              S;  // Vertical separation of the planes
     std::ofstream  oss_ss;  // File to store the forces
 };
 
@@ -22,72 +23,48 @@ void Setup (DEM::Domain & dom, void *UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
     dat.force = 0.5*(dat.p2->F-dat.p1->F);
-    dat.S     = dat.p2->x(1)-dat.p1->x(1);
 }
 
-void Report (DEM::Domain & dom, void *UD)
+
+void ReportSimple(DEM::Domain & dom, void *UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
-    String fv;
-    fv.Printf    ("%s_%08d_particles.res",dom.FileKey.CStr(), dom.idx_out);
-    std::ofstream FV(fv.CStr());
-    FV <<  Util::_10_6 << "PID" << Util::_8s << "vx" << Util::_8s << "vy" << Util::_8s << "vz" << Util::_8s << "x" << Util::_8s << "y" << Util::_8s << "z" <<"\n";
-
-    for (size_t i=0; i<dom.Particles.Size(); i++)
-    {
-        if (dom.Particles[i]->IsFree())
-        {
-            FV << Util::_8s << dom.Particles[i]->Index << Util::_8s << dom.Particles[i]->v(0)   << Util::_8s << dom.Particles[i]->v(1) << Util::_8s << dom.Particles[i]->v(2)
-               << Util::_8s << dom.Particles[i]->x(0)  << Util::_8s << dom.Particles[i]->x(1)   << Util::_8s << dom.Particles[i]->x(2) << "\n";
-        }
-    }
-    FV.close();
-    size_t Nb  = dom.BInteractons.Size(); //Number of bonds
-    size_t Nbb = 0;                   //Number of broken bonds
-    if (Nb>0)
-    {
-        String fc;
-        fc.Printf    ("%s_%08d_bonds.res",dom.FileKey.CStr(), dom.idx_out);
-        std::ofstream FC(fc.CStr());
-        FC <<  Util::_10_6 << "Fx" << Util::_8s << "Fy" << Util::_8s << "Fz" <<  Util::_8s << "Area" << Util::_8s << "valid" << Util::_8s << "P1" <<  Util::_8s << "P2" <<"\n";
-
-        for (size_t i=0; i<dom.BInteractons.Size(); i++)
-        {
-            FC << Util::_8s << dom.BInteractons[i]->Fnet(0)   << Util::_8s << dom.BInteractons[i]->Fnet(1)   << Util::_8s <<  dom.BInteractons[i]->Fnet(2) 
-               << Util::_8s << dom.BInteractons[i]->Area      << Util::_8s << dom.BInteractons[i]->valid
-               << Util::_8s << dom.BInteractons[i]->P1->Index << Util::_8s << dom.BInteractons[i]->P2->Index << "\n";
-            if (!dom.BInteractons[i]->valid) Nbb++; //Add one broken bond if it is no longer valid
-        }
-        FC.close();
-
-        String fl;
-        fl.Printf    ("%s_%08d_clusters.res",dom.FileKey.CStr(), dom.idx_out);
-        std::ofstream FL(fl.CStr());
-        FL <<  Util::_10_6 << "Cluster" << Util::_8s << "Mass" << "\n";
-        FL <<  Util::_8s   << 0         << Util::_8s << dom.Ms << "\n";
-        for (size_t i=0;i<dom.Listofclusters.Size();i++)
-        {
-            double m = 0.0; //mass of the cluster
-            for (size_t j=0;j<dom.Listofclusters[i].Size();j++)
-            {
-                m+=dom.Particles[dom.Listofclusters[i][j]]->Props.m;
-            }
-            FL << Util::_8s << i+1 << Util::_8s << m << "\n"; 
-        }
-        FL.close();
-    }
     if (dom.idx_out==0)
     {
         String fs;
         fs.Printf("%s_walls.res",dom.FileKey.CStr());
         dat.oss_ss.open(fs.CStr());
-        dat.oss_ss << Util::_10_6 << "Time" << Util::_8s << "sx" << Util::_8s << "sy" << Util::_8s << "sz" << Util::_8s << "ez \n";
+        dat.oss_ss << Util::_10_6 << "Time" << Util::_8s << "Fx" << Util::_8s << "Fy" << Util::_8s << "Fz" << Util::_8s << "ez" << Util::_8s << "nu" << Util::_8s << "nu_ave" <<std::endl;
+        double tol = dat.L0(0)/40.0;
+        for (size_t i=0;i<dom.Particles.Size();i++)
+        {
+            for (size_t j=0;j<dom.Particles[i]->Verts.Size();j++)
+            {
+                double r = sqrt(pow((*dom.Particles[i]->Verts[j])(0),2) + pow((*dom.Particles[i]->Verts[j])(2),2));
+                if (fabs(r - 0.5*dat.L0(0))<tol)
+                {
+                    dat.vm.Push(dom.Particles[i]->Verts[j]);
+                }
+            }
+        }
     }
     else 
     {
         if (!dom.Finished) 
         {
-            dat.oss_ss << Util::_10_6 << dom.Time << Util::_8s << fabs(dat.force(0)) << Util::_8s << fabs(dat.force(1)) << Util::_8s << fabs(dat.force(2)) << Util::_8s << dat.S << std::endl;
+            Vec3_t Xmin, Xmax;
+            dom.BoundingBox(Xmin, Xmax);
+            double S      = (Xmax(1) - Xmin(1) - dat.L0(1))/dat.L0(1);
+            std::cout << Xmin << Xmax << dat.L0 << std::endl;
+            double nu     = -0.5*((Xmax(0) - Xmin(0) - dat.L0(0))/dat.L0(0) + (Xmax(2) - Xmin(2) - dat.L0(2))/dat.L0(2))/S;
+            double nu_ave = 0.0;
+            for (size_t i=0;i<dat.vm.Size();i++)
+            {
+                double r = sqrt(pow((*dat.vm[i])(0),2) + pow((*dat.vm[i])(2),2));
+                nu_ave += 2.0*r;
+            }
+            nu_ave = -(nu_ave/dat.vm.Size() - dat.L0(0))/(dat.L0(0)*S);
+            dat.oss_ss << Util::_10_6 << dom.Time << Util::_8s << fabs(dat.force(0)) << Util::_8s << fabs(dat.force(1)) << Util::_8s << fabs(dat.force(2)) << Util::_8s << S << Util::_8s << nu << Util::_8s << nu_ave <<  std::endl;
         }
         else
         {
@@ -154,43 +131,69 @@ int main(int argc, char **argv) try
     infile >> strf;               infile.ignore(200,'\n');
 
 
-    d.CamPos = Vec3_t(0.1*Lx, 0.7*(Lx+Ly+Lz), 0.15*Lz); // position of camera
+    double cam_x=1.1*Ly, cam_y=0.0, cam_z=0.0;
+    d.CamPos = cam_x, cam_y, cam_z;
     if (ptype=="voronoi")      d.AddVoroPack (-1, R, Lx,Ly,Lz, nx,ny,nz, rho, true, false, seed, 1.1);
     else if (ptype=="tetra")
     {
         Mesh::Unstructured mesh(/*NDim*/3);
-        mesh.GenBox  (/*O2*/false,/*V*/Lx*Ly*Lz/(0.5*nx*ny*nz),Lx,Ly,Lz);
+        //mesh.GenBox  (/*O2*/false,/*V*/Lx*Ly*Lz/(0.5*nx*ny*nz),Lx,Ly,Lz);
+        size_t n_divisions = 30;
+        mesh.Set(2*n_divisions,n_divisions+2, 1, 0);
+        mesh.SetReg (0,  -1, 0.25*M_PI*Lx*Lx*Ly/(0.3*nx*ny*nz),  0.0, 0.0, 0.0);  // id, tag, max{volume}, x, y, z <<<<<<< regions
+        //mesh.SetReg (0,  -1, 2.0,  0.0, 0.0, 0.0);  // id, tag, max{volume}, x, y, z <<<<<<< regions
+        Array<int> F1;
+        Array<int> F2;
+        for(size_t i=0; i<n_divisions; i++)
+        {
+            mesh.SetPnt(i              , 0, 0.5*Lx*cos(2*i*M_PI/n_divisions), -0.5*Ly, 0.5*Lx*sin(2*i*M_PI/n_divisions));
+            mesh.SetPnt(i+n_divisions  , 0, 0.5*Lx*cos(2*i*M_PI/n_divisions),  0.5*Ly, 0.5*Lx*sin(2*i*M_PI/n_divisions));
+            F1.Push(i);
+            F2.Push(2*n_divisions-1-i);
+        }
+        mesh.SetFac(0,0,F1);
+        mesh.SetFac(1,0,F2);
+        for(size_t i=0; i<n_divisions; i++)
+        {
+            //mesh.SetSeg(i               , 0, i            , (i+1)%n_divisions);
+            //mesh.SetSeg(i+   n_divisions, 0, i+n_divisions, (i+1)%n_divisions+n_divisions);
+            //mesh.SetSeg(i+ 2*n_divisions, 0, i            ,  i+n_divisions);
+            Array<int> F(4);
+            F = i+n_divisions, (i+1)%n_divisions + n_divisions, (i+1)%n_divisions, i;
+            mesh.SetFac(i+2, 0, F);
+        }
+        mesh.Generate();
         d.GenFromMesh (mesh,/*R*/R,/*rho*/rho,true,false);
     }
     else throw new Fatal("Packing for particle type not implemented yet");
     d.Alpha = 0.5*R;
     d.Center();
-    Vec3_t Xmin,Xmax;
-    d.BoundingBox(Xmin,Xmax);
-    d.AddPlane(-2, Vec3_t(0.0,0.0,Xmin(2)-R), R, Lx, Ly, rho);
-    d.AddPlane(-3, Vec3_t(0.0,0.0,Xmax(2)+R), R, Lx, Ly, rho);
+    d.GenBoundingPlane(-2,R,1.0,true);
     
     // properties of particles prior the brazilian test
     Dict B;
-    B.Set(-1,"Bn Bt Bm Gn Gt eps Kn Kt Mu",Bn,Bt,Bm,Gn,Gt,eps,Kn,Kt,Mu );
-    B.Set(-2,"Bn Bt Bm Gn Gt eps Kn Kt Mu",Bn,Bt,Bm,Gn,Gt,eps,Kn,Kt,0.0);
-    B.Set(-3,"Bn Bt Bm Gn Gt eps Kn Kt Mu",Bn,Bt,Bm,Gn,Gt,eps,Kn,Kt,0.0);
+    B.Set(-1,"Bn Bt Bm Gn Gt Eps Kn Kt Mu",Bn,Bt,Bm,Gn,Gt ,     eps,Kn,Kt,Mu );
+    B.Set(-2,"Bn Bt Bm Gn Gt Eps Kn Kt Mu",Bn,Bt,Bm,Gn,0.0,-0.1*eps,Kn,Kt,0.0);
+    B.Set(-3,"Bn Bt Bm Gn Gt Eps Kn Kt Mu",Bn,Bt,Bm,Gn,0.0,-0.1*eps,Kn,Kt,0.0);
     d.SetProps(B);
 
-    Vec3_t velocity(0.0,0.0,strf*(Xmax(2)-Xmin(2)+2*R)/Tf);
 
     Particle * p1 = d.GetParticle(-2);
     Particle * p2 = d.GetParticle(-3);
     p1->FixVeloc();
-    p1->v =  velocity;
     p2->FixVeloc();
-    p2->v = -velocity;
+    Vec3_t Xmin,Xmax;
+    d.BoundingBox(Xmin,Xmax);
+    Vec3_t velocity(0.0,strf*(Xmax(1)-Xmin(1))/Tf,0.0);
+    dat.L0 = Xmax-Xmin;
+    p1->v =  0.5*velocity;
+    p2->v = -0.5*velocity;
     dat.p1=p1;
     dat.p2=p2;
 
     d.WriteBPY(filekey.CStr());
 
-    d.Solve(Tf, dt, dtOut, &Setup, &Report, filekey.CStr());
+    d.Solve(Tf, dt, dtOut, &Setup, &ReportSimple, filekey.CStr());
 
 
     return 0;

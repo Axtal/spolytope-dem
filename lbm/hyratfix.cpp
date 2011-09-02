@@ -94,7 +94,6 @@ void Report(Domain & dom, void * UD)
     }
     head/=dom.Lat[0].Ndim(0);
     double rho = dat.Head*fabs(sin(dat.ome*dat.time))+dat.Orig;
-    //std::cout << rho << " ";
     dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << head << Util::_8s << water << Util::_8s << Sr << std::endl;
 }
 
