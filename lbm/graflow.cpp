@@ -187,40 +187,68 @@ int main(int argc, char **argv) try
 
     bool   Render = true;
     size_t N      = 100;
+    size_t nx;
+    size_t ny;
+    size_t nz;
+    size_t seed;
+    double fraction;
+    double q;
+    double R;
     double nu     = 1.0/6.0;
     double Tf     = 1.0e3;
     double dtOut  = 1.0e1;
+    bool   oct    = true;
     double Giso   = 1.0;
     double Gdev   = 3.0;
     double th     = 0.0;
+    double DPx;
+    double DPy;
+    double DPz;
+
+    infile >> Render;   infile.ignore(200,'\n');
+    infile >> N;        infile.ignore(200,'\n');
+    infile >> nx;       infile.ignore(200,'\n');
+    infile >> ny;       infile.ignore(200,'\n');
+    infile >> nz;       infile.ignore(200,'\n');
+    infile >> seed;     infile.ignore(200,'\n');
+    infile >> fraction; infile.ignore(200,'\n');
+    infile >> q;        infile.ignore(200,'\n');
+    infile >> R;        infile.ignore(200,'\n');
+    infile >> nu;       infile.ignore(200,'\n');
+    infile >> Tf;       infile.ignore(200,'\n');
+    infile >> dtOut;    infile.ignore(200,'\n');
+    infile >> oct;      infile.ignore(200,'\n');
+    if (oct)
     {
-         infile >> Render; infile.ignore(200,'\n');
-         infile >> N;      infile.ignore(200,'\n');
-         infile >> nu;     infile.ignore(200,'\n');
-         infile >> Tf;     infile.ignore(200,'\n');
-         infile >> dtOut;  infile.ignore(200,'\n');
-         infile >> Giso;   infile.ignore(200,'\n');
-         infile >> Gdev;   infile.ignore(200,'\n');
-         infile >> th;     infile.ignore(200,'\n');
+        infile >> Giso;     infile.ignore(200,'\n');
+        infile >> Gdev;     infile.ignore(200,'\n');
+        infile >> th;       infile.ignore(200,'\n');
+        DPx    = Giso/3.0 + 2.0/3.0*Gdev*sin(180.0*th/M_PI-120.0);
+        DPy    = Giso/3.0 + 2.0/3.0*Gdev*sin(180.0*th/M_PI);
+        DPz    = Giso/3.0 + 2.0/3.0*Gdev*sin(180.0*th/M_PI+120.0);
     }
-    double DPx    = Giso/3.0 + 2.0/3.0*Gdev*sin(180.0*th/M_PI-120.0);
-    double DPy    = Giso/3.0 + 2.0/3.0*Gdev*sin(180.0*th/M_PI);
-    double DPz    = Giso/3.0 + 2.0/3.0*Gdev*sin(180.0*th/M_PI+120.0);
+    else
+    {
+        infile >> DPx;      infile.ignore(200,'\n');
+        infile >> DPy;      infile.ignore(200,'\n');
+        infile >> DPz;      infile.ignore(200,'\n');
+    }
+    
     std::ofstream parfile("param.inp");
     parfile << Util::_8s << DPx << Util::_8s << DPy << Util::_8s << DPz << std::endl;
     parfile.close();
 
     DEM::Domain DemDom;
     //DemDom.Load("ttt_c");
-    DemDom.AddVoroPack(-1,0.1,4,4,4,4,4,4,1.0,false,true,1000,1.0,Vec3_t(1.0,1.0,1.0));
-    Array<int> Tags(6);
-    Tags[0] = -2;
-    Tags[1] = -3;
-    Tags[2] = -4;
-    Tags[3] = -5;
-    Tags[4] = -6;
-    Tags[5] = -7;
-    DemDom.DelParticles(Tags);
+    DemDom.AddVoroPack(-1,R,10.0,10.0,10.0,nx,ny,nz,1.0,false,false,seed,fraction,Vec3_t(q,q,q));
+    //Array<int> Tags(6);
+    //Tags[0] = -2;
+    //Tags[1] = -3;
+    //Tags[2] = -4;
+    //Tags[3] = -5;
+    //Tags[4] = -6;
+    //Tags[5] = -7;
+    //DemDom.DelParticles(Tags);
     Vec3_t Xmin,Xmax;
     DemDom.BoundingBox(Xmin,Xmax);
     size_t bound = 1;
