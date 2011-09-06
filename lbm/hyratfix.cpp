@@ -43,7 +43,7 @@ struct UserData
     std::ofstream oss_ss;       ///< file for stress strain data
 };
 
-void Setup(Domain & dom, void * UD)
+void Setup(LBM::Domain & dom, void * UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
     for (size_t j=0;j<dom.Lat.Size();j++)
@@ -57,7 +57,7 @@ void Setup(Domain & dom, void * UD)
         dat.time += dat.dtOut;
     }
     //double rho = dat.Head*fabs(sin(dat.ome*dom.Time))+54.0;
-    double rho = dat.Head*fabs(sin(dat.ome*dat.time))+dat.Orig;
+    double rho = dat.Head*(sin(dat.ome*dat.time)*sin(dat.ome*dat.time))+dat.Orig;
     //std::cout << rho << std::endl;
     for (size_t i=0;i<dat.Bottom.Size();i++)
     {
@@ -72,10 +72,11 @@ void Setup(Domain & dom, void * UD)
 		c->F[4] = c->F[2] - (2.0/3.0)*c->RhoBC*vy; 
 		c->F[8] = c->F[6] - (1.0/6.0)*c->RhoBC*vy + 0.5*(c->F[3]-c->F[1]);
 		c->F[7] = c->F[5] - (1.0/6.0)*c->RhoBC*vy - 0.5*(c->F[3]-c->F[1]);
+        c->Rho = c->VelDen(c->Vel);
     }
 }
 
-void Report(Domain & dom, void * UD)
+void Report(LBM::Domain & dom, void * UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
     double water = 0.0;
@@ -84,7 +85,7 @@ void Report(Domain & dom, void * UD)
     {
         Cell * c = dom.Lat[0].Cells[i];
         water   += c->Density();
-        if (c->Density()>500.0) Sr+=1.0;
+        if (c->Rho>1200.0) Sr+=1.0;
     }
     Sr/=(dom.Lat[0].Cells.Size()*(1-dom.Lat[0].SolidFraction()));
     double head = 0.0;
@@ -143,7 +144,7 @@ int main(int argc, char **argv) try
     nua[0] = nu;
     nua[1] = nu;
 
-    Domain Dom(D2Q9, nua, iVec3_t(nx,ny,1), dx, dt);
+    LBM::Domain Dom(D2Q9, nua, iVec3_t(nx,ny,1), dx, dt);
     UserData dat;
     Dom.UserData = &dat;
     Dom.Lat[0].G    = -200.0;
@@ -171,15 +172,15 @@ int main(int argc, char **argv) try
         Dom.Lat[0].GetCell(iVec3_t(i,ny-1,0))->IsSolid = true;
         Dom.Lat[1].GetCell(iVec3_t(i,0   ,0))->IsSolid = true;
         dat.Top.Push   (Dom.Lat[1].GetCell(iVec3_t(i,ny-1,0)));
-        dat.Top[i]->RhoBC = 100.0;
+        dat.Top[i]->RhoBC = rho;
     }
-    for (size_t i=0;i<ny;i++)
-    {
-        Dom.Lat[0].GetCell(iVec3_t(0   ,i,0))->IsSolid = true;
-        Dom.Lat[0].GetCell(iVec3_t(nx-1,i,0))->IsSolid = true;
-        Dom.Lat[1].GetCell(iVec3_t(0   ,i,0))->IsSolid = true;
-        Dom.Lat[1].GetCell(iVec3_t(nx-1,i,0))->IsSolid = true;
-    }
+    //for (size_t i=0;i<ny;i++)
+    //{
+        //Dom.Lat[0].GetCell(iVec3_t(0   ,i,0))->IsSolid = true;
+        //Dom.Lat[0].GetCell(iVec3_t(nx-1,i,0))->IsSolid = true;
+        //Dom.Lat[1].GetCell(iVec3_t(0   ,i,0))->IsSolid = true;
+        //Dom.Lat[1].GetCell(iVec3_t(nx-1,i,0))->IsSolid = true;
+    //}
 
 
     srand(seed);
@@ -253,7 +254,7 @@ int main(int argc, char **argv) try
     {
         Vec3_t v0(0.0,0.0,0.0);
         Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(  0.1,v0);
-        Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(  100.0,v0);
+        Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(  rho,v0);
     }
 
     //Solving

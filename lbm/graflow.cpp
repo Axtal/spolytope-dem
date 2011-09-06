@@ -249,18 +249,18 @@ int main(int argc, char **argv) try
     //Tags[4] = -6;
     //Tags[5] = -7;
     //DemDom.DelParticles(Tags);
-    Vec3_t Xmin,Xmax;
-    DemDom.BoundingBox(Xmin,Xmax);
-    size_t bound = 1;
-    double dx = (Xmax(0)-Xmin(0))/(N-2*bound);
-    double dy = (Xmax(1)-Xmin(1))/(N-2*bound);
-    double dz = (Xmax(2)-Xmin(2))/(N-2*bound);
-    DemDom.Center(0.5*(Xmax-Xmin)+Vec3_t(bound*dx,bound*dy,bound*dz));
     //double dx = Cf*lmin/N;
     for (size_t n=0;n<DemDom.Particles.Size();n++)
     {
         DemDom.Particles[n]->Props.R*=0.1;
     }
+    Vec3_t Xmin,Xmax;
+    DemDom.BoundingBox(Xmin,Xmax);
+    int    bound = -1;
+    double dx = (Xmax(0)-Xmin(0))/(N-2*bound);
+    double dy = (Xmax(1)-Xmin(1))/(N-2*bound);
+    double dz = (Xmax(2)-Xmin(2))/(N-2*bound);
+    DemDom.Center(0.5*(Xmax-Xmin)+Vec3_t(bound*dx,bound*dy,bound*dz));
     //DemDom.BoundingBox(Xmin,Xmax);
     //std::cout << Xmin << Xmax << Vec3_t(dx,dy,dz)<< std::endl;
     
