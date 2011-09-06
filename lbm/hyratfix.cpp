@@ -89,13 +89,16 @@ void Report(LBM::Domain & dom, void * UD)
     }
     Sr/=(dom.Lat[0].Cells.Size()*(1-dom.Lat[0].SolidFraction()));
     double head = 0.0;
+    double Gasf = 0.0;
     for (size_t i=0;i<dom.Lat[0].Ndim(0);i++)
     {
-        head += dom.Lat[0].GetCell(iVec3_t(i,1,0))->Density();
+        head += dom.Lat[0].GetCell(iVec3_t(i,1,0))->Rho;
+        Gasf += dat.Top[i]->Rho*dat.Top[i]->Vel(1);
     }
     head/=dom.Lat[0].Ndim(0);
+    Gasf/=dom.Lat[0].Ndim(0);
     double rho = dat.Head*fabs(sin(dat.ome*dat.time))+dat.Orig;
-    dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << head << Util::_8s << water << Util::_8s << Sr << std::endl;
+    dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << head << Util::_8s << water << Util::_8s << Sr << Util::_8s << Gasf << std::endl;
 }
 
 int main(int argc, char **argv) try
@@ -261,7 +264,7 @@ int main(int argc, char **argv) try
     String fs;
     fs.Printf("water_retention.res");
     dat.oss_ss.open(fs.CStr(),std::ios::out);
-    dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "PDen" << Util::_8s << "Head" << Util::_8s << "Water" << Util::_8s << "Sr" <<std::endl;
+    dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "PDen" << Util::_8s << "Head" << Util::_8s << "Water" << Util::_8s << "Sr" << Util::_8s << "Gf" << std::endl;
     Dom.Solve(Tf,dtOut,Setup,Report,"hyratfix",Render);
     dat.oss_ss.close();
 }
