@@ -57,7 +57,8 @@ void Setup(LBM::Domain & dom, void * UD)
         dat.time += dat.dtOut;
     }
     //double rho = dat.Head*fabs(sin(dat.ome*dom.Time))+54.0;
-    double rho = dat.Head*(sin(dat.ome*dat.time)*sin(dat.ome*dat.time))+dat.Orig;
+    //double rho = dat.Head*(sin(dat.ome*dat.time)*sin(dat.ome*dat.time))+dat.Orig;
+    double rho = dat.Head*fabs(sin(dat.ome*dat.time))+dat.Orig;
     //std::cout << rho << std::endl;
     for (size_t i=0;i<dat.Bottom.Size();i++)
     {

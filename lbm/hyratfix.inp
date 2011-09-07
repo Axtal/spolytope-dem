@@ -1,4 +1,4 @@
-1    Render    
+0    Render    
 200    nx    
 300    ny    
 -100.0 Gs
@@ -6,11 +6,11 @@
 1.0     dx    
 1.0     dt    
 8.0e3   Tf    
-1.0e2   dtOut 
+1.0e1   dtOut 
 4.0e1   Headstep
 0.001    rho   
-0.0      ome
-10000.0   Head
-3000.0       Orig  
+1.25      ome
+4000.0   Head
+1.0       Orig  
 0.6       por
 3000      seed
