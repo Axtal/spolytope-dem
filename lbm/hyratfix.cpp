@@ -56,13 +56,18 @@ void Setup(LBM::Domain & dom, void * UD)
     {
         dat.time += dat.dtOut;
     }
-    //double rho = dat.Head*fabs(sin(dat.ome*dom.Time))+54.0;
-    //double rho = dat.Head*(sin(dat.ome*dat.time)*sin(dat.ome*dat.time))+dat.Orig;
-    double rho = dat.Head*fabs(sin(dat.ome*dat.time))+dat.Orig;
-    //std::cout << rho << std::endl;
+    double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
     for (size_t i=0;i<dat.Bottom.Size();i++)
     {
         dat.Bottom[i]->Initialize(rho,OrthoSys::O);
+        //Cell * c = dat.Bottom[i];
+		//if (c->IsSolid) continue;
+        //c->RhoBC = rho;
+		//double vy = -1.0 + (c->F[0]+c->F[1]+c->F[3] + 2.0*(c->F[4]+c->F[7]+c->F[8]))/c->RhoBC;
+		//c->F[2] = c->F[4] - (2.0/3.0)*c->RhoBC*vy; 
+		//c->F[6] = c->F[8] - (1.0/6.0)*c->RhoBC*vy - 0.5*(c->F[3]-c->F[1]);
+		//c->F[5] = c->F[7] - (1.0/6.0)*c->RhoBC*vy + 0.5*(c->F[3]-c->F[1]);
+        //c->Rho = c->VelDen(c->Vel);
     }
 	// Cells with prescribed density
 	for (size_t i=0; i<dat.Top.Size(); ++i)
@@ -82,13 +87,19 @@ void Report(LBM::Domain & dom, void * UD)
     UserData & dat = (*static_cast<UserData *>(UD));
     double water = 0.0;
     double Sr    = 0.0;
+    size_t nw    = 0;
     for (size_t i=0;i<dom.Lat[0].Cells.Size();i++)
     {
         Cell * c = dom.Lat[0].Cells[i];
-        water   += c->Rho;
-        if (c->Rho>1200.0) Sr+=1.0;
+        if (c->Rho>1119.185) 
+        {
+            Sr+=1.0;
+            water+=c->Rho;
+            nw++;
+        }
     }
     Sr/=(dom.Lat[0].Cells.Size()*(1-dom.Lat[0].SolidFraction()));
+    if (nw>0) water/=nw;
     double head = 0.0;
     double Gasf = 0.0;
     double hmax = 0.0;
@@ -100,14 +111,14 @@ void Report(LBM::Domain & dom, void * UD)
         for (size_t j=0;j<dom.Lat[0].Ndim(1);j++)
         {
             Cell * c = dom.Lat[0].GetCell(iVec3_t(i,j,0));
-            if (c->Rho>1200.0&&j>hmaxp) hmaxp = j;
+            if (c->Rho>1119.185&&j>hmaxp) hmaxp = j;
         }
         hmax += hmaxp;
     }
     head/=dom.Lat[0].Ndim(0);
     Gasf/=dom.Lat[0].Ndim(0);
     hmax/=dom.Lat[0].Ndim(0);
-    double rho = dat.Head*fabs(sin(dat.ome*dat.time))+dat.Orig;
+    double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
     dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << head << Util::_8s << water << Util::_8s << Sr << Util::_8s << hmax << Util::_8s << Gasf << std::endl;
 }
 

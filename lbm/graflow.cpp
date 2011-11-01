@@ -20,6 +20,7 @@
 
 //STD
 #include<iostream>
+#include <list>
 
 // MechSys
 #include <mechsys/lbm/Domain.h>
@@ -234,13 +235,31 @@ int main(int argc, char **argv) try
         infile >> DPz;      infile.ignore(200,'\n');
     }
     
-    std::ofstream parfile("param.inp");
-    parfile << Util::_8s << DPx << Util::_8s << DPy << Util::_8s << DPz << std::endl;
-    parfile.close();
 
     DEM::Domain DemDom;
     //DemDom.Load("ttt_c");
     DemDom.AddVoroPack(-1,R,10.0,10.0,10.0,nx,ny,nz,1.0,false,false,seed,fraction,Vec3_t(q,q,q));
+    Vec3_t Inet(OrthoSys::O);
+    for (size_t i=0;i<DemDom.Particles.Size();i++)
+    {   
+        list<double> II;
+        II.push_back(DemDom.Particles[i]->I(0));
+        II.push_back(DemDom.Particles[i]->I(1));
+        II.push_back(DemDom.Particles[i]->I(2));
+        II.sort();
+        list<double>::iterator it;
+        size_t j = 0;
+        for (it = II.begin();it != II.end();it++)
+        {
+            Inet(j) += *it;
+            j++;
+        }
+    }
+    Inet/=DemDom.Particles.Size();
+    std::ofstream parfile("param.inp");
+    parfile << Util::_8s << DPx     << Util::_8s << DPy     << Util::_8s << DPz     << std::endl;
+    parfile << Util::_8s << Inet(0) << Util::_8s << Inet(1) << Util::_8s << Inet(2) << std::endl;
+    parfile.close();
     //Array<int> Tags(6);
     //Tags[0] = -2;
     //Tags[1] = -3;
@@ -252,7 +271,7 @@ int main(int argc, char **argv) try
     //double dx = Cf*lmin/N;
     for (size_t n=0;n<DemDom.Particles.Size();n++)
     {
-        DemDom.Particles[n]->Props.R*=0.1;
+        DemDom.Particles[n]->Props.R*=0.0;
     }
     Vec3_t Xmin,Xmax;
     DemDom.BoundingBox(Xmin,Xmax);

@@ -1,12 +1,12 @@
 1   Render;
 100    N;    
-8      nx
-8      ny
-8      nz
+4      nx
+4      ny
+16      nz
 80   seed
 1.0    fraction
 0.0    qin
-0.2    R
+0.2   R
 0.1   nu;    
 1.0e3   Tf;    
 1.0e1   dtOut;
