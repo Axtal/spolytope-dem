@@ -172,6 +172,20 @@ fracture/fast:
 .PHONY : fracture/fast
 
 # Convenience name for target.
+dem/CMakeFiles/grinding.dir/rule:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/grinding.dir/rule
+.PHONY : dem/CMakeFiles/grinding.dir/rule
+
+# Convenience name for target.
+grinding: dem/CMakeFiles/grinding.dir/rule
+.PHONY : grinding
+
+# fast build rule for target.
+grinding/fast:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/grinding.dir/build.make dem/CMakeFiles/grinding.dir/build
+.PHONY : grinding/fast
+
+# Convenience name for target.
 dem/CMakeFiles/isotropic.dir/rule:
 	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/isotropic.dir/rule
 .PHONY : dem/CMakeFiles/isotropic.dir/rule
@@ -347,6 +361,30 @@ fracture.cpp.s:
 	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/fracture.dir/build.make dem/CMakeFiles/fracture.dir/fracture.cpp.s
 .PHONY : fracture.cpp.s
 
+grinding.o: grinding.cpp.o
+.PHONY : grinding.o
+
+# target to build an object file
+grinding.cpp.o:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/grinding.dir/build.make dem/CMakeFiles/grinding.dir/grinding.cpp.o
+.PHONY : grinding.cpp.o
+
+grinding.i: grinding.cpp.i
+.PHONY : grinding.i
+
+# target to preprocess a source file
+grinding.cpp.i:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/grinding.dir/build.make dem/CMakeFiles/grinding.dir/grinding.cpp.i
+.PHONY : grinding.cpp.i
+
+grinding.s: grinding.cpp.s
+.PHONY : grinding.s
+
+# target to generate assembly for a file
+grinding.cpp.s:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/grinding.dir/build.make dem/CMakeFiles/grinding.dir/grinding.cpp.s
+.PHONY : grinding.cpp.s
+
 isotropic.o: isotropic.cpp.o
 .PHONY : isotropic.o
 
@@ -455,6 +493,7 @@ help:
 	@echo "... edit_cache"
 	@echo "... flocu"
 	@echo "... fracture"
+	@echo "... grinding"
 	@echo "... isotropic"
 	@echo "... rebuild_cache"
 	@echo "... soniattt"
@@ -475,6 +514,9 @@ help:
 	@echo "... fracture.o"
 	@echo "... fracture.i"
 	@echo "... fracture.s"
+	@echo "... grinding.o"
+	@echo "... grinding.i"
+	@echo "... grinding.s"
 	@echo "... isotropic.o"
 	@echo "... isotropic.i"
 	@echo "... isotropic.s"

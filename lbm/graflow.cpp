@@ -224,9 +224,9 @@ int main(int argc, char **argv) try
         infile >> Giso;     infile.ignore(200,'\n');
         infile >> Gdev;     infile.ignore(200,'\n');
         infile >> th;       infile.ignore(200,'\n');
-        DPx    = Giso/3.0 + 2.0/3.0*Gdev*sin(180.0*th/M_PI-120.0);
-        DPy    = Giso/3.0 + 2.0/3.0*Gdev*sin(180.0*th/M_PI);
-        DPz    = Giso/3.0 + 2.0/3.0*Gdev*sin(180.0*th/M_PI+120.0);
+        DPx    = Giso/3.0 + 2.0/3.0*Gdev*sin(M_PI*th/180.0-2.0*M_PI/3.0);
+        DPy    = Giso/3.0 + 2.0/3.0*Gdev*sin(M_PI*th/180.0);
+        DPz    = Giso/3.0 + 2.0/3.0*Gdev*sin(M_PI*th/180.0+2.0*M_PI/3.0);
     }
     else
     {
@@ -237,8 +237,19 @@ int main(int argc, char **argv) try
     
 
     DEM::Domain DemDom;
-    //DemDom.Load("ttt_c");
-    DemDom.AddVoroPack(-1,R,10.0,10.0,10.0,nx,ny,nz,1.0,false,false,seed,fraction,Vec3_t(q,q,q));
+    DemDom.AddVoroPack(-1,R,10.0,10.0,10.0,nx,ny,nz,1.0,true,false,seed,fraction,Vec3_t(q,q,q));
+    std::ofstream areafile("area.out");
+    for (size_t i=0;i<DemDom.BInteractons.Size();i++)
+    {
+        Vec3_t Area;
+        DemDom.BInteractons[i]->P1->Faces[DemDom.BInteractons[i]->F1]->Normal(Area);
+        Area *= DemDom.BInteractons[i]->Area;
+        areafile << Util::_8s << Area(0) << Util::_8s << Area(1) << Util::_8s << Area(2) << std::endl;
+    }
+    areafile.close();
+
+
+
     Vec3_t Inet(OrthoSys::O);
     for (size_t i=0;i<DemDom.Particles.Size();i++)
     {   
@@ -259,6 +270,7 @@ int main(int argc, char **argv) try
     std::ofstream parfile("param.inp");
     parfile << Util::_8s << DPx     << Util::_8s << DPy     << Util::_8s << DPz     << std::endl;
     parfile << Util::_8s << Inet(0) << Util::_8s << Inet(1) << Util::_8s << Inet(2) << std::endl;
+    parfile << Util::_8s << nx      << Util::_8s << ny      << Util::_8s << nz      << std::endl;
     parfile.close();
     //Array<int> Tags(6);
     //Tags[0] = -2;
