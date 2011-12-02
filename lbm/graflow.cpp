@@ -267,11 +267,6 @@ int main(int argc, char **argv) try
         }
     }
     Inet/=DemDom.Particles.Size();
-    std::ofstream parfile("param.inp");
-    parfile << Util::_8s << DPx     << Util::_8s << DPy     << Util::_8s << DPz     << std::endl;
-    parfile << Util::_8s << Inet(0) << Util::_8s << Inet(1) << Util::_8s << Inet(2) << std::endl;
-    parfile << Util::_8s << nx      << Util::_8s << ny      << Util::_8s << nz      << std::endl;
-    parfile.close();
     //Array<int> Tags(6);
     //Tags[0] = -2;
     //Tags[1] = -3;
@@ -299,6 +294,7 @@ int main(int argc, char **argv) try
     LBM::Domain Dom(D3Q15, nu, iVec3_t(N,N,N), 1.0, 1.0);
     UserData dat;
     Dom.UserData = &dat;
+
 
 	// set inner obstacle
     for (int i=0;i<N;i++)
@@ -342,6 +338,14 @@ int main(int argc, char **argv) try
         Dom.Lat[0].Cells[i]->Initialize(rho0, OrthoSys::O);
     }
 
+
+    // Recording the gradient value, the geometric tensor and the porosity
+    std::ofstream parfile("param.inp");
+    parfile << Util::_8s << DPx     << Util::_8s << DPy     << Util::_8s << DPz     << std::endl;
+    parfile << Util::_8s << Inet(0) << Util::_8s << Inet(1) << Util::_8s << Inet(2) << std::endl;
+    parfile << Util::_8s << nx      << Util::_8s << ny      << Util::_8s << nz      << std::endl;
+    parfile << Util::_8s << 1.0-Dom.Lat[0].SolidFraction()  <<                         std::endl;
+    parfile.close();
     //Setting boundary conditions
     for (size_t i=0;i<dat.xmin.Size();i++)
     {

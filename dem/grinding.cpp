@@ -29,84 +29,77 @@ using std::endl;
 
 int main(int argc, char **argv) try
 {
+    double Tf    = 4.5;
+    double dt    = 1.0e-4;
+    double dtOut = 0.01*Tf;
+    double ome   = 0.0*2*M_PI/Tf;
+
+    double Kn = 1.0e5;        // Normal stiffness
+    double Kt = 1.0e5;        // Tangential stiffness
+    double Gn = 8.0;          // Normal dissipative coefficient
+    double Gt = 8.0;          // Tangential dissipative coefficient
+    double Mu = 0.3;          // Microscopic friction coefficient
+    double Bn = 2.0e5;        // Cohesion normal stiffness
+    double Bt = 2.0e5;        // Cohesion tangential stiffness
+    double Bm = 2.0e2;        // Cohesion torque stiffness
+    double Eps = 0.05;        // Threshold for breking bonds
+
     // domain and User data
     DEM::Domain dom;
     dom.Alpha  = 0.05;
-    dom.CamPos = Vec3_t(0.1*Lx, 0.7*(Lx+Ly+Lz), 0.15*Lz); // position of camera
+    dom.CamPos = Vec3_t(0.0,20.0,0.0);
 
     // particle
+    
+    size_t Ind = dom.Particles.Size();
+    Ind = dom.Particles.Size();
+    dom.AddVoroPack (-1, 0.1, 4,4,4, 4,4,4, 3.0, true, true, 1000, 1.0);
+    for (size_t i=Ind;i<dom.Particles.Size();i++)
     {
-        size_t Ind = dom.Particles.Size();
-        dom.AddVoroPack (-1, R, 4,4,4, 4,4,4, rho, Cohesion, Cohesion, seed, fraction);
-        for (size_t i=Ind;i<dom.Particles.Size();i++)
-        {
-            Vec3_t trans(-5.0,0.0,0.0);
-            dom.Particles[i]->Translate(trans);
-        }
-        Ind = dom.Particles.Size();
-        dom.AddVoroPack (-1, R, 4,4,4, 4,4,4, rho, Cohesion, Cohesion, seed, fraction);
-        for (size_t i=Ind;i<dom.Particles.Size();i++)
-        {
-            Vec3_t trans( 5.0,0.0,0.0);
-            dom.Particles[i]->Translate(trans);
-        }
-        Ind = dom.Particles.Size();
-        dom.AddVoroPack (-1, R, 4,4,4, 4,4,4, rho, Cohesion, Cohesion, seed, fraction);
-        for (size_t i=Ind;i<dom.Particles.Size();i++)
-        {
-            Vec3_t trans(0.0,0.0,5.0);
-            dom.Particles[i]->Translate(trans);
-        }
-        Ind = dom.Particles.Size();
-        dom.AddVoroPack (-1, R, 4,4,4, 4,4,4, rho, Cohesion, Cohesion, seed, fraction);
-        for (size_t i=Ind;i<dom.Particles.Size();i++)
-        {
-            Vec3_t trans(0.0,0.0,-5.0);
-            dom.Particles[i]->Translate(trans);
-        }
+        Vec3_t trans(0.0,0.0,5.0);
+        dom.Particles[i]->Translate(trans);
+    }
+    Ind = dom.Particles.Size();
+    dom.AddVoroPack (-1, 0.1, 4,4,4, 4,4,4, 3.0, true, true, 3000, 1.0);
+    for (size_t i=Ind;i<dom.Particles.Size();i++)
+    {
+        Vec3_t trans(0.0,0.0,10.0);
+        dom.Particles[i]->Translate(trans);
+    }
+    Ind = dom.Particles.Size();
+    dom.AddVoroPack (-1, 0.1, 4,4,4, 4,4,4, 3.0, true, true, 5000, 1.0);
+    for (size_t i=Ind;i<dom.Particles.Size();i++)
+    {
+        Vec3_t trans(0.0,0.0,15.0);
+        dom.Particles[i]->Translate(trans);
     }
     
+    for (size_t i=0;i<dom.Particles.Size();i++)
+    {
+        dom.Particles[i]->Initialize(i);
+        dom.Particles[i]->Ff = 0.0,0.0,-dom.Particles[i]->Props.m*9.8;
+    }
 
-    // properties of particles prior the triaxial test
+    dom.AddRice(-2,Vec3_t( 10.0,0.0,0.0),8.0,10.0,3.0,M_PI/2.0,&OrthoSys::e0);
+    dom.Particles[dom.Particles.Size()-1]->FixVeloc();
+    dom.Particles[dom.Particles.Size()-1]->w = Vec3_t(0.0,0.0, ome);
+    dom.AddRice(-3,Vec3_t(-10.0,0.0,0.0),8.0,10.0,3.0,M_PI/2.0,&OrthoSys::e0);
+    dom.Particles[dom.Particles.Size()-1]->FixVeloc();
+    dom.Particles[dom.Particles.Size()-1]->w = Vec3_t(0.0,0.0,-ome);
+    dom.AddRice(-4,Vec3_t( 10.0,0.0,0.0),1.0, 5.0,3.0,M_PI/2.0,&OrthoSys::e1);
+    dom.Particles[dom.Particles.Size()-1]->FixVeloc();
+    dom.Particles[dom.Particles.Size()-1]->w = Vec3_t(0.0,-ome, 0.0);
+    dom.AddRice(-5,Vec3_t(-10.0,0.0,0.0),1.0, 5.0,3.0,M_PI/2.0,&OrthoSys::e1);
+    dom.Particles[dom.Particles.Size()-1]->FixVeloc();
+    dom.Particles[dom.Particles.Size()-1]->w = Vec3_t(0.0, ome, 0.0);
+
     Dict B;
-    B.Set(-1,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu ,Beta,Eta,Bn,Bt ,Bm ,     Eps);
-    B.Set(-2,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu ,Beta,Eta,Bn,0.0,0.0,-0.1*Eps);
-    B.Set(-3,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu ,Beta,Eta,Bn,0.0,0.0,-0.1*Eps);
-    B.Set(-4,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu ,Beta,Eta,Bn,0.0,0.0,-0.1*Eps);
-    B.Set(-5,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu ,Beta,Eta,Bn,0.0,0.0,-0.1*Eps);
-    B.Set(-6,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu ,Beta,Eta,Bn,0.0,0.0,-0.1*Eps);
-    B.Set(-7,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu ,Beta,Eta,Bn,0.0,0.0,-0.1*Eps);
+    B.Set(-1,"Kn Kt Gn Gt Mu Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu,Bn,Bt ,Bm ,     Eps);
+    B.Set(-2,"Kn Kt Gn Gt Mu Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu,Bn,0.0,0.0,-0.1*Eps);
+    B.Set(-3,"Kn Kt Gn Gt Mu Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu,Bn,0.0,0.0,-0.1*Eps);
     dom.SetProps(B);
 
-    // stage 1: isotropic compresssion  //////////////////////////////////////////////////////////////////////
-    String fkey_a(filekey+"_a");
-    String fkey_b(filekey+"_b");
-    Vec3_t  sigf;                      // final stress state
-    bVec3_t peps(false, false, false); // prescribed strain rates ?
-    Vec3_t  depsdt(0.0,0.0,0.0);       // strain rate
-
-    sigf =  Vec3_t(-p0,-p0,-p0);
-    ResetEps  (dom,dat);
-    SetTxTest (sigf, peps, depsdt,0,0,false,dat,dom);
-    dat.tspan = T0/2.0 - dom.Time;
-    dom.Solve  (/*tf*/T0/2.0, /*dt*/dt, /*dtOut*/dtOut, &Setup, &Report, fkey_a.CStr(),RenderVideo);
-    SetTxTest (sigf, peps, depsdt,0,0,false,dat,dom);
-    dat.tspan = T0 - dom.Time;
-    dom.Solve (/*tf*/T0, /*dt*/dt, /*dtOut*/dtOut, &Setup, &Report, fkey_b.CStr(),RenderVideo);
-
-    // stage 2: The proper triaxial test /////////////////////////////////////////////////////////////////////////
-    String fkey_c(filekey+"_c");
-    Vec3_t lf;
-    pqth2L (pf, qf, thf, lf, "cam");
-    sigf   = lf(0), lf(1), lf(2);
-    peps   = bVec3_t(pssrx, pssry, pssrz);
-    depsdt = Vec3_t(srx/(Tf-dom.Time), sry/(Tf-dom.Time), srz/(Tf-dom.Time));
-    
-    // run
-    ResetEps  (dom,dat);
-    SetTxTest (sigf, peps, depsdt, thf*M_PI/180, alpf*M_PI/180, isfailure, dat, dom);
-    dat.tspan = Tf - dom.Time;
-    dom.Solve     (/*tf*/Tf, /*dt*/dt, /*dtOut*/dtOut, &Setup, &Report, fkey_c.CStr(),RenderVideo);
+    dom.Solve     (/*tf*/Tf, /*dt*/dt, /*dtOut*/dtOut, NULL, NULL, "grinding", true);
 
     return 0;
 }
