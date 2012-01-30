@@ -195,6 +195,7 @@ int main(int argc, char **argv) try
     double fraction;
     double q;
     double R;
+    double por;
     double nu     = 1.0/6.0;
     double Tf     = 1.0e3;
     double dtOut  = 1.0e1;
@@ -215,6 +216,7 @@ int main(int argc, char **argv) try
     infile >> fraction; infile.ignore(200,'\n');
     infile >> q;        infile.ignore(200,'\n');
     infile >> R;        infile.ignore(200,'\n');
+    infile >> por;      infile.ignore(200,'\n');
     infile >> nu;       infile.ignore(200,'\n');
     infile >> Tf;       infile.ignore(200,'\n');
     infile >> dtOut;    infile.ignore(200,'\n');
@@ -248,8 +250,6 @@ int main(int argc, char **argv) try
     }
     areafile.close();
 
-
-
     Vec3_t Inet(OrthoSys::O);
     for (size_t i=0;i<DemDom.Particles.Size();i++)
     {   
@@ -267,15 +267,6 @@ int main(int argc, char **argv) try
         }
     }
     Inet/=DemDom.Particles.Size();
-    //Array<int> Tags(6);
-    //Tags[0] = -2;
-    //Tags[1] = -3;
-    //Tags[2] = -4;
-    //Tags[3] = -5;
-    //Tags[4] = -6;
-    //Tags[5] = -7;
-    //DemDom.DelParticles(Tags);
-    //double dx = Cf*lmin/N;
     for (size_t n=0;n<DemDom.Particles.Size();n++)
     {
         DemDom.Particles[n]->Props.R*=0.0;
@@ -287,10 +278,7 @@ int main(int argc, char **argv) try
     double dy = (Xmax(1)-Xmin(1))/(N-2*bound);
     double dz = (Xmax(2)-Xmin(2))/(N-2*bound);
     DemDom.Center(0.5*(Xmax-Xmin)+Vec3_t(bound*dx,bound*dy,bound*dz));
-    //DemDom.BoundingBox(Xmin,Xmax);
-    //std::cout << Xmin << Xmax << Vec3_t(dx,dy,dz)<< std::endl;
-    
-    
+
     LBM::Domain Dom(D3Q15, nu, iVec3_t(N,N,N), 1.0, 1.0);
     UserData dat;
     Dom.UserData = &dat;
@@ -325,11 +313,35 @@ int main(int argc, char **argv) try
                 for (size_t n=0;n<DemDom.Particles.Size();n++)
                 {
                     if (DemDom.Particles[n]->IsInsideAlt(pos)) Dom.Lat[0].GetCell(iVec3_t(i,j,k))->IsSolid = true;
-                    //if (i==0&&j==75&&k==5) std::cout << DemDom.Particles[n]->IsInside(pos);
                 }
             }
         }
     }
+
+    if (por>0.0)
+    {
+        while (1.0-Dom.Lat[0].SolidFraction()>por)
+        {
+            size_t index = (1.0*rand())/RAND_MAX*DemDom.Particles.Size();
+            double newR  = (1.0*rand())/RAND_MAX*R;
+            if (newR>DemDom.Particles[index]->Props.R) DemDom.Particles[index]->Props.R = newR;
+            else continue;
+            for (int i=0;i<N;i++)
+            for (int j=0;j<N;j++)
+            for (int k=0;k<N;k++)
+            {
+                Vec3_t pos((i+0.5)*dx,(j+0.5)*dy,(k+0.5)*dz);
+                if (DemDom.Particles[index]->IsInsideAlt(pos)) Dom.Lat[0].GetCell(iVec3_t(i,j,k))->IsSolid = true;
+            }
+        }
+    }
+
+    double poresize = 0.0;
+    for (size_t i=0;i<DemDom.BInteractons.Size();i++)
+    {
+        poresize += (2.0*R - DemDom.BInteractons[i]->P1->Props.R - DemDom.BInteractons[i]->P2->Props.R)/DemDom.BInteractons.Size();
+    }
+
 
     //Initializing values
     double rho0 = 1.0;
@@ -341,10 +353,10 @@ int main(int argc, char **argv) try
 
     // Recording the gradient value, the geometric tensor and the porosity
     std::ofstream parfile("param.inp");
-    parfile << Util::_8s << DPx     << Util::_8s << DPy     << Util::_8s << DPz     << std::endl;
-    parfile << Util::_8s << Inet(0) << Util::_8s << Inet(1) << Util::_8s << Inet(2) << std::endl;
-    parfile << Util::_8s << nx      << Util::_8s << ny      << Util::_8s << nz      << std::endl;
-    parfile << Util::_8s << 1.0-Dom.Lat[0].SolidFraction()  <<                         std::endl;
+    parfile << Util::_8s << DPx     << Util::_8s << DPy     << Util::_8s << DPz      << std::endl;
+    parfile << Util::_8s << Inet(0) << Util::_8s << Inet(1) << Util::_8s << Inet(2)  << std::endl;
+    parfile << Util::_8s << nx      << Util::_8s << ny      << Util::_8s << nz       << std::endl;
+    parfile << Util::_8s << 1.0-Dom.Lat[0].SolidFraction()  << Util::_8s << poresize << std::endl;
     parfile.close();
     //Setting boundary conditions
     for (size_t i=0;i<dat.xmin.Size();i++)
