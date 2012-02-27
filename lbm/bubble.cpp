@@ -57,7 +57,8 @@ void Setup(LBM::Domain & dom, void * UD)
 
 int main(int argc, char **argv) try
 {
-    double Gs = atof(argv[1]); 
+    //double Gs = atof(argv[1]); 
+    double Gs = 300;
 
 
     Array<double> nu(2);

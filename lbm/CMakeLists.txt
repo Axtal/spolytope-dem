@@ -22,7 +22,9 @@ SET(PROGS
     hyratfix
     test_write
     graflow
-    bubble)
+    bubble
+    soil3D
+    streamline)
 
 FOREACH(var ${PROGS})
     ADD_EXECUTABLE        (${var} "${var}.cpp")

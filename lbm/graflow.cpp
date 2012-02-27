@@ -26,6 +26,13 @@
 #include <mechsys/lbm/Domain.h>
 #include <mechsys/dem/domain.h>
 
+enum GradCase
+{
+    Gx,  ///< Gradient in the x direction solely
+    Gy,  ///< Gradient in the x direction solely
+    Gz   ///< Gradient in the x direction solely
+};
+
 struct UserData
 {
     Array<Cell *> xmin;
@@ -51,15 +58,8 @@ void Setup (LBM::Domain & dom, void * UD)
         c->F[9] = 1.0/24.0*(-2*c->F[0]+20*c->F[10]-4*c->F[12]-4*c->F[14]-4*c->F[2]+c->F[3]-5*c->F[4]-5*c->F[5]+c->F[6]-4*c->F[8]+2*c->RhoBC);
         c->F[11]= 1.0/24.0*(-2*c->F[0]-4*c->F[10]+20*c->F[12]-4*c->F[14]-4*c->F[2]-5*c->F[3]+c->F[4]  +c->F[5]-5*c->F[6]-4*c->F[8]+2*c->RhoBC);
         c->F[13]= 1.0/24.0*(-2*c->F[0]-4*c->F[10]-4 *c->F[12]+20*c->F[14]-4*c->F[2]-5*c->F[3]+  c->F[4]-5*c->F[5]+c->F[6]-4*c->F[8]+2*c->RhoBC);
-        //c->F[1]  = (1.0/3.0)*(-c->F[2] + 2.0*(c->RhoBC - c->F[0] - c->F[3] - c->F[4] - c->F[5] - c->F[6]) - 4.0*(c->F[8] + c->F[10] + c->F[12] + c->F[14]));
-        //c->F[7 ] = (1.0/24.0)*(c->F[3] + c->F[5] + 2.0*(c->RhoBC - c->F[0]) - 4.0*(c->F[2] + c->F[10] + c->F[12] + c->F[14]) - 5.0*(c->F[4] + c->F[6]) + 20.0*c->F[8 ]);
-        //c->F[9 ] = (1.0/24.0)*(c->F[3] + c->F[6] + 2.0*(c->RhoBC - c->F[0]) - 4.0*(c->F[2] + c->F[8 ] + c->F[12] + c->F[14]) - 5.0*(c->F[4] + c->F[5]) + 20.0*c->F[10]);
-        //c->F[11] = (1.0/24.0)*(c->F[4] + c->F[5] + 2.0*(c->RhoBC - c->F[0]) - 4.0*(c->F[2] + c->F[8 ] + c->F[10] + c->F[14]) - 5.0*(c->F[3] + c->F[6]) + 20.0*c->F[12]);
-        //c->F[13] = (1.0/24.0)*(c->F[4] + c->F[6] + 2.0*(c->RhoBC - c->F[0]) - 4.0*(c->F[2] + c->F[8 ] + c->F[10] + c->F[12]) - 5.0*(c->F[3] + c->F[5]) + 20.0*c->F[14]);
-        //std::cout << c->Density() << std::endl;
         c->Rho = c->VelDen(c->Vel);
     }
-
     for (size_t i=0;i<dat.xmax.Size();i++)
     {
         Cell * c = dat.xmax[i];
@@ -69,12 +69,6 @@ void Setup (LBM::Domain & dom, void * UD)
         c->F[10]= 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] - 4*c->F[13] - 5*c->F[3] + c->F[4] + c->F[5] - 5*c->F[6] - 4*c->F[7] + 20*c->F[9] + 2*c->RhoBC) ;
         c->F[12]= 1/24.0*(-2*c->F[0] - 4*c->F[1] + 20*c->F[11] - 4*c->F[13] + c->F[3] - 5*c->F[4] - 5*c->F[5] + c->F[6] -  4*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
         c->F[14]= 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] + 20*c->F[13] + c->F[3] - 5*c->F[4] + c->F[5] - 5*c->F[6] -  4*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
-        //c->F[2]  = (1.0/3.0)*(-c->F[1] + 2.0*(c->RhoBC - c->F[0] - c->F[3] - c->F[4] - c->F[5] - c->F[6]) - 4.0*(c->F[7] + c->F[9 ] + c->F[11] + c->F[13]));
-        //c->F[8 ] = (1.0/24.0)*(c->F[3] + c->F[5] + 2.0*(c->RhoBC - c->F[0]) - 4.0*(c->F[2] + c->F[10] + c->F[12] + c->F[14]) - 5.0*(c->F[4] + c->F[6]) + 20.0*c->F[8 ]);
-        //c->F[10] = (1.0/24.0)*(c->F[3] + c->F[6] + 2.0*(c->RhoBC - c->F[0]) - 4.0*(c->F[2] + c->F[8 ] + c->F[12] + c->F[14]) - 5.0*(c->F[4] + c->F[5]) + 20.0*c->F[10]);
-        //c->F[12] = (1.0/24.0)*(c->F[4] + c->F[5] + 2.0*(c->RhoBC - c->F[0]) - 4.0*(c->F[2] + c->F[8 ] + c->F[10] + c->F[14]) - 5.0*(c->F[3] + c->F[6]) + 20.0*c->F[12]);
-        //c->F[14] = (1.0/24.0)*(c->F[4] + c->F[6] + 2.0*(c->RhoBC - c->F[0]) - 4.0*(c->F[2] + c->F[8 ] + c->F[10] + c->F[12]) - 5.0*(c->F[3] + c->F[5]) + 20.0*c->F[14]);
-        //std::cout << c->Density() << std::endl;
         c->Rho = c->VelDen(c->Vel);
     }
     for (size_t i=0;i<dat.ymin.Size();i++)
@@ -121,34 +115,6 @@ void Setup (LBM::Domain & dom, void * UD)
         c->F[13]= 1/24.0*(-2*c->F[0]+ c->F[1]- 4*c->F[10]- 4*c->F[11]+ 20*c->F[14]- 5*c->F[2]- 5*c->F[3]+ c->F[4]-4*c->F[5]- 4*c->F[7]+ 2*c->RhoBC);
         c->Rho = c->VelDen(c->Vel);
     }
-
-    //for (size_t i=0;i<dat.Left.Size();i++)
-    //{
-        //dat.Left [i]->Initialize(dat.Left [i]->RhoBC,dat.Left [i]->VelBC);
-        //dat.Right[i]->Initialize(dat.Right[i]->RhoBC,dat.Right[i]->VelBC);
-    //}
-
-	// Cells with prescribed velocity
-	//for (size_t i=0; i<dat.Left.Size(); ++i)
-	//{
-		//Cell * c = dat.Left[i];
-		//if (c->IsSolid) continue;
-		//double rho = (c->F[0]+c->F[2]+c->F[4] + 2.0*(c->F[3]+c->F[6]+c->F[7]))/(1.0-c->VelBC(0));
-		//c->F[1] = c->F[3] + (2.0/3.0)*rho*c->VelBC(0);
-		//c->F[5] = c->F[7] + (1.0/6.0)*rho*c->VelBC(0) + 0.5*rho*c->VelBC[1] - 0.5*(c->F[2]-c->F[4]);
-		//c->F[8] = c->F[6] + (1.0/6.0)*rho*c->VelBC(0) - 0.5*rho*c->VelBC[1] + 0.5*(c->F[2]-c->F[4]);
-	//}
-
-	// Cells with prescribed density
-	//for (size_t i=0; i<dat.Right.Size(); ++i)
-	//{
-		//Cell * c = dat.Right[i];
-		//if (c->IsSolid) continue;
-		//double vx = -1.0 + (c->F[0]+c->F[2]+c->F[4] + 2.0*(c->F[1]+c->F[5]+c->F[8]))/c->RhoBC;
-		//c->F[3] = c->F[1] - (2.0/3.0)*c->RhoBC*vx; 
-		//c->F[7] = c->F[5] - (1.0/6.0)*c->RhoBC*vx + 0.5*(c->F[2]-c->F[4]);
-		//c->F[6] = c->F[8] - (1.0/6.0)*c->RhoBC*vx - 0.5*(c->F[2]-c->F[4]);
-	//}
 }
 
 void Report (LBM::Domain & dom, void * UD)
@@ -370,14 +336,169 @@ int main(int argc, char **argv) try
         dat.xmin[i]->Initialize(rho0+DPx,OrthoSys::O);
         dat.ymin[i]->Initialize(rho0+DPy,OrthoSys::O);
         dat.zmin[i]->Initialize(rho0+DPz,OrthoSys::O);
-        dat.xmax[i]->Initialize(rho0,OrthoSys::O);
-        dat.ymax[i]->Initialize(rho0,OrthoSys::O);
-        dat.zmax[i]->Initialize(rho0,OrthoSys::O);
+        dat.xmax[i]->Initialize(rho0,    OrthoSys::O);
+        dat.ymax[i]->Initialize(rho0,    OrthoSys::O);
+        dat.zmax[i]->Initialize(rho0,    OrthoSys::O);
     }
 
     //Solving
     Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render);
     dat.oss_ss.close();
+
+    //Calculating tortuosity
+    if (oct) return 0;
+
+    GradCase Case;
+    if(DPx>1.0e-3) Case = Gx;
+    if(DPy>1.0e-3) Case = Gy;
+    if(DPz>1.0e-3) Case = Gz;
+    Array <double> Len;
+    Array <bool>   Spam;
+
+    if (Case==Gx)
+    {
+        for (size_t i=0;i<dat.xmin.Size();i++)
+        {
+            Cell * c   = dat.xmin[i];
+            if (c->IsSolid) continue;
+            Cell *nc;
+            bool valid = true;
+            bool spam  = false;
+            double  dt = 1.0e3;
+            double len = 0.0;
+            size_t NC  = 0;
+            iVec3_t In;
+            Vec3_t x(OrthoSys::O);
+            x(0) = c->Index(0)+0.4;
+            x(1) = c->Index(1)+0.4;
+            x(2) = c->Index(2)+0.4;
+            while (valid&&(NC<1.0e6))
+            {   
+                In(0) = (size_t) x(0);
+                In(1) = (size_t) x(1);
+                In(2) = (size_t) x(2);
+                if ((In(1)==0)||(In(1)>=N-1)||(In(2)==0)||(In(2)>=N-1)||(x(0)<0.0))
+                {
+                    valid = false;
+                    break;
+                }
+                if (In(0)>=N-1)
+                {
+                    valid = false;
+                    spam  = true;
+                    break;
+                }
+                nc    = Dom.Lat[0].GetCell(In);
+                if (nc->IsSolid) break;
+                x    += nc->Vel*dt;
+                len  += norm(nc->Vel)*dt;
+                NC++;
+            }
+            Len.Push(len);
+            Spam.Push(spam);
+        }   
+    }
+
+    if (Case==Gy)
+    {
+        for (size_t i=0;i<dat.ymin.Size();i++)
+        {
+            Cell * c   = dat.ymin[i];
+            if (c->IsSolid) continue;
+            Cell *nc;
+            bool valid = true;
+            bool spam  = false;
+            double  dt = 1.0e3;
+            double len = 0.0;
+            size_t NC  = 0;
+            iVec3_t In;
+            Vec3_t x(OrthoSys::O);
+            x(0) = c->Index(0)+0.4;
+            x(1) = c->Index(1)+0.4;
+            x(2) = c->Index(2)+0.4;
+            while (valid&&(NC<1.0e6))
+            {   
+                In(0) = (size_t) x(0);
+                In(1) = (size_t) x(1);
+                In(2) = (size_t) x(2);
+                if ((In(0)==0)||(In(0)>=N-1)||(In(2)==0)||(In(2)>=N-1)||(x(1)<0.0))
+                {
+                    valid = false;
+                    break;
+                }
+                if (In(1)>=N-1)
+                {
+                    valid = false;
+                    spam  = true;
+                    break;
+                }
+                nc    = Dom.Lat[0].GetCell(In);
+                if (nc->IsSolid) break;
+                x    += nc->Vel*dt;
+                len  += norm(nc->Vel)*dt;
+                NC++;
+            }
+            Len.Push(len);
+            Spam.Push(spam);
+        }   
+    }
+
+    if (Case==Gz)
+    {
+        for (size_t i=0;i<dat.zmin.Size();i++)
+        {
+            Cell * c   = dat.zmin[i];
+            if (c->IsSolid) continue;
+            Cell *nc;
+            bool valid = true;
+            bool spam  = false;
+            double  dt = 1.0e3;
+            double len = 0.0;
+            size_t NC  = 0;
+            iVec3_t In;
+            Vec3_t x(OrthoSys::O);
+            x(0) = c->Index(0)+0.4;
+            x(1) = c->Index(1)+0.4;
+            x(2) = c->Index(2)+0.4;
+            while (valid&&(NC<1.0e6))
+            {   
+                In(0) = (size_t) x(0);
+                In(1) = (size_t) x(1);
+                In(2) = (size_t) x(2);
+                if ((In(0)==0)||(In(0)>=N-1)||(In(1)==0)||(In(1)>=N-1)||(x(2)<0.0))
+                {
+                    valid = false;
+                    break;
+                }
+                if (In(2)>=N-1)
+                {
+                    valid = false;
+                    spam  = true;
+                    break;
+                }
+                nc    = Dom.Lat[0].GetCell(In);
+                if (nc->IsSolid) break;
+                x    += nc->Vel*dt;
+                len  += norm(nc->Vel)*dt;
+                NC++;
+            }
+            Len.Push(len);
+            Spam.Push(spam);
+        }   
+    }
+
+    
+
+    std::ofstream torfile("tortuosity.res");
+    torfile << Util::_8s << "Len" << Util::_8s << "Spams?" << std::endl;
+    for (size_t i=0;i<Len.Size();i++)
+    {
+        torfile << Util::_8s << Len[i] << Util::_8s << Spam[i] << std::endl;
+    }
+    torfile.close();
+
+
+    return 0;
 }
 MECHSYS_CATCH
 
