@@ -19,10 +19,6 @@
 
 // MechSys
 #include <mechsys/dem/domain.h>
-#include <mechsys/util/fatal.h>
-#include <mechsys/util/util.h>
-#include <mechsys/mesh/unstructured.h>
-#include <mechsys/linalg/matvec.h>
 
 using std::cout;
 using std::endl;
@@ -31,18 +27,23 @@ int main(int argc, char **argv) try
 {
     // set the simulation domain ////////////////////////////////////////////////////////////////////////////
     DEM::Domain dom;
-    dom.CamPos = Vec3_t(0.0,10.0,0.0); 
+    dom.Alpha  = 3.0;
+    dom.CamPos = Vec3_t(0.0,15.0,0.0); 
 
-    dom.AddCylinder (-4, /*X0*/Vec3_t(-10.0,0.0,0.0), /*R0*/0.01, /*X1*/Vec3_t(-3.0,0.0,0.1), /*R1*/3.0, 0.2, 1.0);
-    dom.GetParticle(-4)->FixVeloc();
+    dom.AddCylinder(-1, /*X0*/Vec3_t(-10.0,0.0,-2.0), /*R0*/0.5, /*X1*/Vec3_t(0.0,0.0,0.1), /*R1*/3.0, /*SR*/0.2, /*rho*/1.0);
+    dom.GetParticle(-1)->FixVeloc();
 
-    dom.AddSphere(-1,Vec3_t(5.0,0.0,0.0),1.0,1.0);
-    dom.GetParticle(-1)->v = -3.0,0.0,0.0;
+    dom.AddTetra(-2,/*X*/Vec3_t(5.0,0.0,0.0),/*SR*/0.2,/*L*/2.0,/*rho*/3.0,0.0,&OrthoSys::e1);
+    dom.GetParticle(-2)->v = -1.0,0.0,0.0;
+    dom.GetParticle(-2)->w =  0.0,0.0,0.0;
 
-    // properties of particles prior the triaxial test
-    double dt = 1.0e-3;
+    // Define the interaction constants
+    Dict B;
+    B.Set(-1,"Kn Kt Gn Gt Mu",1.0e5,1.0e5,8.0,8.0,0.0);
+    B.Set(-2,"Kn Kt Gn Gt Mu",1.0e5,1.0e5,8.0,8.0,0.0);
+    dom.SetProps(B);
 
-    dom.Solve(10.0,dt,0.1,NULL,NULL,"cone",true);
+    dom.Solve(/*Tf*/6.0e-3,/*dt*/3.0e-3,/*dtOut*/0.3,NULL,NULL,/*filekey*/"cone",/*RenderVideo?*/true);
     return 0;
 }
 MECHSYS_CATCH

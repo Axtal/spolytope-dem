@@ -79,8 +79,10 @@ void Report (LBM::Domain & dom, void * UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
     double water = 0.0;
+    double oil   = 0.0;
     double Sr    = 0.0;
     size_t nw    = 0;
+    size_t no    = 0;
     for (size_t i=0;i<dom.Lat[1].Cells.Size();i++)
     {
         Cell * c = dom.Lat[1].Cells[i];
@@ -90,9 +92,16 @@ void Report (LBM::Domain & dom, void * UD)
             water+=c->Rho;
             nw++;
         }
+        c = dom.Lat[0].Cells[i];
+        if (c->Rho>800.0)
+        {
+            oil  +=c->Rho;
+            no++;
+        }
     }
     Sr/=(dom.Lat[0].Cells.Size()*(1-dom.Lat[0].SolidFraction()));
     if (nw>0) water/=nw;
+    if (no>0) oil  /=no;
     double head = 0.0;
     size_t nfb  = 0;
     for (size_t i=0;i<dom.Lat[0].Ndim(1);i++)
@@ -115,6 +124,8 @@ int main(int argc, char **argv) try
     String filename (filekey+".inp");
     if (!Util::FileExists(filename)) throw new Fatal("File <%s> not found",filename.CStr());
     std::ifstream infile(filename.CStr());
+    size_t Nproc = 1;
+    if (argc==3) Nproc = atoi(argv[2]);
 
     bool   Render   = true;
     size_t N        = 200;
@@ -249,7 +260,7 @@ int main(int argc, char **argv) try
     fs.Printf("water_retention.res");
     dat.oss_ss.open(fs.CStr(),std::ios::out);
     dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "PDen" << Util::_8s << "Head" << Util::_8s << "Water" << Util::_8s << "Sr" << std::endl;
-    Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render);
+    Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render,Nproc);
     dat.oss_ss.close();
 }
 MECHSYS_CATCH

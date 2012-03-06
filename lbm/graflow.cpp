@@ -151,6 +151,8 @@ int main(int argc, char **argv) try
     String filename (filekey+".inp");
     if (!Util::FileExists(filename)) throw new Fatal("File <%s> not found",filename.CStr());
     std::ifstream infile(filename.CStr());
+    size_t Nproc = 1;
+    if (argc==3) Nproc = atoi(argv[2]);
 
     bool   Render = true;
     size_t N      = 100;
@@ -342,160 +344,162 @@ int main(int argc, char **argv) try
     }
 
     //Solving
-    Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render);
+    //std::cout << Nproc << std::endl;
+    Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render,Nproc);
     dat.oss_ss.close();
 
-    //Calculating tortuosity
-    if (oct) return 0;
-
-    GradCase Case;
-    if(DPx>1.0e-3) Case = Gx;
-    if(DPy>1.0e-3) Case = Gy;
-    if(DPz>1.0e-3) Case = Gz;
-    Array <double> Len;
-    Array <bool>   Spam;
-
-    if (Case==Gx)
-    {
-        for (size_t i=0;i<dat.xmin.Size();i++)
-        {
-            Cell * c   = dat.xmin[i];
-            if (c->IsSolid) continue;
-            Cell *nc;
-            bool valid = true;
-            bool spam  = false;
-            double  dt = 1.0e3;
-            double len = 0.0;
-            size_t NC  = 0;
-            iVec3_t In;
-            Vec3_t x(OrthoSys::O);
-            x(0) = c->Index(0)+0.4;
-            x(1) = c->Index(1)+0.4;
-            x(2) = c->Index(2)+0.4;
-            while (valid&&(NC<1.0e6))
-            {   
-                In(0) = (size_t) x(0);
-                In(1) = (size_t) x(1);
-                In(2) = (size_t) x(2);
-                if ((In(1)==0)||(In(1)>=N-1)||(In(2)==0)||(In(2)>=N-1)||(x(0)<0.0))
-                {
-                    valid = false;
-                    break;
-                }
-                if (In(0)>=N-1)
-                {
-                    valid = false;
-                    spam  = true;
-                    break;
-                }
-                nc    = Dom.Lat[0].GetCell(In);
-                if (nc->IsSolid) break;
-                x    += nc->Vel*dt;
-                len  += norm(nc->Vel)*dt;
-                NC++;
-            }
-            Len.Push(len);
-            Spam.Push(spam);
-        }   
-    }
-
-    if (Case==Gy)
-    {
-        for (size_t i=0;i<dat.ymin.Size();i++)
-        {
-            Cell * c   = dat.ymin[i];
-            if (c->IsSolid) continue;
-            Cell *nc;
-            bool valid = true;
-            bool spam  = false;
-            double  dt = 1.0e3;
-            double len = 0.0;
-            size_t NC  = 0;
-            iVec3_t In;
-            Vec3_t x(OrthoSys::O);
-            x(0) = c->Index(0)+0.4;
-            x(1) = c->Index(1)+0.4;
-            x(2) = c->Index(2)+0.4;
-            while (valid&&(NC<1.0e6))
-            {   
-                In(0) = (size_t) x(0);
-                In(1) = (size_t) x(1);
-                In(2) = (size_t) x(2);
-                if ((In(0)==0)||(In(0)>=N-1)||(In(2)==0)||(In(2)>=N-1)||(x(1)<0.0))
-                {
-                    valid = false;
-                    break;
-                }
-                if (In(1)>=N-1)
-                {
-                    valid = false;
-                    spam  = true;
-                    break;
-                }
-                nc    = Dom.Lat[0].GetCell(In);
-                if (nc->IsSolid) break;
-                x    += nc->Vel*dt;
-                len  += norm(nc->Vel)*dt;
-                NC++;
-            }
-            Len.Push(len);
-            Spam.Push(spam);
-        }   
-    }
-
-    if (Case==Gz)
-    {
-        for (size_t i=0;i<dat.zmin.Size();i++)
-        {
-            Cell * c   = dat.zmin[i];
-            if (c->IsSolid) continue;
-            Cell *nc;
-            bool valid = true;
-            bool spam  = false;
-            double  dt = 1.0e3;
-            double len = 0.0;
-            size_t NC  = 0;
-            iVec3_t In;
-            Vec3_t x(OrthoSys::O);
-            x(0) = c->Index(0)+0.4;
-            x(1) = c->Index(1)+0.4;
-            x(2) = c->Index(2)+0.4;
-            while (valid&&(NC<1.0e6))
-            {   
-                In(0) = (size_t) x(0);
-                In(1) = (size_t) x(1);
-                In(2) = (size_t) x(2);
-                if ((In(0)==0)||(In(0)>=N-1)||(In(1)==0)||(In(1)>=N-1)||(x(2)<0.0))
-                {
-                    valid = false;
-                    break;
-                }
-                if (In(2)>=N-1)
-                {
-                    valid = false;
-                    spam  = true;
-                    break;
-                }
-                nc    = Dom.Lat[0].GetCell(In);
-                if (nc->IsSolid) break;
-                x    += nc->Vel*dt;
-                len  += norm(nc->Vel)*dt;
-                NC++;
-            }
-            Len.Push(len);
-            Spam.Push(spam);
-        }   
-    }
-
     
-
-    std::ofstream torfile("tortuosity.res");
-    torfile << Util::_8s << "Len" << Util::_8s << "Spams?" << std::endl;
-    for (size_t i=0;i<Len.Size();i++)
-    {
-        torfile << Util::_8s << Len[i] << Util::_8s << Spam[i] << std::endl;
-    }
-    torfile.close();
+    //Calculating tortuosity
+    //if (oct) return 0;
+//
+    //GradCase Case;
+    //if(DPx>1.0e-3) Case = Gx;
+    //if(DPy>1.0e-3) Case = Gy;
+    //if(DPz>1.0e-3) Case = Gz;
+    //Array <double> Len;
+    //Array <bool>   Spam;
+//
+    //if (Case==Gx)
+    //{
+        //for (size_t i=0;i<dat.xmin.Size();i++)
+        //{
+            //Cell * c   = dat.xmin[i];
+            //if (c->IsSolid) continue;
+            //Cell *nc;
+            //bool valid = true;
+            //bool spam  = false;
+            //double  dt = 1.0e3;
+            //double len = 0.0;
+            //size_t NC  = 0;
+            //iVec3_t In;
+            //Vec3_t x(OrthoSys::O);
+            //x(0) = c->Index(0)+0.4;
+            //x(1) = c->Index(1)+0.4;
+            //x(2) = c->Index(2)+0.4;
+            //while (valid&&(NC<1.0e6))
+            //{   
+                //In(0) = (size_t) x(0);
+                //In(1) = (size_t) x(1);
+                //In(2) = (size_t) x(2);
+                //if ((In(1)==0)||(In(1)>=N-1)||(In(2)==0)||(In(2)>=N-1)||(x(0)<0.0))
+                //{
+                    //valid = false;
+                    //break;
+                //}
+                //if (In(0)>=N-1)
+                //{
+                    //valid = false;
+                    //spam  = true;
+                    //break;
+                //}
+                //nc    = Dom.Lat[0].GetCell(In);
+                //if (nc->IsSolid) break;
+                //x    += nc->Vel*dt;
+                //len  += norm(nc->Vel)*dt;
+                //NC++;
+            //}
+            //Len.Push(len);
+            //Spam.Push(spam);
+        //}   
+    //}
+//
+    //if (Case==Gy)
+    //{
+        //for (size_t i=0;i<dat.ymin.Size();i++)
+        //{
+            //Cell * c   = dat.ymin[i];
+            //if (c->IsSolid) continue;
+            //Cell *nc;
+            //bool valid = true;
+            //bool spam  = false;
+            //double  dt = 1.0e3;
+            //double len = 0.0;
+            //size_t NC  = 0;
+            //iVec3_t In;
+            //Vec3_t x(OrthoSys::O);
+            //x(0) = c->Index(0)+0.4;
+            //x(1) = c->Index(1)+0.4;
+            //x(2) = c->Index(2)+0.4;
+            //while (valid&&(NC<1.0e6))
+            //{   
+                //In(0) = (size_t) x(0);
+                //In(1) = (size_t) x(1);
+                //In(2) = (size_t) x(2);
+                //if ((In(0)==0)||(In(0)>=N-1)||(In(2)==0)||(In(2)>=N-1)||(x(1)<0.0))
+                //{
+                    //valid = false;
+                    //break;
+                //}
+                //if (In(1)>=N-1)
+                //{
+                    //valid = false;
+                    //spam  = true;
+                    //break;
+                //}
+                //nc    = Dom.Lat[0].GetCell(In);
+                //if (nc->IsSolid) break;
+                //x    += nc->Vel*dt;
+                //len  += norm(nc->Vel)*dt;
+                //NC++;
+            //}
+            //Len.Push(len);
+            //Spam.Push(spam);
+        //}   
+    //}
+//
+    //if (Case==Gz)
+    //{
+        //for (size_t i=0;i<dat.zmin.Size();i++)
+        //{
+            //Cell * c   = dat.zmin[i];
+            //if (c->IsSolid) continue;
+            //Cell *nc;
+            //bool valid = true;
+            //bool spam  = false;
+            //double  dt = 1.0e3;
+            //double len = 0.0;
+            //size_t NC  = 0;
+            //iVec3_t In;
+            //Vec3_t x(OrthoSys::O);
+            //x(0) = c->Index(0)+0.4;
+            //x(1) = c->Index(1)+0.4;
+            //x(2) = c->Index(2)+0.4;
+            //while (valid&&(NC<1.0e6))
+            //{   
+                //In(0) = (size_t) x(0);
+                //In(1) = (size_t) x(1);
+                //In(2) = (size_t) x(2);
+                //if ((In(0)==0)||(In(0)>=N-1)||(In(1)==0)||(In(1)>=N-1)||(x(2)<0.0))
+                //{
+                    //valid = false;
+                    //break;
+                //}
+                //if (In(2)>=N-1)
+                //{
+                    //valid = false;
+                    //spam  = true;
+                    //break;
+                //}
+                //nc    = Dom.Lat[0].GetCell(In);
+                //if (nc->IsSolid) break;
+                //x    += nc->Vel*dt;
+                //len  += norm(nc->Vel)*dt;
+                //NC++;
+            //}
+            //Len.Push(len);
+            //Spam.Push(spam);
+        //}   
+    //}
+//
+    //
+//
+    //std::ofstream torfile("tortuosity.res");
+    //torfile << Util::_8s << "Len" << Util::_8s << "Spams?" << std::endl;
+    //for (size_t i=0;i<Len.Size();i++)
+    //{
+        //torfile << Util::_8s << Len[i] << Util::_8s << Spam[i] << std::endl;
+    //}
+    //torfile.close();
 
 
     return 0;

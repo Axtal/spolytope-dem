@@ -66,9 +66,8 @@ int main(int argc, char **argv) try
     if (!Util::FileExists(filename)) throw new Fatal("File <%s> not found",filename.CStr());
     int    Case = atoi(argv[1]);
     float  Ndiv = atof(argv[2]);
-    float    dt = atof(argv[3]);
-
-    size_t N      = 100;
+    double dt   = atof(argv[3]);
+    size_t N      = 200;
 
     LBM::Domain Dom(D3Q15, 0.1, iVec3_t(N,N,N), 1.0, 1.0);
     hid_t file_id;
@@ -222,6 +221,8 @@ int main(int argc, char **argv) try
 
     if (Case==2)
     {
+        //for (size_t i=0.5*Ndiv;i<0.5*Ndiv+1;i++)
+        //for (size_t j=0.5*Ndiv;j<0.5*Ndiv+1;j++)
         for (size_t i=0;i<Ndiv;i++)
         for (size_t j=0;j<Ndiv;j++)
         {
@@ -264,6 +265,8 @@ int main(int argc, char **argv) try
                 //Runge Kutta integration
                 Vec3_t k1,k2,k3,k4;
                 VelInter(Dom,x       ,k1);
+                if (norm(k1)<1.0e-12) break;
+                //dt = dt/norm(k1);
                 k1 *= dt;
                 VelInter(Dom,x+0.5*k1,k2);
                 k2 *= dt;
