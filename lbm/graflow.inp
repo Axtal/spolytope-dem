@@ -1,17 +1,17 @@
 1   Render;
-100    N;    
-4      nx
-4      ny
-16      nz
-80   seed
+200    N;    
+6    nx
+6    ny
+24    nz
+1000   seed
 1.0    fraction
 0.0    qin
-0.2   R
--0.4  por
+0.2    R
+-0.4   por
 0.1   nu;    
 1.0e3   Tf;    
 1.0e1   dtOut;
-0      oct
+1      oct
 0.02    Giso or DPx;  
-0.0     G    or Dpy;    
-0.0     th   or DPz;    
+0.01    G    or Dpy;    
+90    th   or DPz;    

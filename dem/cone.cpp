@@ -35,7 +35,7 @@ int main(int argc, char **argv) try
 
     dom.AddTetra(-2,/*X*/Vec3_t(5.0,0.0,0.0),/*SR*/0.2,/*L*/2.0,/*rho*/3.0,0.0,&OrthoSys::e1);
     dom.GetParticle(-2)->v = -1.0,0.0,0.0;
-    dom.GetParticle(-2)->w =  0.0,0.0,0.0;
+    dom.GetParticle(-2)->w =  1.0,0.0,0.0;
 
     // Define the interaction constants
     Dict B;
@@ -43,7 +43,7 @@ int main(int argc, char **argv) try
     B.Set(-2,"Kn Kt Gn Gt Mu",1.0e5,1.0e5,8.0,8.0,0.0);
     dom.SetProps(B);
 
-    dom.Solve(/*Tf*/6.0e-3,/*dt*/3.0e-3,/*dtOut*/0.3,NULL,NULL,/*filekey*/"cone",/*RenderVideo?*/true);
+    dom.Solve(/*Tf*/20.0,/*dt*/1.0e-3,/*dtOut*/0.1,NULL,NULL,/*filekey*/"cone",/*RenderVideo?*/true);
     return 0;
 }
 MECHSYS_CATCH
