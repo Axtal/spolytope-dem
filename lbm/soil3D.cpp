@@ -191,10 +191,10 @@ int main(int argc, char **argv) try
     dat.time     = 0.0;
 
     Dom.Lat[0].G = -150.0;
-    Dom.Lat[0].Gs= -100.0;
+    Dom.Lat[0].Gs= -10.0;
     Dom.Lat[1].G = -200.0;
-    Dom.Lat[1].Gs= -200.0;
-    Dom.Gmix     =  0.0001;
+    Dom.Lat[1].Gs= -500;
+    Dom.Gmix     =  0.001;
 
 	// set inner obstacle
     for (int i=0;i<N;i++)

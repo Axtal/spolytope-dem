@@ -25,8 +25,7 @@ SET(PROGS
     bubble
     soil3D
     streamline
-    alexgflow
-    alexDEM)
+    alexgflow)
 
 FOREACH(var ${PROGS})
     ADD_EXECUTABLE        (${var} "${var}.cpp")

@@ -57,8 +57,10 @@ void Setup(LBM::Domain & dom, void * UD)
 
 int main(int argc, char **argv) try
 {
+    size_t Nproc = 1;
+    if (argc>=2) Nproc = atoi(argv[1]);
+
     //double Gs = atof(argv[1]); 
-    double Gs = 300;
 
 
     Array<double> nu(2);
@@ -66,7 +68,7 @@ int main(int argc, char **argv) try
     nu[1] = 1.0/6.0;
 
     size_t nx   = 200, ny = 100;
-    double Tf   = 10000.0;
+    double Tf   = 20000.0;
     double ome  = 1.0;
 
     // Setting top and bottom wall as solid
@@ -117,8 +119,8 @@ int main(int argc, char **argv) try
 		}
 		else if (pow((int)(i)-obsX,2.0) + pow((int)(j)-obsZ,2.0) <= pow(r2,2.0)) 
 		{
-            Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(800.0,V);
-            Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(0.1  ,V);
+            Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(800.0 ,V);
+            Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(0.1   ,V);
             //Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(0.001,V);
             //Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(1.0  ,V);
 		}
@@ -133,10 +135,10 @@ int main(int argc, char **argv) try
 
     // Set parameters
     Dom.Lat[0].G = -150.0;
-    Dom.Lat[0].Gs= -300.0;
+    Dom.Lat[0].Gs= -10.0;
     Dom.Lat[1].G = -200.0;
-    Dom.Lat[1].Gs= -Gs;
-    Dom.Gmix     =  0.0001;
+    Dom.Lat[1].Gs= -500;
+    Dom.Gmix     =  0.001;
     //Dom.Lat[0].G = -150.0;
     //Dom.Lat[0].Gs=  400.0;
     //Dom.Lat[1].G = -200.0;
@@ -149,7 +151,7 @@ int main(int argc, char **argv) try
     //Dom.Lat[1].Gs= -2.0;
     //Dom.Gmix     =  4.0;
 
-    Dom.Solve(Tf,0.01*Tf,Setup,NULL,"bubble");
+    Dom.Solve(Tf,0.01*Tf,Setup,NULL,"bubble",true,Nproc);
 
 
     return 0;
