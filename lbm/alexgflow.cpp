@@ -120,6 +120,8 @@ int main(int argc, char **argv) try
     double dt       = 1.0;
     double Kn       = 1.0e3;
     double Mu       = 0.4;
+    double Eta      = 1.0;
+    double Beta     = 0.12;
     double DPz      = 0.0;
     double R1       = 2.0;
     double R2       = 20.0;
@@ -139,6 +141,8 @@ int main(int argc, char **argv) try
     infile >> dt;        infile.ignore(200,'\n');
     infile >> Kn;        infile.ignore(200,'\n');
     infile >> Mu;        infile.ignore(200,'\n');
+    infile >> Eta;       infile.ignore(200,'\n');
+    infile >> Beta;      infile.ignore(200,'\n');
     infile >> DPz;       infile.ignore(200,'\n');
     infile >> R1;        infile.ignore(200,'\n');
     infile >> R2;        infile.ignore(200,'\n');
@@ -219,11 +223,36 @@ int main(int argc, char **argv) try
         DEM::Domain DemDom; 
         DemDom.Load(filekey.CStr());
         
-        std::cout << DemDom.Particles.Size() << std::endl;
-
+        Array<size_t> Big;
+        Array<size_t> Small;
         for (size_t i=0;i<DemDom.Particles.Size();i++)
         {
             DEM::Particle * Pa = DemDom.Particles[i];
+            if (Pa->Props.R>0.5*R2)  Big.Push(i);
+            else                     Small.Push(i);
+        }
+
+        std::cout << DemDom.Particles.Size() << " " << Big.Size() << " " << Small.Size() << std::endl;
+        size_t nmin = 0;
+        size_t nmax = 0;
+        size_t ratio = Small.Size()/Big.Size();
+        size_t j;
+        bool valid = true;
+        for (size_t i=0;i<DemDom.Particles.Size();i++)
+        {
+            if (nmin%ratio==0&&valid&&nmax<Big.Size()) 
+            {
+                j = Big[nmax];
+                nmax++;
+                valid = false;
+            }
+            else
+            {
+                j = Small[nmin];
+                nmin++;
+                valid = true;
+            }
+            DEM::Particle * Pa = DemDom.Particles[j];
             Dom.AddSphere(Pa->Tag,Pa->x,OrthoSys::O,OrthoSys::O,2.5,Pa->Props.R,dt);
         }
     }
@@ -237,7 +266,9 @@ int main(int argc, char **argv) try
         Dom.Particles[i]->Kn =     Kn;
         Dom.Particles[i]->Kt = 0.5*Kn;
         Dom.Particles[i]->Mu =     Mu;
-        Dom.Particles[i]->Eta=    0.0;
+        Dom.Particles[i]->Eta=    Eta;
+        Dom.Particles[i]->Beta=  Beta;
+        //std::cout << Dom.Particles[i]->Eta << " " << Dom.Particles[i]->Beta << std::endl;
     }
 
     Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render,Nproc);

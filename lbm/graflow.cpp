@@ -235,10 +235,36 @@ int main(int argc, char **argv) try
         }
     }
     Inet/=DemDom.Particles.Size();
+    double mean_area   = 0.0;
+    double mean_volume = 0.0;
+    double mean_sa     = 0.0;
+
     for (size_t n=0;n<DemDom.Particles.Size();n++)
     {
-        DemDom.Particles[n]->Props.R*=0.0;
+        DEM::Particle * P = DemDom.Particles[n];
+        P->Props.R = 0.0;
+        double temp_area = 0.0;
+        for (size_t j=0;j<P->Faces.Size();j++)
+        {
+            temp_area += P->Faces[j]->Area();
+        }
+        Vec3_t temp_cm;
+        Mat3_t temp_I;
+        double temp_vol;
+        Array<Vec3_t> temp_vec(P->Verts.Size());
+        for (size_t j=0;j<P->Verts.Size();j++)
+        {
+            temp_vec[j] = *P->Verts[j];
+        }
+        DEM::PolyhedraMP(temp_vec,P->FaceCon,temp_vol,temp_cm,temp_I);
+        mean_area   += temp_area;
+        mean_volume += temp_vol;
+        mean_sa     += temp_area/temp_vol;
     }
+    mean_area   /= DemDom.Particles.Size();
+    mean_volume /= DemDom.Particles.Size();
+    mean_sa     /= DemDom.Particles.Size();
+
     Vec3_t Xmin,Xmax;
     DemDom.BoundingBox(Xmin,Xmax);
     int    bound = -1;
@@ -321,10 +347,11 @@ int main(int argc, char **argv) try
 
     // Recording the gradient value, the geometric tensor and the porosity
     std::ofstream parfile("param.inp");
-    parfile << Util::_8s << DPx     << Util::_8s << DPy     << Util::_8s << DPz      << std::endl;
-    parfile << Util::_8s << Inet(0) << Util::_8s << Inet(1) << Util::_8s << Inet(2)  << std::endl;
-    parfile << Util::_8s << nx      << Util::_8s << ny      << Util::_8s << nz       << std::endl;
-    parfile << Util::_8s << 1.0-Dom.Lat[0].SolidFraction()  << Util::_8s << poresize << std::endl;
+    parfile << Util::_8s << DPx       << Util::_8s << DPy         << Util::_8s << DPz      << std::endl;
+    parfile << Util::_8s << Inet(0)   << Util::_8s << Inet(1)     << Util::_8s << Inet(2)  << std::endl;
+    parfile << Util::_8s << nx        << Util::_8s << ny          << Util::_8s << nz       << std::endl;
+    parfile << Util::_8s << 1.0-Dom.Lat[0].SolidFraction()        << Util::_8s << poresize << std::endl;
+    parfile << Util::_8s << mean_area << Util::_8s << mean_volume << Util::_8s << mean_sa  << std::endl;
     parfile.close();
     //Setting boundary conditions
     for (size_t i=0;i<dat.xmin.Size();i++)

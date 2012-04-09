@@ -88,6 +88,9 @@ int main(int argc, char **argv) try
     double dx       = 1.0;
     double dt       = 1.0;
     double Kn       = 1.0e3;
+    double Mu       = 0.4;
+    double Eta      = 1.0;
+    double Beta     = 0.12;
     double DPz      = 0.0;
     double R1       = 2.0;
     double R2       = 20.0;
@@ -106,6 +109,9 @@ int main(int argc, char **argv) try
     infile >> dx;        infile.ignore(200,'\n');
     infile >> dt;        infile.ignore(200,'\n');
     infile >> Kn;        infile.ignore(200,'\n');
+    infile >> Mu;        infile.ignore(200,'\n');
+    infile >> Eta;       infile.ignore(200,'\n');
+    infile >> Beta;      infile.ignore(200,'\n');
     infile >> DPz;       infile.ignore(200,'\n');
     infile >> R1;        infile.ignore(200,'\n');
     infile >> R2;        infile.ignore(200,'\n');
@@ -124,16 +130,25 @@ int main(int argc, char **argv) try
     Dom.Alpha    = std::min(R1,R2);
     
 
-    Dom.GenSpheresBox (-1, dat.Xmin , dat.Xmax - Vec3_t(0.0,0.0,0.5*nz*dx), /*R*/R1, 2.5, seed, fraction, Rmin); ///< Create an array of spheres
-    Dom.GenSpheresBox (-2, dat.Xmax - Vec3_t(nx*dx,ny*dx,0.5*nz*dx), dat.Xmax + Vec3_t(0.0,0.0,0.3*nz*dx), /*R*/R2, 2.5, seed, fraction, Rmin); ///< Create an array of spheres
-    Dom.CamPos = Vec3_t(nz*dx,nz*dx,nx*dx);
+    Dom.GenSpheresBox (-1, dat.Xmin , dat.Xmax - Vec3_t(0.0,0.0,0.2*nz*dx), /*R*/R1, 2.5, seed, fraction, Rmin); ///< Create an array of spheres
+    Dom.AddSphere(-2,Vec3_t(0.5*nx*dx,0.5*ny*dx,0.8*nz*dx+R2),R2,2.5);
+    //Dom.GenSpheresBox (-2, dat.Xmax - Vec3_t(nx*dx,ny*dx,0.5*nz*dx), dat.Xmax + Vec3_t(0.0,0.0,0.3*nz*dx), /*R*/R2, 2.5, seed, fraction, Rmin); ///< Create an array of spheres
+    Dom.CamPos = Vec3_t(1.5*nz*dx,1.5*nz*dx,1.5*nx*dx);
+    Vec3_t xmin,xmax;
+    Dom.BoundingBox(xmin,xmax);
+    std::cout << xmin << xmax << std::endl;
     for (size_t i=0;i<Dom.Particles.Size();i++)
     {
-        Dom.Particles[i]->Props.Kn = Kn;
-        Dom.Particles[i]->Props.Kt = Kn;
+        Dom.Particles[i]->Props.Kn  =     Kn;
+        Dom.Particles[i]->Props.Kt  = 0.5*Kn;
+        Dom.Particles[i]->Props.Mu  =     Mu;
+        Dom.Particles[i]->Props.Eta =    Eta;
+        Dom.Particles[i]->Props.Beta=  Beta;
     }
 
     Dom.Solve(Tf,dt,dtOut,&Setup,&Report,filekey.CStr(),Render,Nproc);
+    Dom.BoundingBox(xmin,xmax);
+    std::cout << xmin << xmax << std::endl;
     Dom.Save(filekey.CStr());
     return 0;
 }

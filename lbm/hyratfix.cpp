@@ -128,6 +128,8 @@ int main(int argc, char **argv) try
     String filename (filekey+".inp");
     if (!Util::FileExists(filename)) throw new Fatal("File <%s> not found",filename.CStr());
     std::ifstream infile(filename.CStr());
+    size_t Nproc = 1;
+    if (argc==3) Nproc = atoi(argv[2]);
 
     bool   Render   = true;
     size_t nx       = 200;
@@ -292,7 +294,7 @@ int main(int argc, char **argv) try
     fs.Printf("water_retention.res");
     dat.oss_ss.open(fs.CStr(),std::ios::out);
     dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "PDen" << Util::_8s << "Head" << Util::_8s << "Water" << Util::_8s << "Sr" << Util::_8s << "Hmax" << Util::_8s << "Gf" << std::endl;
-    Dom.Solve(Tf,dtOut,Setup,Report,"hyratfix",Render);
+    Dom.Solve(Tf,dtOut,Setup,Report,"hyratfix",Render,Nproc);
     dat.oss_ss.close();
 }
 MECHSYS_CATCH
