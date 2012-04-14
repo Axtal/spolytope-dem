@@ -46,12 +46,12 @@ struct UserData
 void Setup(LBM::Domain & dom, void * UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
-    for (size_t j=0;j<dom.Lat.Size();j++)
-    for (size_t i=0;i<dom.Lat[j].Cells.Size();i++)
-    {
-        Cell * c = dom.Lat[j].Cells[i];
-        c->BForcef = c->Density()*dat.g;
-    }
+    //for (size_t j=0;j<dom.Lat.Size();j++)
+    //for (size_t i=0;i<dom.Lat[j].Cells.Size();i++)
+    //{
+        //Cell * c = dom.Lat[j].Cells[i];
+        //c->BForcef = c->Density()*dat.g;
+    //}
     if (dom.Time>dat.time)
     {
         dat.time += dat.dtOut;
@@ -59,15 +59,15 @@ void Setup(LBM::Domain & dom, void * UD)
     double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
     for (size_t i=0;i<dat.Bottom.Size();i++)
     {
-        dat.Bottom[i]->Initialize(rho,OrthoSys::O);
-        //Cell * c = dat.Bottom[i];
-		//if (c->IsSolid) continue;
-        //c->RhoBC = rho;
-		//double vy = -1.0 + (c->F[0]+c->F[1]+c->F[3] + 2.0*(c->F[4]+c->F[7]+c->F[8]))/c->RhoBC;
-		//c->F[2] = c->F[4] - (2.0/3.0)*c->RhoBC*vy; 
-		//c->F[6] = c->F[8] - (1.0/6.0)*c->RhoBC*vy - 0.5*(c->F[3]-c->F[1]);
-		//c->F[5] = c->F[7] - (1.0/6.0)*c->RhoBC*vy + 0.5*(c->F[3]-c->F[1]);
-        //c->Rho = c->VelDen(c->Vel);
+        //dat.Bottom[i]->Initialize(rho,OrthoSys::O);
+        Cell * c = dat.Bottom[i];
+		if (c->IsSolid) continue;
+        c->RhoBC = rho;
+		double vy = -1.0 + (c->F[0]+c->F[1]+c->F[3] + 2.0*(c->F[4]+c->F[7]+c->F[8]))/c->RhoBC;
+		c->F[2] = c->F[4] - (2.0/3.0)*c->RhoBC*vy; 
+		c->F[6] = c->F[8] - (1.0/6.0)*c->RhoBC*vy - 0.5*(c->F[3]-c->F[1]);
+		c->F[5] = c->F[7] - (1.0/6.0)*c->RhoBC*vy + 0.5*(c->F[3]-c->F[1]);
+        c->Rho = c->VelDen(c->Vel);
     }
 	// Cells with prescribed density
 	for (size_t i=0; i<dat.Top.Size(); ++i)
@@ -175,7 +175,8 @@ int main(int argc, char **argv) try
     Dom.UserData = &dat;
     Dom.Lat[0].G    = -200.0;
     Dom.Lat[0].Gs   =  Gs;
-    dat.g        = 0.0,-0.001,0.0;
+    //dat.g        = 0.0,-0.001,0.0;
+    dat.g        = OrthoSys::O;
     dat.Tf       = Tf;
     dat.Xmin     = 0.0,0.0,0.0;
     dat.Xmax     = nx*dx,ny*dx,0.0;
@@ -294,7 +295,7 @@ int main(int argc, char **argv) try
     fs.Printf("water_retention.res");
     dat.oss_ss.open(fs.CStr(),std::ios::out);
     dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "PDen" << Util::_8s << "Head" << Util::_8s << "Water" << Util::_8s << "Sr" << Util::_8s << "Hmax" << Util::_8s << "Gf" << std::endl;
-    Dom.Solve(Tf,dtOut,Setup,Report,"hyratfix",Render,Nproc);
+    Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render,Nproc);
     dat.oss_ss.close();
 }
 MECHSYS_CATCH

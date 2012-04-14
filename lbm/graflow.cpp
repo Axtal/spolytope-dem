@@ -375,7 +375,6 @@ int main(int argc, char **argv) try
     Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render,Nproc);
     dat.oss_ss.close();
 
-    
     return 0;
 }
 MECHSYS_CATCH
