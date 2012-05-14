@@ -18,7 +18,6 @@
 
 SET(PROGS
     colloid
-    hyrat
     hyratfix
     test_write
     graflow
@@ -26,7 +25,8 @@ SET(PROGS
     soil3D
     streamline
     alexgflow
-    alexDEM)
+    alexDEM
+    multicomp)
 
 FOREACH(var ${PROGS})
     ADD_EXECUTABLE        (${var} "${var}.cpp")

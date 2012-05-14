@@ -47,6 +47,7 @@ struct UserData
     double          ome;
     double        dtOut;
     double         time;
+    double          rho;
     std::ofstream oss_ss;       ///< file for stress strain data
 };
 
@@ -86,14 +87,14 @@ void Report (LBM::Domain & dom, void * UD)
     for (size_t i=0;i<dom.Lat[1].Cells.Size();i++)
     {
         Cell * c = dom.Lat[1].Cells[i];
-        if (c->Rho>1119.185) 
+        if (c->Rho>0.5*dat.rho) 
         {
             Sr+=1.0;
             water+=c->Rho;
             nw++;
         }
         c = dom.Lat[0].Cells[i];
-        if (c->Rho>800.0)
+        if (c->Rho>0.5*dat.rho)
         {
             oil  +=c->Rho;
             no++;
@@ -102,19 +103,26 @@ void Report (LBM::Domain & dom, void * UD)
     Sr/=(dom.Lat[0].Cells.Size()*(1-dom.Lat[0].SolidFraction()));
     if (nw>0) water/=nw;
     if (no>0) oil  /=no;
-    double head = 0.0;
+    double rhow = 0.0;
+    double rhoo = 0.0;
     size_t nfb  = 0;
+    size_t nfo  = 0;
     for (size_t i=0;i<dom.Lat[0].Ndim(1);i++)
     for (size_t j=0;j<dom.Lat[0].Ndim(2);j++)
     {
         Cell * c = dom.Lat[0].GetCell(iVec3_t(1,i,j));
         if (c->IsSolid) continue;
-        head += c->Rho;        
+        rhow += c->Rho;        
         nfb++;
+        c = dom.Lat[1].GetCell(iVec3_t(dom.Lat[1].Ndim(0)-2,i,j));
+        if (c->IsSolid) continue;
+        rhoo += c->Rho;        
+        nfo++;
     }
-    head/=nfb;
+    rhow/=nfb;
+    rhoo/=nfo;
     double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
-    dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << head << Util::_8s << water << Util::_8s << Sr << std::endl;
+    dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << rhow << Util::_8s << rhoo << Util::_8s << water << Util::_8s << Sr << std::endl;
 }
 
 
@@ -129,7 +137,7 @@ int main(int argc, char **argv) try
 
     bool   Render   = true;
     size_t N        = 200;
-    double Gs       = -200;
+    double Gs       = -0.53;
     double nu       = 0.05;
     double dt       = 1.0;
     double Tf       = 10000.0;
@@ -162,76 +170,38 @@ int main(int argc, char **argv) try
     nua[0] = nu;
     nua[1] = nu;
 
+
     DEM::Domain DemDom;
-    //DemDom.AddVoroPack(-1,R,10.0,10.0,10.0,nx,ny,nz,1.0,true,false,seed,fraction,Vec3_t(q,q,q));
-    DemDom.GenSpheres  (-1, 10.0, 10, 1.0, "Normal", seed, 1.0);
-    DemDom.Initialize (1.0);
-    
-
-
-
-
+    DemDom.Load(filekey.CStr());
+    Array<int> idx(6);
+    idx = -2,-3,-4,-5,-6,-7;
+    DemDom.DelParticles(idx);
     Vec3_t Xmin,Xmax;
     DemDom.BoundingBox(Xmin,Xmax);
-    int    bound = -1;
+    int    bound = 2;
     double dx = (Xmax(0)-Xmin(0))/(N-2*bound);
-    double dy = (Xmax(1)-Xmin(1))/(N-2*bound);
-    double dz = (Xmax(2)-Xmin(2))/(N-2*bound);
-    DemDom.Center(0.5*(Xmax-Xmin)+Vec3_t(bound*dx,bound*dy,bound*dz));
-
-    LBM::Domain Dom(D3Q15, nua, iVec3_t(N,N,N), 1.0, 1.0);
-    UserData dat;
-    Dom.UserData = &dat;
-
-    dat.Tf       = Tf;
-    dat.ome      = 2*M_PI*ome/Tf;
-    dat.Head     = Head;
-    dat.Orig     = Orig;
-    dat.dtOut    = HeadStep;
-    dat.time     = 0.0;
-
-    Dom.Lat[0].G = -150.0;
-    Dom.Lat[0].Gs= -10.0;
-    Dom.Lat[1].G = -200.0;
-    Dom.Lat[1].Gs= -500;
-    Dom.Gmix     =  0.001;
-
-	// set inner obstacle
+    //double dy = (Xmax(1)-Xmin(1))/(N-2*bound);
+    //double dz = (Xmax(2)-Xmin(2))/(N-2*bound);
+    size_t Ny = (int) (Xmax(1)-Xmin(1))/dx;
+    size_t Nz = (int) (Xmax(2)-Xmin(2))/dx;
+    DemDom.Center(0.5*(Xmax-Xmin)+Vec3_t(bound*dx,0.0,0.0));
+    LBM::Domain Dom(D3Q15, nua, iVec3_t(N,Ny,Nz), 1.0, 1.0);
+    //for (size_t i=0;i<DemDom.Particles.Size();i++)
+    //{
+        //DEM::Particle * Pa = DemDom.Particles[i];
+        //Dom.AddSphere(Pa->Tag,Pa->x/dx,OrthoSys::O,OrthoSys::O,2.5,Pa->Props.R/dx,dt);
+        //Dom.Particles[Dom.Particles.Size()-1]->FixVelocity();
+    //}
     for (int i=0;i<N;i++)
     {
-        for (int j=0;j<N;j++)
+        for (int j=0;j<Ny;j++)
         {
-            dat.xmin0.Push(Dom.Lat[0].GetCell(iVec3_t(0  ,i,j)));
-            dat.xmax0.Push(Dom.Lat[0].GetCell(iVec3_t(N-1,i,j)));
-            dat.ymin0.Push(Dom.Lat[0].GetCell(iVec3_t(i,0  ,j)));
-            dat.ymax0.Push(Dom.Lat[0].GetCell(iVec3_t(i,N-1,j)));
-            dat.zmin0.Push(Dom.Lat[0].GetCell(iVec3_t(i,j,0  )));
-            dat.zmax0.Push(Dom.Lat[0].GetCell(iVec3_t(i,j,N-1)));
-            dat.xmin1.Push(Dom.Lat[1].GetCell(iVec3_t(0  ,i,j)));
-            dat.xmax1.Push(Dom.Lat[1].GetCell(iVec3_t(N-1,i,j)));
-            dat.ymin1.Push(Dom.Lat[1].GetCell(iVec3_t(i,0  ,j)));
-            dat.ymax1.Push(Dom.Lat[1].GetCell(iVec3_t(i,N-1,j)));
-            dat.zmin1.Push(Dom.Lat[1].GetCell(iVec3_t(i,j,0  )));
-            dat.zmax1.Push(Dom.Lat[1].GetCell(iVec3_t(i,j,N-1)));
-
-            dat.xmax0.Last()->IsSolid = true;
-            dat.xmin1.Last()->IsSolid = true;
-
-            dat.ymin0.Last()->IsSolid = true;
-            dat.ymax0.Last()->IsSolid = true;
-            dat.zmin0.Last()->IsSolid = true;
-            dat.zmax0.Last()->IsSolid = true;
-            dat.ymin1.Last()->IsSolid = true;
-            dat.ymax1.Last()->IsSolid = true;
-            dat.zmin1.Last()->IsSolid = true;
-            dat.zmax1.Last()->IsSolid = true;
-
-            for (int k=0;k<N;k++)
+            for (int k=0;k<Nz;k++)
             {
-                Vec3_t pos((i+0.5)*dx,(j+0.5)*dy,(k+0.5)*dz);
+                Vec3_t pos((i+0.5)*dx,(j+0.5)*dx,(k+0.5)*dx);
                 for (size_t n=0;n<DemDom.Particles.Size();n++)
                 {
-                    if (DemDom.Particles[n]->IsInsideAlt(pos))
+                    if (DemDom.Particles[n]->IsInsideAlt(pos)) 
                     {
                         Dom.Lat[0].GetCell(iVec3_t(i,j,k))->IsSolid = true;
                         Dom.Lat[1].GetCell(iVec3_t(i,j,k))->IsSolid = true;
@@ -241,25 +211,129 @@ int main(int argc, char **argv) try
         }
     }
 
+    UserData dat;
+    Dom.UserData = &dat;
+
+    dat.Tf       = Tf;
+    dat.ome      = 2*M_PI*ome/Tf;
+    dat.Head     = Head;
+    dat.Orig     = Orig;
+    dat.dtOut    = HeadStep;
+    dat.time     = 0.0;
+    dat.rho      = rho;
+
+    //Dom.Lat[0].G = -150.0;
+    //Dom.Lat[0].Gs= -10.0;
+    //Dom.Lat[1].G = -200.0;
+    //Dom.Lat[1].Gs= -500;
+    //Dom.Gmix     =  0.001;
+    Dom.Lat[0].G = 0.0;
+    Dom.Lat[0].Gs= -0.1*Gs;
+    Dom.Lat[1].G = 0.0;
+    Dom.Lat[1].Gs= -Gs;
+    Dom.Gmix     =  2.0;
+
+	// set inner obstacles
+    
+    for (int i=0;i<Ny;i++)
+    for (int j=0;j<Nz;j++)
+    {
+        dat.xmin0.Push(Dom.Lat[0].GetCell(iVec3_t(0  ,i,j)));
+        dat.xmax0.Push(Dom.Lat[0].GetCell(iVec3_t(N-1,i,j)));
+        dat.xmin1.Push(Dom.Lat[1].GetCell(iVec3_t(0  ,i,j)));
+        dat.xmax1.Push(Dom.Lat[1].GetCell(iVec3_t(N-1,i,j)));
+        dat.xmax0.Last()->IsSolid = true;
+        dat.xmin1.Last()->IsSolid = true;
+    }
+
+    for (int i=0;i<N;i++)
+    for (int j=0;j<Nz;j++)
+    {
+        dat.ymin0.Push(Dom.Lat[0].GetCell(iVec3_t(i,0  ,j)));
+        dat.ymax0.Push(Dom.Lat[0].GetCell(iVec3_t(i,Ny-1,j)));
+        dat.ymin1.Push(Dom.Lat[1].GetCell(iVec3_t(i,0  ,j)));
+        dat.ymax1.Push(Dom.Lat[1].GetCell(iVec3_t(i,Ny-1,j)));
+        dat.ymin0.Last()->IsSolid = true;
+        dat.ymax0.Last()->IsSolid = true;
+        dat.ymin1.Last()->IsSolid = true;
+        dat.ymax1.Last()->IsSolid = true;
+    }
+    for (int i=0;i<N;i++)
+    for (int j=0;j<Ny;j++)
+    {
+        dat.zmin0.Push(Dom.Lat[0].GetCell(iVec3_t(i,j,0  )));
+        dat.zmax0.Push(Dom.Lat[0].GetCell(iVec3_t(i,j,Nz-1)));
+        dat.zmin1.Push(Dom.Lat[1].GetCell(iVec3_t(i,j,0  )));
+        dat.zmax1.Push(Dom.Lat[1].GetCell(iVec3_t(i,j,Nz-1)));
+        dat.zmin0.Last()->IsSolid = true;
+        dat.zmax0.Last()->IsSolid = true;
+        dat.zmin1.Last()->IsSolid = true;
+        dat.zmax1.Last()->IsSolid = true;
+    }
+    
+    //for (int i=0;i<N;i++)
+    //{
+        //for (int j=0;j<N;j++)
+        //{
+            //dat.xmin0.Push(Dom.Lat[0].GetCell(iVec3_t(0  ,i,j)));
+            //dat.xmax0.Push(Dom.Lat[0].GetCell(iVec3_t(N-1,i,j)));
+            //dat.ymin0.Push(Dom.Lat[0].GetCell(iVec3_t(i,0  ,j)));
+            //dat.ymax0.Push(Dom.Lat[0].GetCell(iVec3_t(i,Ny-1,j)));
+            //dat.zmin0.Push(Dom.Lat[0].GetCell(iVec3_t(i,j,0  )));
+            //dat.zmax0.Push(Dom.Lat[0].GetCell(iVec3_t(i,j,Nz-1)));
+            //dat.xmin1.Push(Dom.Lat[1].GetCell(iVec3_t(0  ,i,j)));
+            //dat.xmax1.Push(Dom.Lat[1].GetCell(iVec3_t(N-1,i,j)));
+            //dat.ymin1.Push(Dom.Lat[1].GetCell(iVec3_t(i,0  ,j)));
+            //dat.ymax1.Push(Dom.Lat[1].GetCell(iVec3_t(i,Ny-1,j)));
+            //dat.zmin1.Push(Dom.Lat[1].GetCell(iVec3_t(i,j,0  )));
+            //dat.zmax1.Push(Dom.Lat[1].GetCell(iVec3_t(i,j,Nz-1)));
+//
+            //dat.xmax0.Last()->IsSolid = true;
+            //dat.xmin1.Last()->IsSolid = true;
+//
+            //dat.ymin0.Last()->IsSolid = true;
+            //dat.ymax0.Last()->IsSolid = true;
+            //dat.zmin0.Last()->IsSolid = true;
+            //dat.zmax0.Last()->IsSolid = true;
+            //dat.ymin1.Last()->IsSolid = true;
+            //dat.ymax1.Last()->IsSolid = true;
+            //dat.zmin1.Last()->IsSolid = true;
+            //dat.zmax1.Last()->IsSolid = true;
+
+            //for (int k=0;k<N;k++)
+            //{
+                //Vec3_t pos((i+0.5)*dx,(j+0.5)*dy,(k+0.5)*dz);
+                //for (size_t n=0;n<DemDom.Particles.Size();n++)
+                //{
+                    //if (DemDom.Particles[n]->IsInsideAlt(pos))
+                    //{
+                        //Dom.Lat[0].GetCell(iVec3_t(i,j,k))->IsSolid = true;
+                        //Dom.Lat[1].GetCell(iVec3_t(i,j,k))->IsSolid = true;
+                    //}
+                //}
+            //}
+        //}
+    //}
+
     //Initializing values
     for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
     {
-        Dom.Lat[0].Cells[i]->Initialize(0.1, OrthoSys::O);
-        Dom.Lat[1].Cells[i]->Initialize(1300.0, OrthoSys::O);
+        Dom.Lat[1].Cells[i]->Initialize(0.999*rho, OrthoSys::O);
+        Dom.Lat[0].Cells[i]->Initialize(0.001*rho, OrthoSys::O);
     }
 
 
     //Setting boundary conditions
-    for (size_t i=0;i<dat.xmin0.Size();i++)
-    {
-        dat.xmax1[i]->RhoBC = 1300.0;
-    }
+    //for (size_t i=0;i<dat.xmin0.Size();i++)
+    //{
+        //dat.xmax1[i]->RhoBC = 1300.0;
+    //}
 
     //Solving
     String fs;
     fs.Printf("water_retention.res");
     dat.oss_ss.open(fs.CStr(),std::ios::out);
-    dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "PDen" << Util::_8s << "Head" << Util::_8s << "Water" << Util::_8s << "Sr" << std::endl;
+    dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "PDen" << Util::_8s << "Rhow" << Util::_8s << "Rhoo" << Util::_8s << "Water" << Util::_8s << "Sr" << std::endl;
     Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render,Nproc);
     dat.oss_ss.close();
 }

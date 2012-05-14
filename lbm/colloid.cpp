@@ -44,7 +44,7 @@ struct UserData
     std::ofstream oss_ss;       ///< file for stress strain data
 };
 
-void Setup (Domain & dom, void * UD)
+void Setup (LBM::Domain & dom, void * UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
     //for (size_t i=0;i<dat.Left.Size();i++)
@@ -109,7 +109,7 @@ void Setup (Domain & dom, void * UD)
     }
 }
 
-void Report(Domain & dom, void * UD)
+void Report(LBM::Domain & dom, void * UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
     if (dom.idx_out==0)
@@ -121,15 +121,15 @@ void Report(Domain & dom, void * UD)
     }
     double MassFlux = 0.0;
     double Density  = 0.0;
-    for (size_t i = 0;i < dom.Lat.Ndim(1) ; i++)
+    for (size_t i = 0;i < dom.Lat[0].Ndim(1) ; i++)
     {
         Vec3_t V;
-        double rho = dom.Lat.GetCell(iVec3_t(0,i,0))->VelDen(V);
+        double rho = dom.Lat[0].GetCell(iVec3_t(0,i,0))->VelDen(V);
         Density  += rho;
         MassFlux += rho*norm(V);
     }
-    Density /=dom.Lat.Ndim(1);
-    MassFlux/=dom.Lat.Ndim(1);
+    Density /=dom.Lat[0].Ndim(1);
+    MassFlux/=dom.Lat[0].Ndim(1);
 
     double As = 0.0;
     for (size_t i=0;i<dom.Particles.Size();i++)
@@ -180,7 +180,7 @@ int main(int argc, char **argv) try
 
 
     double xlim   = 2.0*rc;
-    Domain Dom(D2Q9, nu, iVec3_t(nx,ny,1), dx, dt);
+    LBM::Domain Dom(D2Q9, nu, iVec3_t(nx,ny,1), dx, dt);
     UserData dat;
     Dom.UserData = &dat;
     Dom.Alpha    = 2.0*rc;
@@ -198,8 +198,8 @@ int main(int argc, char **argv) try
     //Assigning the left and right cells
     for (size_t i=0;i<ny;i++)
     {
-        dat.Left .Push(Dom.Lat.GetCell(iVec3_t(0   ,i,0)));
-        dat.Right.Push(Dom.Lat.GetCell(iVec3_t(nx-1,i,0)));
+        dat.Left .Push(Dom.Lat[0].GetCell(iVec3_t(0   ,i,0)));
+        dat.Right.Push(Dom.Lat[0].GetCell(iVec3_t(nx-1,i,0)));
         double vx = vb; // horizontal velocity
         double vy = 0.0;                          // vertical velocity
 		Vec3_t v(vx, vy, 0.0);                    // velocity vector
@@ -213,8 +213,8 @@ int main(int argc, char **argv) try
     //Assigning solid boundaries at top and bottom
     for (size_t i=0;i<nx;i++)
     {
-        Dom.Lat.GetCell(iVec3_t(i,0   ,0))->IsSolid = true;
-        Dom.Lat.GetCell(iVec3_t(i,ny-1,0))->IsSolid = true;
+        Dom.Lat[0].GetCell(iVec3_t(i,0   ,0))->IsSolid = true;
+        Dom.Lat[0].GetCell(iVec3_t(i,ny-1,0))->IsSolid = true;
     }
 
 	// Set grains
@@ -233,7 +233,7 @@ int main(int argc, char **argv) try
     srand(seed);
     size_t ntries = 0;
     double n      = (nx*dx - dat.nr*rc)/(nx*dx);
-    while (1-Dom.Lat.SolidFraction()/n>por)
+    while (1-Dom.Lat[0].SolidFraction()/n>por)
     {
         ntries++;
         if (ntries>1.0e4) throw new Fatal("Too many tries to achieved requested porosity, please increase it");
@@ -258,10 +258,10 @@ int main(int argc, char **argv) try
         Dom.AddDisk(0,Vec3_t(xc,yc,0.0),OrthoSys::O,OrthoSys::O,3.0,r,1.0);
         Dom.Particles[Dom.Particles.Size()-1]->FixVelocity();
         Dom.Particles[Dom.Particles.Size()-1]->Kn = Kn;
-        Dom.Particles[Dom.Particles.Size()-1]->ImprintDisk(Dom.Lat);
+        Dom.ImprintLattice();
     }
 
-    std::cout << 1-Dom.Lat.SolidFraction()/n << std::endl;
+    std::cout << 1-Dom.Lat[0].SolidFraction()/n << std::endl;
 
     //Writing correlation information
     String fs;
@@ -296,9 +296,9 @@ int main(int argc, char **argv) try
     Vec3_t v0(0.0,0.0,0.0);
 
     //Initializing values
-    for (size_t i=0;i<Dom.Lat.Cells.Size();i++)
+    for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
     {
-        Dom.Lat.Cells[i]->Initialize(rho0, v0);
+        Dom.Lat[0].Cells[i]->Initialize(rho0, v0);
     }
 
     //Solving
