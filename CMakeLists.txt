@@ -27,7 +27,7 @@ OPTION(A_MAKE_PROFILING     "Make with profiling information (-pg)"             
 OPTION(A_MAKE_OPTIMIZED     "Make optimized (-O3)"                              ON)
 
 ADD_DEFINITIONS (-fPIC -fmessage-length=0) # Each error message will appear on a single line; no line-wrapping will be done.
-
+#INCLUDE_DIRECTORIES ($ENV{HOME}/pkg/boost_1_49_0)
 ### FLAGS ###############################################################################################
 
 IF(A_MAKE_VERBOSE)
