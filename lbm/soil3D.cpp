@@ -28,26 +28,26 @@
 
 struct UserData
 {
-    Array<Cell *> xmin0;
-    Array<Cell *> xmax0;
-    Array<Cell *> ymin0;
-    Array<Cell *> ymax0;
-    Array<Cell *> zmin0;
-    Array<Cell *> zmax0;
-    Array<Cell *> xmin1;
-    Array<Cell *> xmax1;
-    Array<Cell *> ymin1;
-    Array<Cell *> ymax1;
-    Array<Cell *> zmin1;
-    Array<Cell *> zmax1;
-    double         Head;       ///< Current hydraulic head
-    double         Orig;       ///< Original hydraulic head
-    double           Tf;
-    double           Kn;
-    double          ome;
-    double        dtOut;
-    double         time;
-    double          rho;
+    Array<Cell *>  xmin0;
+    Array<Cell *>  xmax0;
+    Array<Cell *>  ymin0;
+    Array<Cell *>  ymax0;
+    Array<Cell *>  zmin0;
+    Array<Cell *>  zmax0;
+    Array<Cell *>  xmin1;
+    Array<Cell *>  xmax1;
+    Array<Cell *>  ymin1;
+    Array<Cell *>  ymax1;
+    Array<Cell *>  zmin1;
+    Array<Cell *>  zmax1;
+    double          Head;       ///< Current hydraulic head
+    double          Orig;       ///< Original hydraulic head
+    double            Tf;
+    double            Kn;
+    double           ome;
+    double         dtOut;
+    double          time;
+    double           rho;
     std::ofstream oss_ss;       ///< file for stress strain data
 };
 
@@ -59,14 +59,41 @@ void Setup (LBM::Domain & dom, void * UD)
         dat.time += dat.dtOut;
     }
     double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
+    double rho0min = 0.99*rho;
+    double rho1min = 0.01*rho;
+    double rho0max = 0.01*(2.0*dat.rho - rho);
+    double rho1max = 0.99*(2.0*dat.rho - rho);
     for (size_t i=0;i<dat.xmin0.Size();i++)
     {
-        dat.xmin0[i]->Initialize(rho,OrthoSys::O);
-    }
-    for (size_t i=0;i<dat.xmax1.Size();i++)
-    {
-        Cell * c = dat.xmax1[i];
-        if(c->IsSolid) continue;
+        Cell * c = dat.xmin0[i];
+        c->RhoBC = rho0min;
+        c->F[1] = 1.0/3.0*(-2*c->F[0]-4*c->F[10]-4*c->F[12]-4*c->F[14]-c->F[2]-2*c->F[3]-2*c->F[4]-2*c->F[5]-2*c->F[6]-4*c->F[8]+2*c->RhoBC);
+        c->F[7] = 1.0/24.0*(-2*c->F[0]-4*c->F[10]-4*c->F[12]-4*c->F[14]-4*c->F[2]  +c->F[3]-5*c->F[4]  +c->F[5]-5*c->F[6]+20*c->F[8]+2*c->RhoBC);
+        c->F[9] = 1.0/24.0*(-2*c->F[0]+20*c->F[10]-4*c->F[12]-4*c->F[14]-4*c->F[2]+c->F[3]-5*c->F[4]-5*c->F[5]+c->F[6]-4*c->F[8]+2*c->RhoBC);
+        c->F[11]= 1.0/24.0*(-2*c->F[0]-4*c->F[10]+20*c->F[12]-4*c->F[14]-4*c->F[2]-5*c->F[3]+c->F[4]  +c->F[5]-5*c->F[6]-4*c->F[8]+2*c->RhoBC);
+        c->F[13]= 1.0/24.0*(-2*c->F[0]-4*c->F[10]-4 *c->F[12]+20*c->F[14]-4*c->F[2]-5*c->F[3]+  c->F[4]-5*c->F[5]+c->F[6]-4*c->F[8]+2*c->RhoBC);
+        c->Rho = c->VelDen(c->Vel);
+
+        c = dat.xmin1[i];
+        c->RhoBC = rho1min;
+        c->F[1] = 1.0/3.0*(-2*c->F[0]-4*c->F[10]-4*c->F[12]-4*c->F[14]-c->F[2]-2*c->F[3]-2*c->F[4]-2*c->F[5]-2*c->F[6]-4*c->F[8]+2*c->RhoBC);
+        c->F[7] = 1.0/24.0*(-2*c->F[0]-4*c->F[10]-4*c->F[12]-4*c->F[14]-4*c->F[2]  +c->F[3]-5*c->F[4]  +c->F[5]-5*c->F[6]+20*c->F[8]+2*c->RhoBC);
+        c->F[9] = 1.0/24.0*(-2*c->F[0]+20*c->F[10]-4*c->F[12]-4*c->F[14]-4*c->F[2]+c->F[3]-5*c->F[4]-5*c->F[5]+c->F[6]-4*c->F[8]+2*c->RhoBC);
+        c->F[11]= 1.0/24.0*(-2*c->F[0]-4*c->F[10]+20*c->F[12]-4*c->F[14]-4*c->F[2]-5*c->F[3]+c->F[4]  +c->F[5]-5*c->F[6]-4*c->F[8]+2*c->RhoBC);
+        c->F[13]= 1.0/24.0*(-2*c->F[0]-4*c->F[10]-4 *c->F[12]+20*c->F[14]-4*c->F[2]-5*c->F[3]+  c->F[4]-5*c->F[5]+c->F[6]-4*c->F[8]+2*c->RhoBC);
+        c->Rho = c->VelDen(c->Vel);
+
+        c = dat.xmax0[i];
+        c->RhoBC = rho0max;
+        c->F[2] = 1/3.0* (-2*c->F[0]-c->F[1]-2*(2*c->F[11]+2*c->F[13]+c->F[3]+c->F[4]+c->F[5]+c->F[6]+2*c->F[7]+2*c->F[9]-c->RhoBC));
+        c->F[8] = 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] - 4*c->F[13] - 5*c->F[3] + c->F[4] - 5*c->F[5] + c->F[6] +20*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
+        c->F[10]= 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] - 4*c->F[13] - 5*c->F[3] + c->F[4] + c->F[5] - 5*c->F[6] - 4*c->F[7] + 20*c->F[9] + 2*c->RhoBC) ;
+        c->F[12]= 1/24.0*(-2*c->F[0] - 4*c->F[1] + 20*c->F[11] - 4*c->F[13] + c->F[3] - 5*c->F[4] - 5*c->F[5] + c->F[6] -  4*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
+        c->F[14]= 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] + 20*c->F[13] + c->F[3] - 5*c->F[4] + c->F[5] - 5*c->F[6] -  4*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
+        c->Rho = c->VelDen(c->Vel);
+        
+        c = dat.xmax1[i];
+        c->RhoBC = rho1max;
         c->F[2] = 1/3.0* (-2*c->F[0]-c->F[1]-2*(2*c->F[11]+2*c->F[13]+c->F[3]+c->F[4]+c->F[5]+c->F[6]+2*c->F[7]+2*c->F[9]-c->RhoBC));
         c->F[8] = 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] - 4*c->F[13] - 5*c->F[3] + c->F[4] - 5*c->F[5] + c->F[6] +20*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
         c->F[10]= 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] - 4*c->F[13] - 5*c->F[3] + c->F[4] + c->F[5] - 5*c->F[6] - 4*c->F[7] + 20*c->F[9] + 2*c->RhoBC) ;
@@ -87,6 +114,7 @@ void Report (LBM::Domain & dom, void * UD)
     for (size_t i=0;i<dom.Lat[1].Cells.Size();i++)
     {
         Cell * c = dom.Lat[1].Cells[i];
+        if (c->IsSolid) continue;
         if (c->Rho>0.5*dat.rho) 
         {
             Sr+=1.0;
@@ -115,14 +143,14 @@ void Report (LBM::Domain & dom, void * UD)
         rhow += c->Rho;        
         nfb++;
         c = dom.Lat[1].GetCell(iVec3_t(dom.Lat[1].Ndim(0)-2,i,j));
-        if (c->IsSolid) continue;
         rhoo += c->Rho;        
         nfo++;
     }
     rhow/=nfb;
     rhoo/=nfo;
     double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
-    dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << rhow << Util::_8s << rhoo << Util::_8s << water << Util::_8s << Sr << std::endl;
+    double Pc  = (2.0*(rho - dat.rho) + dom.Gmix*(rho*rho*0.99*0.01 - (2.0*dat.rho - rho)*(2.0*dat.rho - rho)*0.99*0.01))/3.0;
+    dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << rhoo << Util::_8s << rhow << Util::_8s << water << Util::_8s << oil << Util::_8s << Pc << Util::_8s << Sr << std::endl;
 }
 
 
@@ -135,6 +163,7 @@ int main(int argc, char **argv) try
     size_t Nproc = 1;
     if (argc==3) Nproc = atoi(argv[2]);
 
+    String fileDEM;
     bool   Render   = true;
     size_t N        = 200;
     double Gs       = -0.53;
@@ -151,6 +180,7 @@ int main(int argc, char **argv) try
     double seed     = 1000;
     
     {
+        infile >> fileDEM;  infile.ignore(200,'\n');
         infile >> Render;    infile.ignore(200,'\n');
         infile >> N;         infile.ignore(200,'\n');
         infile >> Gs;        infile.ignore(200,'\n');
@@ -172,13 +202,13 @@ int main(int argc, char **argv) try
 
 
     DEM::Domain DemDom;
-    DemDom.Load(filekey.CStr());
+    DemDom.Load(fileDEM.CStr());
     Array<int> idx(6);
     idx = -2,-3,-4,-5,-6,-7;
     DemDom.DelParticles(idx);
     Vec3_t Xmin,Xmax;
     DemDom.BoundingBox(Xmin,Xmax);
-    int    bound = 2;
+    int    bound = 4;
     double dx = (Xmax(0)-Xmin(0))/(N-2*bound);
     //double dy = (Xmax(1)-Xmin(1))/(N-2*bound);
     //double dz = (Xmax(2)-Xmin(2))/(N-2*bound);
@@ -242,8 +272,8 @@ int main(int argc, char **argv) try
         dat.xmax0.Push(Dom.Lat[0].GetCell(iVec3_t(N-1,i,j)));
         dat.xmin1.Push(Dom.Lat[1].GetCell(iVec3_t(0  ,i,j)));
         dat.xmax1.Push(Dom.Lat[1].GetCell(iVec3_t(N-1,i,j)));
-        dat.xmax0.Last()->IsSolid = true;
-        dat.xmin1.Last()->IsSolid = true;
+        //dat.xmax0.Last()->IsSolid = true;
+        //dat.xmin1.Last()->IsSolid = true;
     }
 
     for (int i=0;i<N;i++)
@@ -318,8 +348,8 @@ int main(int argc, char **argv) try
     //Initializing values
     for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
     {
-        Dom.Lat[1].Cells[i]->Initialize(0.999*rho, OrthoSys::O);
-        Dom.Lat[0].Cells[i]->Initialize(0.001*rho, OrthoSys::O);
+        Dom.Lat[1].Cells[i]->Initialize(0.99*rho, OrthoSys::O);
+        Dom.Lat[0].Cells[i]->Initialize(0.01*rho, OrthoSys::O);
     }
 
 
@@ -333,7 +363,7 @@ int main(int argc, char **argv) try
     String fs;
     fs.Printf("water_retention.res");
     dat.oss_ss.open(fs.CStr(),std::ios::out);
-    dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "PDen" << Util::_8s << "Rhow" << Util::_8s << "Rhoo" << Util::_8s << "Water" << Util::_8s << "Sr" << std::endl;
+    dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "PDen" << Util::_8s << "Rhow" << Util::_8s << "Rhoo" << Util::_8s << "Water" << Util::_8s << "Oil" << Util::_8s << "Pc" << Util::_8s << "Sr" << std::endl;
     Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render,Nproc);
     dat.oss_ss.close();
 }
