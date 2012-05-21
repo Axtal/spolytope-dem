@@ -27,6 +27,8 @@ using std::cout;
 using std::endl;
 struct UserData
 {
+    double            Orig;
+    double             Amp;
     double             ome;
     double              Tf;
     Vec3_t               g;
@@ -39,7 +41,7 @@ void Setup(LBM::Domain & dom, void * UD)
     double rho;
     //rho = 1.0 + 0.001*0.5*(1-cos(dat.ome*dom.Time));
     //rho = 1.0 + 0.1*sin(dat.ome*dom.Time);
-    rho = 0.85 + 0.15*cos(dat.ome*(dom.Time-0.33*1.6e5));
+    rho = dat.Orig + dat.Amp*sin(dat.ome*dom.Time);
     for(size_t i=0;i<dat.Center.Size();i++)
     {
         dat.Center[i]->Initialize(rho,OrthoSys::O);
@@ -49,10 +51,32 @@ void Setup(LBM::Domain & dom, void * UD)
 
 int main(int argc, char **argv) try
 {
-    size_t Nproc = 1;
-    if (argc>=2) Nproc = atoi(argv[1]);
+    size_t Nproc = 1; 
+    double Gmix  = 0.001;
+    double Gs0   = 0.001;
+    double Gs1   = 0.001;
+    double R     = 10.0;
+    double rho0  = 1.0;
+    double rho1  = 0.01;
+    double ome   = 1.0;
+    double Orig  = 1.0;
+    double Amp   = 1.0;
+    double Tf    = 5000.0;
 
-    //double Gs = atof(argv[1]); 
+    if (argc>=2)
+    {
+        Nproc  =atoi(argv[ 1]);
+        Gmix   =atof(argv[ 2]);
+        Gs0    =atof(argv[ 3]);
+        Gs1    =atof(argv[ 4]);
+        R      =atof(argv[ 5]);
+        rho0   =atof(argv[ 6]);
+        rho1   =atof(argv[ 7]);
+        ome    =atof(argv[ 8]);
+        Orig   =atof(argv[ 9]);
+        Amp    =atof(argv[10]);
+        Tf     =atof(argv[11]);
+    }
 
 
     Array<double> nu(2);
@@ -60,8 +84,6 @@ int main(int argc, char **argv) try
     nu[1] = 1.0/6.0;
 
     size_t nx   = 200, ny = 100;
-    double Tf   = 160000.0;
-    double ome  = 2.0;
 
     // Setting top and bottom wall as solid
     LBM::Domain Dom(D2Q9, nu, iVec3_t(nx,ny,1), 1.0, 1.0);
@@ -73,6 +95,8 @@ int main(int argc, char **argv) try
     //dat.g           = 0.0,-0.0005,0.0;
     dat.ome         = 2*M_PI*ome/Tf;
     dat.Tf          = Tf;
+    dat.Amp         = Amp;
+    dat.Orig        = Orig;
 
 
 
@@ -92,11 +116,11 @@ int main(int argc, char **argv) try
     //}
 
     // Set inner drop
-    int obsX = nx/2, obsY = ny/2, obsZ = 3*ny/4;
+    int obsX = nx/2, obsY = ny/2;
     //int radius =  ny/4.0;
-    int r1 =  ny/20.0;
+    int r1 =  R;
     //int r2 =  ny/3.0;
-    int r2 =  1.3*ny/2.0;
+    int r2 =  0.1*R;
 
 	for (size_t i=0; i<nx; ++i)
 	for (size_t j=0; j<ny; ++j)
@@ -104,29 +128,28 @@ int main(int argc, char **argv) try
 		Vec3_t V;  V = 0.0, 0.0, 0.0;
 		if (pow((int)(i)-obsX,2.0) + pow((int)(j)-obsY,2.0) <= pow(r1,2.0)) // circle equation
 		{
-            Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(0.999,V);
-            Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(0.001,V);
+            Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(rho0,V);
+            Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(rho1,V);
             dat.Center.Push(Dom.Lat[0].GetCell(iVec3_t(i,j,0)));
 		}
 		else if (pow((int)(i)-obsX,2.0) + pow((int)(j)-obsY,2.0) <= pow(r2,2.0)) 
 		{
-            Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(0.999,V);
-            Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(0.001,V);
+            Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(rho0,V);
+            Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(rho1,V);
 		}
         else
         {
-            Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(0.001,V);
-            Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(0.999,V);
+            Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(rho1,V);
+            Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(rho0,V);
         }
     }
 
     // Set parameters
-    double Gs    =  0.53;
     Dom.Lat[0].G =  0.0 ;
-    Dom.Lat[0].Gs=  -0.1*Gs;
+    Dom.Lat[0].Gs=  Gs0;
     Dom.Lat[1].G =  0.0 ;
-    Dom.Lat[1].Gs= -Gs  ;
-    Dom.Gmix     =  2.0 ;
+    Dom.Lat[1].Gs=  Gs1  ;
+    Dom.Gmix     =  Gmix ;
     //Dom.Lat[0].G = -150.0;
     //Dom.Lat[0].Gs=  400.0;
     //Dom.Lat[1].G = -200.0;

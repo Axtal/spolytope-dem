@@ -59,10 +59,10 @@ void Setup (LBM::Domain & dom, void * UD)
         dat.time += dat.dtOut;
     }
     double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
-    double rho0min = 0.99*rho;
-    double rho1min = 0.01*rho;
-    double rho0max = 0.01*(2.0*dat.rho - rho);
-    double rho1max = 0.99*(2.0*dat.rho - rho);
+    double rho0min = 0.999*rho;
+    double rho1min = 0.001*rho;
+    double rho0max = 0.001*(2.0*dat.rho - rho);
+    double rho1max = 0.999*(2.0*dat.rho - rho);
     for (size_t i=0;i<dat.xmin0.Size();i++)
     {
         Cell * c = dat.xmin0[i];
@@ -166,7 +166,9 @@ int main(int argc, char **argv) try
     String fileDEM;
     bool   Render   = true;
     size_t N        = 200;
-    double Gs       = -0.53;
+    double Gs0      = -0.53;
+    double Gs1      = -0.53;
+    double Gmix     = 2.0;
     double nu       = 0.05;
     double dt       = 1.0;
     double Tf       = 10000.0;
@@ -180,10 +182,12 @@ int main(int argc, char **argv) try
     double seed     = 1000;
     
     {
-        infile >> fileDEM;  infile.ignore(200,'\n');
+        infile >> fileDEM;   infile.ignore(200,'\n');
         infile >> Render;    infile.ignore(200,'\n');
         infile >> N;         infile.ignore(200,'\n');
-        infile >> Gs;        infile.ignore(200,'\n');
+        infile >> Gs0;       infile.ignore(200,'\n');
+        infile >> Gs1;       infile.ignore(200,'\n');
+        infile >> Gmix;      infile.ignore(200,'\n');
         infile >> nu;        infile.ignore(200,'\n');
         infile >> dt;        infile.ignore(200,'\n');
         infile >> Tf;        infile.ignore(200,'\n');
@@ -258,10 +262,10 @@ int main(int argc, char **argv) try
     //Dom.Lat[1].Gs= -500;
     //Dom.Gmix     =  0.001;
     Dom.Lat[0].G = 0.0;
-    Dom.Lat[0].Gs= -0.1*Gs;
+    Dom.Lat[0].Gs= Gs0;
     Dom.Lat[1].G = 0.0;
-    Dom.Lat[1].Gs= -Gs;
-    Dom.Gmix     =  2.0;
+    Dom.Lat[1].Gs= Gs1;
+    Dom.Gmix     = Gmix;
 
 	// set inner obstacles
     
@@ -348,8 +352,8 @@ int main(int argc, char **argv) try
     //Initializing values
     for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
     {
-        Dom.Lat[1].Cells[i]->Initialize(0.99*rho, OrthoSys::O);
-        Dom.Lat[0].Cells[i]->Initialize(0.01*rho, OrthoSys::O);
+        Dom.Lat[1].Cells[i]->Initialize(0.999*rho, OrthoSys::O);
+        Dom.Lat[0].Cells[i]->Initialize(0.001*rho, OrthoSys::O);
     }
 
 

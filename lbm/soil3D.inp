@@ -1,7 +1,9 @@
 soil3D    fileDEM
 1    Render    
 100    N
-0.53 Gs
+ 0.53 Gs0
+-0.53 Gs1
+2.0   Gmix
 0.1    nu    
 1.0     dt    
 4.0e5   Tf    
