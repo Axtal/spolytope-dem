@@ -1,17 +1,18 @@
 soil3D    fileDEM
+Pc0.h5    fileLBM
 1    Render    
 100    N
- 0.53 Gs0
--0.53 Gs1
-2.0   Gmix
+ 0.48 Gs0
+-0.48 Gs1
+1.0   Gmix
 0.1    nu    
 1.0     dt    
-4.0e5   Tf    
-4.0e2   dtOut 
-4.0e3   HeadStep
-1.0   rho   
-1.0   ome   
+4.0e3   Tf    
+4.0e1   dtOut 
+1.0e0   HeadStep
+2.0   rho   
+0.0   ome   
 0.2  Head  
-0.9   Orig
+0.95  Orig
 1.0    por
 80   seed

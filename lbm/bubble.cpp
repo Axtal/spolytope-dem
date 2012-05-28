@@ -117,10 +117,8 @@ int main(int argc, char **argv) try
 
     // Set inner drop
     int obsX = nx/2, obsY = ny/2;
-    //int radius =  ny/4.0;
-    int r1 =  R;
-    //int r2 =  ny/3.0;
-    int r2 =  0.1*R;
+    int r1 =  0.1*R;
+    int r2 =  R;
 
 	for (size_t i=0; i<nx; ++i)
 	for (size_t j=0; j<ny; ++j)

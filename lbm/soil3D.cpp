@@ -164,6 +164,7 @@ int main(int argc, char **argv) try
     if (argc==3) Nproc = atoi(argv[2]);
 
     String fileDEM;
+    String fileLBM;
     bool   Render   = true;
     size_t N        = 200;
     double Gs0      = -0.53;
@@ -178,11 +179,9 @@ int main(int argc, char **argv) try
     double ome      = 2.0;
     double Head     = 500.0;
     double Orig     = 54.0;
-    double por      = 0.6;
-    double seed     = 1000;
-    
     {
         infile >> fileDEM;   infile.ignore(200,'\n');
+        infile >> fileLBM;   infile.ignore(200,'\n');
         infile >> Render;    infile.ignore(200,'\n');
         infile >> N;         infile.ignore(200,'\n');
         infile >> Gs0;       infile.ignore(200,'\n');
@@ -197,8 +196,6 @@ int main(int argc, char **argv) try
         infile >> ome;       infile.ignore(200,'\n');
         infile >> Head;      infile.ignore(200,'\n');
         infile >> Orig;      infile.ignore(200,'\n');
-        infile >> por;       infile.ignore(200,'\n');
-        infile >> seed;      infile.ignore(200,'\n');
     }
     Array<double> nua(2);
     nua[0] = nu;
@@ -216,10 +213,11 @@ int main(int argc, char **argv) try
     double dx = (Xmax(0)-Xmin(0))/(N-2*bound);
     //double dy = (Xmax(1)-Xmin(1))/(N-2*bound);
     //double dz = (Xmax(2)-Xmin(2))/(N-2*bound);
-    size_t Ny = (int) (Xmax(1)-Xmin(1))/dx;
-    size_t Nz = (int) (Xmax(2)-Xmin(2))/dx;
+    size_t Ny = (Xmax(1)-Xmin(1))/dx;
+    size_t Nz = (Xmax(2)-Xmin(2))/dx;
     DemDom.Center(0.5*(Xmax-Xmin)+Vec3_t(bound*dx,0.0,0.0));
     LBM::Domain Dom(D3Q15, nua, iVec3_t(N,Ny,Nz), 1.0, 1.0);
+    //Dom.PrtVec = false;
     //for (size_t i=0;i<DemDom.Particles.Size();i++)
     //{
         //DEM::Particle * Pa = DemDom.Particles[i];
@@ -287,10 +285,14 @@ int main(int argc, char **argv) try
         dat.ymax0.Push(Dom.Lat[0].GetCell(iVec3_t(i,Ny-1,j)));
         dat.ymin1.Push(Dom.Lat[1].GetCell(iVec3_t(i,0  ,j)));
         dat.ymax1.Push(Dom.Lat[1].GetCell(iVec3_t(i,Ny-1,j)));
-        dat.ymin0.Last()->IsSolid = true;
-        dat.ymax0.Last()->IsSolid = true;
-        dat.ymin1.Last()->IsSolid = true;
-        dat.ymax1.Last()->IsSolid = true;
+        //dat.ymin0.Last()->IsSolid = true;
+        //dat.ymax0.Last()->IsSolid = true;
+        //dat.ymin1.Last()->IsSolid = true;
+        //dat.ymax1.Last()->IsSolid = true;
+        //dat.ymin0.Last()->Gs      = 0.0;
+        //dat.ymax0.Last()->Gs      = 0.0;
+        //dat.ymin1.Last()->Gs      = 0.0;
+        //dat.ymax1.Last()->Gs      = 0.0;
     }
     for (int i=0;i<N;i++)
     for (int j=0;j<Ny;j++)
@@ -299,10 +301,14 @@ int main(int argc, char **argv) try
         dat.zmax0.Push(Dom.Lat[0].GetCell(iVec3_t(i,j,Nz-1)));
         dat.zmin1.Push(Dom.Lat[1].GetCell(iVec3_t(i,j,0  )));
         dat.zmax1.Push(Dom.Lat[1].GetCell(iVec3_t(i,j,Nz-1)));
-        dat.zmin0.Last()->IsSolid = true;
-        dat.zmax0.Last()->IsSolid = true;
-        dat.zmin1.Last()->IsSolid = true;
-        dat.zmax1.Last()->IsSolid = true;
+        //dat.zmin0.Last()->IsSolid = true;
+        //dat.zmax0.Last()->IsSolid = true;
+        //dat.zmin1.Last()->IsSolid = true;
+        //dat.zmax1.Last()->IsSolid = true;
+        //dat.zmin0.Last()->Gs      = 0.0;
+        //dat.zmax0.Last()->Gs      = 0.0;
+        //dat.zmin1.Last()->Gs      = 0.0;
+        //dat.zmax1.Last()->Gs      = 0.0;
     }
     
     //for (int i=0;i<N;i++)
@@ -350,10 +356,44 @@ int main(int argc, char **argv) try
     //}
 
     //Initializing values
-    for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
+    if (Util::FileExists(fileLBM))
     {
-        Dom.Lat[1].Cells[i]->Initialize(0.999*rho, OrthoSys::O);
-        Dom.Lat[0].Cells[i]->Initialize(0.001*rho, OrthoSys::O);
+        hid_t file_id;
+        file_id = H5Fopen(fileLBM.CStr(), H5F_ACC_RDONLY, H5P_DEFAULT);
+        float * Density0   = new float[  Dom.Lat[0].Ndim[0]*Dom.Lat[0].Ndim[1]*Dom.Lat[0].Ndim[2]];
+        float * Vvec0      = new float[3*Dom.Lat[0].Ndim[0]*Dom.Lat[0].Ndim[1]*Dom.Lat[0].Ndim[2]];
+        float * Density1   = new float[  Dom.Lat[0].Ndim[0]*Dom.Lat[0].Ndim[1]*Dom.Lat[0].Ndim[2]];
+        float * Vvec1      = new float[3*Dom.Lat[0].Ndim[0]*Dom.Lat[0].Ndim[1]*Dom.Lat[0].Ndim[2]];
+        H5LTread_dataset_float(file_id,"Density_0" ,Density0);
+        H5LTread_dataset_float(file_id,"Velocity_0",Vvec0   );
+        H5LTread_dataset_float(file_id,"Density_1" ,Density1);
+        H5LTread_dataset_float(file_id,"Velocity_1",Vvec1   );
+        for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
+        {
+            Cell * c = Dom.Lat[0].Cells[i];
+            Vec3_t V;
+            V(0) =  Vvec0[3*i  ];
+            V(1) =  Vvec0[3*i+1];
+            V(2) =  Vvec0[3*i+2];
+            c->Initialize(Density0[i],V);
+            c = Dom.Lat[1].Cells[i];
+            V(0) =  Vvec1[3*i  ];
+            V(1) =  Vvec1[3*i+1];
+            V(2) =  Vvec1[3*i+2];
+            c->Initialize(Density1[i],V);
+        }
+        delete [] Density0;
+        delete [] Vvec0;
+        delete [] Density1;
+        delete [] Vvec1;
+    }
+    else
+    {
+        for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
+        {
+            Dom.Lat[1].Cells[i]->Initialize(0.999*rho, OrthoSys::O);
+            Dom.Lat[0].Cells[i]->Initialize(0.001*rho, OrthoSys::O);
+        }
     }
 
 
