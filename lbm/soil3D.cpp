@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License    *
  * along with this program. If not, see <http://www.gnu.org/licenses/>  *
  ************************************************************************/
-// Vorticity test
 
 //STD
 #include<iostream>
@@ -113,18 +112,18 @@ void Report (LBM::Domain & dom, void * UD)
     size_t no    = 0;
     for (size_t i=0;i<dom.Lat[1].Cells.Size();i++)
     {
-        Cell * c = dom.Lat[1].Cells[i];
-        if (c->IsSolid) continue;
-        if (c->Rho>0.5*dat.rho) 
+        double wr = dom.Lat[1].Cells[i]->Rho;
+        double ar = dom.Lat[0].Cells[i]->Rho;
+        if (dom.Lat[1].Cells[i]->IsSolid) continue;
+        if (wr>0.5*dat.rho) 
         {
             Sr+=1.0;
-            water+=c->Rho;
+            water+=(wr + ar + dom.Gmix*wr*ar)/3.0;
             nw++;
         }
-        c = dom.Lat[0].Cells[i];
-        if (c->Rho>0.5*dat.rho)
+        if (ar>0.5*dat.rho)
         {
-            oil  +=c->Rho;
+            oil  +=(wr + ar + dom.Gmix*wr*ar)/3.0;
             no++;
         }
     }
@@ -213,8 +212,8 @@ int main(int argc, char **argv) try
     double dx = (Xmax(0)-Xmin(0))/(N-2*bound);
     //double dy = (Xmax(1)-Xmin(1))/(N-2*bound);
     //double dz = (Xmax(2)-Xmin(2))/(N-2*bound);
-    size_t Ny = (Xmax(1)-Xmin(1))/dx;
-    size_t Nz = (Xmax(2)-Xmin(2))/dx;
+    size_t Ny = (Xmax(1)-Xmin(1))/dx-bound;
+    size_t Nz = (Xmax(2)-Xmin(2))/dx-bound;
     DemDom.Center(0.5*(Xmax-Xmin)+Vec3_t(bound*dx,0.0,0.0));
     LBM::Domain Dom(D3Q15, nua, iVec3_t(N,Ny,Nz), 1.0, 1.0);
     //Dom.PrtVec = false;
@@ -233,11 +232,42 @@ int main(int argc, char **argv) try
                 Vec3_t pos((i+0.5)*dx,(j+0.5)*dx,(k+0.5)*dx);
                 for (size_t n=0;n<DemDom.Particles.Size();n++)
                 {
-                    if (DemDom.Particles[n]->IsInsideAlt(pos)) 
+                    DEM::Particle *P = DemDom.Particles[n];
+                    if (P->IsInsideAlt(pos)) 
                     {
                         Dom.Lat[0].GetCell(iVec3_t(i,j,k))->IsSolid = true;
                         Dom.Lat[1].GetCell(iVec3_t(i,j,k))->IsSolid = true;
                     }
+                    Vec3_t T(0.0,-(Ny*dx),0.0);
+                    P->Translate(T);
+                    if (P->IsInsideAlt(pos)) 
+                    {
+                        Dom.Lat[0].GetCell(iVec3_t(i,j,k))->IsSolid = true;
+                        Dom.Lat[1].GetCell(iVec3_t(i,j,k))->IsSolid = true;
+                    }
+                    T = Vec3_t(0.0,Ny*dx,-(Nz*dx));
+                    P->Translate(T);
+                    if (P->IsInsideAlt(pos)) 
+                    {
+                        Dom.Lat[0].GetCell(iVec3_t(i,j,k))->IsSolid = true;
+                        Dom.Lat[1].GetCell(iVec3_t(i,j,k))->IsSolid = true;
+                    }
+                    T = Vec3_t(0.0,Ny*dx,Nz*dx);
+                    P->Translate(T);
+                    if (P->IsInsideAlt(pos)) 
+                    {
+                        Dom.Lat[0].GetCell(iVec3_t(i,j,k))->IsSolid = true;
+                        Dom.Lat[1].GetCell(iVec3_t(i,j,k))->IsSolid = true;
+                    }
+                    T = Vec3_t(0.0,-(Ny*dx),Nz*dx);
+                    P->Translate(T);
+                    if (P->IsInsideAlt(pos)) 
+                    {
+                        Dom.Lat[0].GetCell(iVec3_t(i,j,k))->IsSolid = true;
+                        Dom.Lat[1].GetCell(iVec3_t(i,j,k))->IsSolid = true;
+                    }
+                    T = Vec3_t(0.0,0.0,-(Nz*dx));
+                    P->Translate(T);
                 }
             }
         }
@@ -285,10 +315,10 @@ int main(int argc, char **argv) try
         dat.ymax0.Push(Dom.Lat[0].GetCell(iVec3_t(i,Ny-1,j)));
         dat.ymin1.Push(Dom.Lat[1].GetCell(iVec3_t(i,0  ,j)));
         dat.ymax1.Push(Dom.Lat[1].GetCell(iVec3_t(i,Ny-1,j)));
-        dat.ymin0.Last()->IsSolid = true;
-        dat.ymax0.Last()->IsSolid = true;
-        dat.ymin1.Last()->IsSolid = true;
-        dat.ymax1.Last()->IsSolid = true;
+        //dat.ymin0.Last()->IsSolid = true;
+        //dat.ymax0.Last()->IsSolid = true;
+        //dat.ymin1.Last()->IsSolid = true;
+        //dat.ymax1.Last()->IsSolid = true;
         //dat.ymin0.Last()->Gs      = 0.0;
         //dat.ymax0.Last()->Gs      = 0.0;
         //dat.ymin1.Last()->Gs      = 0.0;
@@ -301,10 +331,10 @@ int main(int argc, char **argv) try
         dat.zmax0.Push(Dom.Lat[0].GetCell(iVec3_t(i,j,Nz-1)));
         dat.zmin1.Push(Dom.Lat[1].GetCell(iVec3_t(i,j,0  )));
         dat.zmax1.Push(Dom.Lat[1].GetCell(iVec3_t(i,j,Nz-1)));
-        dat.zmin0.Last()->IsSolid = true;
-        dat.zmax0.Last()->IsSolid = true;
-        dat.zmin1.Last()->IsSolid = true;
-        dat.zmax1.Last()->IsSolid = true;
+        //dat.zmin0.Last()->IsSolid = true;
+        //dat.zmax0.Last()->IsSolid = true;
+        //dat.zmin1.Last()->IsSolid = true;
+        //dat.zmax1.Last()->IsSolid = true;
         //dat.zmin0.Last()->Gs      = 0.0;
         //dat.zmax0.Last()->Gs      = 0.0;
         //dat.zmin1.Last()->Gs      = 0.0;

@@ -1,4 +1,4 @@
-soil3D    fileDEM
+soil    fileDEM
 Pc0.h5    fileLBM
 1    Render    
 100    N
@@ -12,7 +12,5 @@ Pc0.h5    fileLBM
 1.0e0   HeadStep
 2.0   rho   
 0.0   ome   
-0.2  Head  
-0.95  Orig
-1.0    por
-80   seed
+0.0  Head  
+2.0  Orig
