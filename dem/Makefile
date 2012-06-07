@@ -200,6 +200,20 @@ isotropic/fast:
 .PHONY : isotropic/fast
 
 # Convenience name for target.
+dem/CMakeFiles/slope.dir/rule:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/slope.dir/rule
+.PHONY : dem/CMakeFiles/slope.dir/rule
+
+# Convenience name for target.
+slope: dem/CMakeFiles/slope.dir/rule
+.PHONY : slope
+
+# fast build rule for target.
+slope/fast:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/slope.dir/build.make dem/CMakeFiles/slope.dir/build
+.PHONY : slope/fast
+
+# Convenience name for target.
 dem/CMakeFiles/soniattt.dir/rule:
 	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/soniattt.dir/rule
 .PHONY : dem/CMakeFiles/soniattt.dir/rule
@@ -409,6 +423,30 @@ isotropic.cpp.s:
 	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/isotropic.dir/build.make dem/CMakeFiles/isotropic.dir/isotropic.cpp.s
 .PHONY : isotropic.cpp.s
 
+slope.o: slope.cpp.o
+.PHONY : slope.o
+
+# target to build an object file
+slope.cpp.o:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/slope.dir/build.make dem/CMakeFiles/slope.dir/slope.cpp.o
+.PHONY : slope.cpp.o
+
+slope.i: slope.cpp.i
+.PHONY : slope.i
+
+# target to preprocess a source file
+slope.cpp.i:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/slope.dir/build.make dem/CMakeFiles/slope.dir/slope.cpp.i
+.PHONY : slope.cpp.i
+
+slope.s: slope.cpp.s
+.PHONY : slope.s
+
+# target to generate assembly for a file
+slope.cpp.s:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/slope.dir/build.make dem/CMakeFiles/slope.dir/slope.cpp.s
+.PHONY : slope.cpp.s
+
 soniattt.o: soniattt.cpp.o
 .PHONY : soniattt.o
 
@@ -496,6 +534,7 @@ help:
 	@echo "... grinding"
 	@echo "... isotropic"
 	@echo "... rebuild_cache"
+	@echo "... slope"
 	@echo "... soniattt"
 	@echo "... testvoro"
 	@echo "... torus"
@@ -520,6 +559,9 @@ help:
 	@echo "... isotropic.o"
 	@echo "... isotropic.i"
 	@echo "... isotropic.s"
+	@echo "... slope.o"
+	@echo "... slope.i"
+	@echo "... slope.s"
 	@echo "... soniattt.o"
 	@echo "... soniattt.i"
 	@echo "... soniattt.s"
