@@ -104,9 +104,9 @@ int main(int argc, char **argv) try
 
     mesh.SetPnt(0,0,0.0,   0.0);
     mesh.SetPnt(1,0,Lx ,   0.0);
-    mesh.SetPnt(2,0,Lx ,0.5*Ly);
-    mesh.SetPnt(3,0,Lx-0.5*(Lx-sbase),0.5*Ly);
-    mesh.SetPnt(4,0,0.5*(Lx-sbase),Ly);
+    mesh.SetPnt(2,0,Lx ,0.33*Ly);
+    mesh.SetPnt(3,0,0.5*Lx,0.33*Ly);
+    mesh.SetPnt(4,0,0.5*Lx-sbase,Ly);
     mesh.SetPnt(5,0,0.0,Ly);
 
     for (size_t i=0;i<6;i++)

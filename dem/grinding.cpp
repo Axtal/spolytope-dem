@@ -29,10 +29,12 @@ using std::endl;
 
 int main(int argc, char **argv) try
 {
+    size_t Nproc = 1;
+    if (argc>1) Nproc = atoi(argv[1]);
     double Tf    = 4.5;
     double dt    = 1.0e-4;
     double dtOut = 0.01*Tf;
-    double ome   = 0.0*2*M_PI/Tf;
+    double ome   = 4.0*2*M_PI/Tf;
 
     double Kn = 1.0e5;        // Normal stiffness
     double Kt = 1.0e5;        // Tangential stiffness
@@ -53,21 +55,21 @@ int main(int argc, char **argv) try
     
     size_t Ind = dom.Particles.Size();
     Ind = dom.Particles.Size();
-    dom.AddVoroPack (-1, 0.1, 4,4,4, 4,4,4, 3.0, true, true, 1000, 1.0);
+    dom.AddVoroPack (-1, 0.1, 4,4,4, 8,8,8, 3.0, true, true, 1000, 1.0);
     for (size_t i=Ind;i<dom.Particles.Size();i++)
     {
         Vec3_t trans(0.0,0.0,5.0);
         dom.Particles[i]->Translate(trans);
     }
     Ind = dom.Particles.Size();
-    dom.AddVoroPack (-1, 0.1, 4,4,4, 4,4,4, 3.0, true, true, 3000, 1.0);
+    dom.AddVoroPack (-1, 0.1, 4,4,4, 8,8,8, 3.0, true, true, 3000, 1.0);
     for (size_t i=Ind;i<dom.Particles.Size();i++)
     {
         Vec3_t trans(0.0,0.0,10.0);
         dom.Particles[i]->Translate(trans);
     }
     Ind = dom.Particles.Size();
-    dom.AddVoroPack (-1, 0.1, 4,4,4, 4,4,4, 3.0, true, true, 5000, 1.0);
+    dom.AddVoroPack (-1, 0.1, 4,4,4, 8,8,8, 3.0, true, true, 5000, 1.0);
     for (size_t i=Ind;i<dom.Particles.Size();i++)
     {
         Vec3_t trans(0.0,0.0,15.0);
@@ -99,7 +101,7 @@ int main(int argc, char **argv) try
     B.Set(-3,"Kn Kt Gn Gt Mu Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu,Bn,0.0,0.0,-0.1*Eps);
     dom.SetProps(B);
 
-    dom.Solve     (/*tf*/Tf, /*dt*/dt, /*dtOut*/dtOut, NULL, NULL, "grinding", true);
+    dom.Solve     (/*tf*/Tf, /*dt*/dt, /*dtOut*/dtOut, NULL, NULL, "grinding",1,Nproc);
 
     return 0;
 }
