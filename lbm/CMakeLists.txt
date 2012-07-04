@@ -26,7 +26,8 @@ SET(PROGS
     streamline
     alexgflow
     alexDEM
-    multicomp)
+    multicomp
+    btransport)
 
 FOREACH(var ${PROGS})
     ADD_EXECUTABLE        (${var} "${var}.cpp")

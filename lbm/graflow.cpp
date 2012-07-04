@@ -207,7 +207,7 @@ int main(int argc, char **argv) try
     
 
     DEM::Domain DemDom;
-    DemDom.AddVoroPack(-1,R,N/10,N/10,N/10,nx,ny,nz,1.0,true,false,seed,fraction,Vec3_t(q,q,q));
+    DemDom.AddVoroPack(-1,R,10,10,10,nx,ny,nz,1.0,true,false,seed,fraction,Vec3_t(q,q,q));
     std::ofstream areafile("area.out");
     for (size_t i=0;i<DemDom.BInteractons.Size();i++)
     {
