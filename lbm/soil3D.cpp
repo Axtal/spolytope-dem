@@ -57,7 +57,9 @@ void Setup (LBM::Domain & dom, void * UD)
     {
         dat.time += dat.dtOut;
     }
-    double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
+    //double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
+    double a   = M_PI/dat.ome;
+    double rho = dat.Head*((2.0/a)*(dat.time-a*floor(dat.time/a+0.5))*pow(-1,floor(dat.time/a-0.5))+1.0)+dat.Orig;
     double rho0min = 0.999*rho;
     double rho1min = 0.001*rho;
     double rho0max = 0.001*(2.0*dat.rho - rho);
@@ -147,7 +149,9 @@ void Report (LBM::Domain & dom, void * UD)
     }
     rhow/=nfb;
     rhoo/=nfo;
-    double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
+    //double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
+    double a   = M_PI/dat.ome;
+    double rho = dat.Head*((2.0/a)*(dat.time-a*floor(dat.time/a+0.5))*pow(-1,floor(dat.time/a-0.5))+1.0)+dat.Orig;
     double Pc  = (2.0*(rho - dat.rho) + dom.Gmix*(rho*rho*0.99*0.01 - (2.0*dat.rho - rho)*(2.0*dat.rho - rho)*0.99*0.01))/3.0;
     dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << rhoo << Util::_8s << rhow << Util::_8s << water << Util::_8s << oil << Util::_8s << Pc << Util::_8s << Sr << std::endl;
 }
