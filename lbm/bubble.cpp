@@ -46,6 +46,7 @@ void Setup(LBM::Domain & dom, void * UD)
     {
         dat.Center[i]->Initialize(rho,OrthoSys::O);
     }
+    //double G = 
 }
 
 

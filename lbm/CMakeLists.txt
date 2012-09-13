@@ -27,7 +27,8 @@ SET(PROGS
     alexgflow
     alexDEM
     multicomp
-    btransport)
+    btransport
+    fracking)
 
 FOREACH(var ${PROGS})
     ADD_EXECUTABLE        (${var} "${var}.cpp")
