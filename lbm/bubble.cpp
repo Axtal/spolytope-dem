@@ -27,17 +27,28 @@ using std::cout;
 using std::endl;
 struct UserData
 {
+    bool               rev;
     double            Orig;
+    double         Gsolid0;
+    double         Gsolid1;
     double             Amp;
     double             ome;
     double              Tf;
+    double          revrad1;
+    double          revrad2;
     Vec3_t               g;
     Array<Cell *>   Center;
+    Array<size_t>      Top;
+    Array<size_t>   Bottom;
 };
 
 void Setup(LBM::Domain & dom, void * UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
+    for (size_t i=0;i<dom.Lat[0].Cells.Size();i++)
+    {
+        dom.Lat[0].Cells[i]->BForcef = dom.Lat[0].Cells[i]->Rho*dat.g;
+    }
     double rho;
     //rho = 1.0 + 0.001*0.5*(1-cos(dat.ome*dom.Time));
     //rho = 1.0 + 0.1*sin(dat.ome*dom.Time);
@@ -46,13 +57,52 @@ void Setup(LBM::Domain & dom, void * UD)
     {
         dat.Center[i]->Initialize(rho,OrthoSys::O);
     }
-    //double G = 
+    if (dat.rev)
+    {
+        for (size_t i=0;i<dat.Top.Size();i++)
+        {
+            Cell * c0  = dom.Lat[0].Cells[dat.Top[i]];
+            Cell * c1  = dom.Lat[1].Cells[dat.Top[i]];
+            Cell * nb  = dom.Lat[0].Cells[c0->Neighs[4]];
+            Cell * nbr = dom.Lat[0].Cells[c0->Neighs[7]];
+            Cell * nbl = dom.Lat[0].Cells[c0->Neighs[8]];
+            nbr = dom.Lat[0].GetCell(iVec3_t(std::min(size_t(c0->Index(0) + dat.revrad1),size_t(dom.Lat[0].Ndim(0))),c0->Index(1)-1,c0->Index(2)));
+            nbl = dom.Lat[0].GetCell(iVec3_t(std::max(size_t(c0->Index(0) - dat.revrad1),size_t(0)                 ),c0->Index(1)-1,c0->Index(2)));
+            if (nb->Rho>1.0&&(nbr->Rho>1.0&&nbl->Rho>1.0)&&c0->Gs>0.0) 
+            {
+                //std::cout << dom.Time << " " << c0->Index << std::endl;
+                c0->Gs = -1.0;
+                c1->Gs = -1.0;
+            }
+            else
+            { 
+                nbr = dom.Lat[0].GetCell(iVec3_t(std::min(size_t(c0->Index(0) + dat.revrad2),size_t(dom.Lat[0].Ndim(0))),c0->Index(1)-1,c0->Index(2)));
+                nbl = dom.Lat[0].GetCell(iVec3_t(std::max(size_t(c0->Index(0) - dat.revrad2),size_t(0)                 ),c0->Index(1)-1,c0->Index(2)));
+                if (c0->Gs<0.0&&(nbr->Rho<1.0&&nbl->Rho<1.0)&&nb->Rho<1.0)
+                {
+                    //std::cout << dom.Time << " " << c0->Index << std::endl;
+                    c0->Gs =  1.0;
+                    c1->Gs =  1.0;
+                }
+            }
+        }
+
+
+        //dom.Lat[0].Gs = dat.Gsolid0*cos(dat.ome*dom.Time);
+        //dom.Lat[1].Gs = dat.Gsolid1*cos(dat.ome*dom.Time);
+    }
 }
 
 
 int main(int argc, char **argv) try
 {
-    size_t Nproc = 1; 
+    String filekey  (argv[1]);
+    String filename (filekey+".inp");
+    if (!Util::FileExists(filename)) throw new Fatal("File <%s> not found",filename.CStr());
+    std::ifstream infile(filename.CStr());
+    size_t Nproc = 1;
+    if (argc==3) Nproc = atoi(argv[2]);
+
     double Gmix  = 0.001;
     double Gs0   = 0.001;
     double Gs1   = 0.001;
@@ -63,22 +113,24 @@ int main(int argc, char **argv) try
     double Orig  = 1.0;
     double Amp   = 1.0;
     double Tf    = 5000.0;
-
-    if (argc>=2)
-    {
-        Nproc  =atoi(argv[ 1]);
-        Gmix   =atof(argv[ 2]);
-        Gs0    =atof(argv[ 3]);
-        Gs1    =atof(argv[ 4]);
-        R      =atof(argv[ 5]);
-        rho0   =atof(argv[ 6]);
-        rho1   =atof(argv[ 7]);
-        ome    =atof(argv[ 8]);
-        Orig   =atof(argv[ 9]);
-        Amp    =atof(argv[10]);
-        Tf     =atof(argv[11]);
-    }
-
+    bool   rev   = false;
+    double revrad1= 4.0;
+    double revrad2= 4.0;
+    
+    infile >>    Gmix;        infile.ignore(200,'\n');
+    infile >>    Gs0;         infile.ignore(200,'\n');
+    infile >>    Gs1;         infile.ignore(200,'\n');
+    infile >>    R;           infile.ignore(200,'\n');
+    infile >>    rho0;        infile.ignore(200,'\n');
+    infile >>    rho1;        infile.ignore(200,'\n');
+    infile >>    ome;         infile.ignore(200,'\n');
+    infile >>    Orig;        infile.ignore(200,'\n');
+    infile >>    Amp;         infile.ignore(200,'\n');
+    infile >>    Tf;          infile.ignore(200,'\n');
+    infile >>    rev;         infile.ignore(200,'\n');
+    infile >>    revrad1;     infile.ignore(200,'\n');
+    infile >>    revrad2;     infile.ignore(200,'\n');
+    
 
     Array<double> nu(2);
     nu[0] = 1.0/6.0;
@@ -94,10 +146,16 @@ int main(int argc, char **argv) try
     //dat.g           = 0.0,-0.001,0.0;
     //dat.g          *= 0.5*ny/100.0;
     //dat.g           = 0.0,-0.0005,0.0;
+    dat.g           = 0.0,0.0001,0.0;
     dat.ome         = 2*M_PI*ome/Tf;
     dat.Tf          = Tf;
     dat.Amp         = Amp;
     dat.Orig        = Orig;
+    dat.Gsolid0     = Gs0;
+    dat.Gsolid1     = Gs1;
+    dat.rev         = rev;
+    dat.revrad1     = revrad1;
+    dat.revrad2     = revrad2;
 
 
 
@@ -107,6 +165,9 @@ int main(int argc, char **argv) try
         Dom.Lat[0].GetCell(iVec3_t(i,ny-1,0))->IsSolid = true;
         Dom.Lat[1].GetCell(iVec3_t(i,0   ,0))->IsSolid = true;
         Dom.Lat[1].GetCell(iVec3_t(i,ny-1,0))->IsSolid = true;
+        
+        dat.Bottom.Push(Dom.Lat[0].GetCell(iVec3_t(i,0   ,0))->ID);
+        dat.Top   .Push(Dom.Lat[0].GetCell(iVec3_t(i,ny-1,0))->ID);
     }
     //for (size_t i=0;i<ny;i++)
     //{
@@ -117,7 +178,7 @@ int main(int argc, char **argv) try
     //}
 
     // Set inner drop
-    int obsX = nx/2, obsY = ny/2;
+    int obsX = nx/2, obsY = 3.0*ny/4.0;
     int r1 =  0.1*R;
     int r2 =  R;
 

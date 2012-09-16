@@ -425,8 +425,18 @@ int main(int argc, char **argv) try
     {
         for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
         {
-            Dom.Lat[1].Cells[i]->Initialize(0.999*rho, OrthoSys::O);
-            Dom.Lat[0].Cells[i]->Initialize(0.001*rho, OrthoSys::O);
+            Cell * c0 = Dom.Lat[0].Cells[i];
+            Cell * c1 = Dom.Lat[1].Cells[i];
+            if (c0->Index(0)>bound) 
+            {
+                c1->Initialize(0.999*rho, OrthoSys::O);
+                c0->Initialize(0.001*rho, OrthoSys::O);
+            }
+            else
+            {
+                c0->Initialize(0.999*rho, OrthoSys::O);
+                c1->Initialize(0.001*rho, OrthoSys::O);
+            }
         }
     }
 
