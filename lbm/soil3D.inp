@@ -1,16 +1,16 @@
-soil    fileDEM
-Pc0.h5    fileLBM
+soil2    fileDEM
+a.h5    fileLBM
 1    Render    
 100    N
- 0.48 Gs0
--0.48 Gs1
+-0.48 Gs0
+ 0.48 Gs1
 1.0   Gmix
-0.1    nu    
+0.16    nu    
 1.0     dt    
 4.0e3   Tf    
 4.0e1   dtOut 
 1.0e0   HeadStep
 2.0   rho   
-0.0   ome   
+1.0   ome   
 0.0  Head  
-2.0  Orig
+1.6  Orig
