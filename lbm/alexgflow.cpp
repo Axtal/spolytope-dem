@@ -37,6 +37,7 @@ struct UserData
     double          Tf;
     double          dt;
     double         DPz;
+    std::ofstream oss_ss;       ///< file for stress strain data
 };
 
 void Setup (LBM::Domain & dom, void * UD)
@@ -74,25 +75,70 @@ void Setup (LBM::Domain & dom, void * UD)
 
     for (size_t i=0;i<dom.Particles.Size();i++)
     {
-        dom.Particles[i]->Ff = dom.Particles[i]->M*dat.g;
+        dom.Particles[i]->Ff = dom.Particles[i]->Props.m*dat.g;
         double delta;
-        delta =   dat.Xmin(0) - dom.Particles[i]->X(0) + dom.Particles[i]->R;
+        delta =   dat.Xmin(0) - dom.Particles[i]->x(0) + dom.Particles[i]->Props.R;
         if (delta > 0.0)  dom.Particles[i]->Ff(0) += dat.Kn*delta;
-        delta = - dat.Xmax(0) + dom.Particles[i]->X(0) + dom.Particles[i]->R;
+        delta = - dat.Xmax(0) + dom.Particles[i]->x(0) + dom.Particles[i]->Props.R;
         if (delta > 0.0)  dom.Particles[i]->Ff(0) -= dat.Kn*delta;
-        delta =   dat.Xmin(1) - dom.Particles[i]->X(1) + dom.Particles[i]->R;
+        delta =   dat.Xmin(1) - dom.Particles[i]->x(1) + dom.Particles[i]->Props.R;
         if (delta > 0.0)  dom.Particles[i]->Ff(1) += dat.Kn*delta;
-        delta = - dat.Xmax(1) + dom.Particles[i]->X(1) + dom.Particles[i]->R;
+        delta = - dat.Xmax(1) + dom.Particles[i]->x(1) + dom.Particles[i]->Props.R;
         if (delta > 0.0)  dom.Particles[i]->Ff(1) -= dat.Kn*delta;
-        delta =   dat.Xmin(2) - dom.Particles[i]->X(2) + dom.Particles[i]->R;
+        delta =   dat.Xmin(2) - dom.Particles[i]->x(2) + dom.Particles[i]->Props.R;
         if (delta > 0.0)  dom.Particles[i]->Ff(2) += dat.Kn*delta;
-        //delta = - dat.Xmax(2) + dom.Particles[i]->X(2) + dom.Particles[i]->R;
-        //if (delta > 0.0)  dom.Particles[i]->Ff(2) -= dat.Kn*delta;
     }
 }
 
 void Report (LBM::Domain & dom, void * UD)
 {
+    UserData & dat = (*static_cast<UserData *>(UD));
+    if (dom.idx_out==0)
+    {
+        String fs;
+        fs.Printf("report.res");
+        dat.oss_ss.open(fs.CStr(),std::ios::out);
+        dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "C1" << Util::_8s << "C2" << Util::_8s << "Cn1" << Util::_8s << "Porosity" << Util::_8s << "Zmin" << Util::_8s << "Zmax" << std::endl;
+    }
+    if (!dom.Finished)
+    {
+        Vec3_t Xmin,Xmax;
+        dom.BoundingBox(Xmin,Xmax);
+        double volumecontainer = (Xmax(0)-Xmin(0))*(Xmax(1)-Xmin(1))*(Xmax(2)-Xmin(2));
+        double por             = 1.0 - dom.Voltot/volumecontainer;
+        double C1              = 0.0;
+        double C2              = 0.0;
+        double Cn              = 0.0;
+        for (size_t i=0;i<dom.CInteractons.Size();i++)
+        {
+            DEM::CInteracton * CI = dom.CInteractons[i];
+            if ((CI->P1->Tag==-1)||(CI->P2->Tag==-1))            
+            {
+                C1+=norm(CI->Fnet);
+            }
+            if ((CI->P1->Tag==-2)||(CI->P2->Tag==-2))            
+            {
+                C2+=norm(CI->Fnet);
+            }
+        }
+        size_t n1 = 0;
+        size_t n2 = 0;
+        for(size_t i=0;i<dom.Particles.Size();i++)
+        {
+            Cn += dom.Particles[i]->Cn;
+            if (dom.Particles[i]->Tag==-1) n1++;
+            if (dom.Particles[i]->Tag==-2) n2++;
+        }        
+        C1/=n1;
+        C2/=n2;
+        Cn/=(n1+n2);
+        dat.oss_ss << dom.Time << Util::_8s << C1 << Util::_8s << C2 << Util::_8s << Cn << Util::_8s << por << Util::_8s << Xmin(2) << Util::_8s << Xmax(2) << std::endl;
+    }
+    else
+    {
+        dat.oss_ss.close();
+    }
+
 }
 
 
@@ -122,6 +168,7 @@ int main(int argc, char **argv) try
     double Mu       = 0.4;
     double Eta      = 1.0;
     double Beta     = 0.12;
+    double Gn       = 1.0;
     double DPz      = 0.0;
     double R1       = 2.0;
     double R2       = 20.0;
@@ -143,6 +190,7 @@ int main(int argc, char **argv) try
     infile >> Mu;        infile.ignore(200,'\n');
     infile >> Eta;       infile.ignore(200,'\n');
     infile >> Beta;      infile.ignore(200,'\n');
+    infile >> Gn;        infile.ignore(200,'\n');
     infile >> DPz;       infile.ignore(200,'\n');
     infile >> R1;        infile.ignore(200,'\n');
     infile >> R2;        infile.ignore(200,'\n');
@@ -152,8 +200,9 @@ int main(int argc, char **argv) try
     LBM::Domain Dom(D3Q15, nu, iVec3_t(nx,ny,nz), dx, dt);
     UserData dat;
     Dom.UserData = &dat;
+    Dom.Step     = 2;
     dat.g        = 0.0,0.0,-g;
-    dat.Xmin     = 0.0,0.0,dx*nz/10.0;
+    dat.Xmin     = 0.0,0.0,dx*nx/5.0;
     dat.Xmax     = nx*dx,ny*dx,nz*dx;
     dat.Kn       = Kn;
     dat.Tf       = Tf;
@@ -253,7 +302,7 @@ int main(int argc, char **argv) try
                 valid = true;
             }
             DEM::Particle * Pa = DemDom.Particles[j];
-            Dom.AddSphere(Pa->Tag,Pa->x,OrthoSys::O,OrthoSys::O,2.5,Pa->Props.R,dt);
+            Dom.AddSphere(Pa->Tag,Pa->x,Pa->Props.R,2.5);
         }
     }
 
@@ -263,13 +312,16 @@ int main(int argc, char **argv) try
     
     for (size_t i=0;i<Dom.Particles.Size();i++)
     {
-        Dom.Particles[i]->Kn =     Kn;
-        Dom.Particles[i]->Kt = 0.5*Kn;
-        Dom.Particles[i]->Mu =     Mu;
-        Dom.Particles[i]->Eta=    Eta;
-        Dom.Particles[i]->Beta=  Beta;
-        //std::cout << Dom.Particles[i]->Eta << " " << Dom.Particles[i]->Beta << std::endl;
+        Dom.Particles[i]->Props.Kn  =     Kn;
+        Dom.Particles[i]->Props.Kt  =     Kn;
+        Dom.Particles[i]->Props.Mu  =     Mu;
+        Dom.Particles[i]->Props.Eta =    Eta;
+        Dom.Particles[i]->Props.Beta=   Beta;
+        Dom.Particles[i]->Props.Gn  =     Gn;
+        Dom.Particles[i]->Props.Gt  =    0.0;
     }
+
+    //Dom.WriteXDMF(filekey.CStr());
 
     Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render,Nproc);
     return 0;

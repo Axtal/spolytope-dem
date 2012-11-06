@@ -23,6 +23,7 @@ SET(PROGS
     graflow
     bubble
     soil3D
+    soilana
     streamline
     alexgflow
     alexDEM

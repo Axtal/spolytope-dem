@@ -88,6 +88,7 @@ void Report(LBM::Domain & dom, void * UD)
     double water = 0.0;
     double Sr    = 0.0;
     size_t nw    = 0;
+    Vec3_t Vm    = OrthoSys::O;
     for (size_t i=0;i<dom.Lat[0].Cells.Size();i++)
     {
         Cell * c = dom.Lat[0].Cells[i];
@@ -96,10 +97,15 @@ void Report(LBM::Domain & dom, void * UD)
             Sr+=1.0;
             water+=c->Rho;
             nw++;
+            Vm += c->Vel*c->Rho;
         }
     }
     Sr/=(dom.Lat[0].Cells.Size()*(1-dom.Lat[0].SolidFraction()));
-    if (nw>0) water/=nw;
+    if (nw>0)
+    {
+        water/=nw;
+        Vm/=water;
+    }
     double head = 0.0;
     double Gasf = 0.0;
     double hmax = 0.0;
@@ -119,7 +125,7 @@ void Report(LBM::Domain & dom, void * UD)
     Gasf/=dom.Lat[0].Ndim(0);
     hmax/=dom.Lat[0].Ndim(0);
     double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
-    dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << head << Util::_8s << water << Util::_8s << Sr << Util::_8s << hmax << Util::_8s << Gasf << std::endl;
+    dat.oss_ss << dom.Time << Util::_8s << rho << Util::_8s << head << Util::_8s << water << Util::_8s << Sr << Util::_8s << hmax << Util::_8s << Gasf << Util::_8s << norm(Vm) << std::endl;
 }
 
 int main(int argc, char **argv) try
@@ -294,7 +300,7 @@ int main(int argc, char **argv) try
     String fs;
     fs.Printf("water_retention.res");
     dat.oss_ss.open(fs.CStr(),std::ios::out);
-    dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "PDen" << Util::_8s << "Head" << Util::_8s << "Water" << Util::_8s << "Sr" << Util::_8s << "Hmax" << Util::_8s << "Gf" << std::endl;
+    dat.oss_ss << Util::_10_6  <<  "Time" << Util::_8s << "PDen" << Util::_8s << "Head" << Util::_8s << "Water" << Util::_8s << "Sr" << Util::_8s << "Hmax" << Util::_8s << "Gf" << Util::_8s << "Vm" << std::endl;
     Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render,Nproc);
     dat.oss_ss.close();
 }

@@ -74,7 +74,7 @@ int main(int argc, char **argv) try
     size_t Nproc = 1;
     if (argc==3) Nproc = atoi(argv[2]);
 
-    bool   Render   = true;
+    size_t Render   = 2;
     size_t seed     = 100;
     double fraction = 0.8;
     double Rmin     = 0.9;
@@ -91,6 +91,7 @@ int main(int argc, char **argv) try
     double Mu       = 0.4;
     double Eta      = 1.0;
     double Beta     = 0.12;
+    double Gn       = 1.0;
     double DPz      = 0.0;
     double R1       = 2.0;
     double R2       = 20.0;
@@ -112,6 +113,7 @@ int main(int argc, char **argv) try
     infile >> Mu;        infile.ignore(200,'\n');
     infile >> Eta;       infile.ignore(200,'\n');
     infile >> Beta;      infile.ignore(200,'\n');
+    infile >> Gn;        infile.ignore(200,'\n');
     infile >> DPz;       infile.ignore(200,'\n');
     infile >> R1;        infile.ignore(200,'\n');
     infile >> R2;        infile.ignore(200,'\n');
@@ -130,9 +132,9 @@ int main(int argc, char **argv) try
     Dom.Alpha    = std::min(R1,R2);
     
 
-    Dom.GenSpheresBox (-1, dat.Xmin , dat.Xmax - Vec3_t(0.0,0.0,0.2*nz*dx), /*R*/R1, 2.5, seed, fraction, Rmin); ///< Create an array of spheres
-    Dom.AddSphere(-2,Vec3_t(0.5*nx*dx,0.5*ny*dx,0.8*nz*dx+R2),R2,2.5);
-    //Dom.GenSpheresBox (-2, dat.Xmax - Vec3_t(nx*dx,ny*dx,0.5*nz*dx), dat.Xmax + Vec3_t(0.0,0.0,0.3*nz*dx), /*R*/R2, 2.5, seed, fraction, Rmin); ///< Create an array of spheres
+    Dom.GenSpheresBox (-1, dat.Xmin , dat.Xmax - Vec3_t(0.0,0.0,0.5*nz*dx), /*R*/R1, 2.5,"HCP", seed, fraction, Rmin); ///< Create an array of spheres
+    //Dom.AddSphere(-2,Vec3_t(0.5*nx*dx,0.5*ny*dx,0.8*nz*dx+R2),R2,2.5);
+    Dom.GenSpheresBox (-2, dat.Xmax - Vec3_t(nx*dx,ny*dx,0.5*nz*dx), dat.Xmax + Vec3_t(0.0,0.0,0.3*nz*dx), /*R*/R2, 2.5, "HCP", seed, fraction, Rmin); ///< Create an array of spheres
     Dom.CamPos = Vec3_t(1.5*nz*dx,1.5*nz*dx,1.5*nx*dx);
     Vec3_t xmin,xmax;
     Dom.BoundingBox(xmin,xmax);
@@ -140,10 +142,12 @@ int main(int argc, char **argv) try
     for (size_t i=0;i<Dom.Particles.Size();i++)
     {
         Dom.Particles[i]->Props.Kn  =     Kn;
-        Dom.Particles[i]->Props.Kt  = 0.5*Kn;
+        Dom.Particles[i]->Props.Kt  =     Kn;
         Dom.Particles[i]->Props.Mu  =     Mu;
         Dom.Particles[i]->Props.Eta =    Eta;
-        Dom.Particles[i]->Props.Beta=  Beta;
+        Dom.Particles[i]->Props.Beta=   Beta;
+        Dom.Particles[i]->Props.Gn  =     Gn;
+        Dom.Particles[i]->Props.Gt  =    0.0;
     }
 
     Dom.Solve(Tf,dt,dtOut,&Setup,&Report,filekey.CStr(),Render,Nproc);
