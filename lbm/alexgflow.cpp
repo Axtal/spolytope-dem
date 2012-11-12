@@ -172,6 +172,8 @@ int main(int argc, char **argv) try
     double DPz      = 0.0;
     double R1       = 2.0;
     double R2       = 20.0;
+    double rho1     = 2.5;
+    double rho2     = 2.5;
 
     infile >> Render;    infile.ignore(200,'\n');
     infile >> seed;      infile.ignore(200,'\n');
@@ -194,6 +196,8 @@ int main(int argc, char **argv) try
     infile >> DPz;       infile.ignore(200,'\n');
     infile >> R1;        infile.ignore(200,'\n');
     infile >> R2;        infile.ignore(200,'\n');
+    infile >> rho1;      infile.ignore(200,'\n');
+    infile >> rho2;      infile.ignore(200,'\n');
 
 
 
@@ -289,20 +293,23 @@ int main(int argc, char **argv) try
         bool valid = true;
         for (size_t i=0;i<DemDom.Particles.Size();i++)
         {
+            double rho;
             if (nmin%ratio==0&&valid&&nmax<Big.Size()) 
             {
                 j = Big[nmax];
                 nmax++;
                 valid = false;
+                rho = rho2;
             }
             else
             {
                 j = Small[nmin];
                 nmin++;
                 valid = true;
+                rho = rho1;
             }
             DEM::Particle * Pa = DemDom.Particles[j];
-            Dom.AddSphere(Pa->Tag,Pa->x,Pa->Props.R,2.5);
+            Dom.AddSphere(Pa->Tag,Pa->x,Pa->Props.R,rho);
         }
     }
 
