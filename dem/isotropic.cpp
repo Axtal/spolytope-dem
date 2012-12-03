@@ -638,12 +638,12 @@ int main(int argc, char **argv) try
     ResetEps  (dom,dat);
     SetTxTest (sigf, peps, depsdt,0,0,false,dat,dom);
     dat.tspan = T0max - dom.Time;
-    dom.Solve  (/*tf*/T0max, /*dt*/dt, /*dtOut*/dtOut, &Setup, &Report, fkey_a.CStr(),RenderVideo);
+    dom.Solve  (/*tf*/T0max, /*dt*/dt, /*dtOut*/dtOut, &Setup, &Report, fkey_a.CStr(),RenderVideo,Nproc);
 
     sigf =  Vec3_t(-pc,-pc,-pc);
     SetTxTest (sigf, peps, depsdt,0,0,false,dat,dom);
     dat.tspan = Tc - dom.Time;
-    dom.Solve (/*tf*/Tc, /*dt*/dt, /*dtOut*/dtOut, &Setup, &Report, fkey_b.CStr(),RenderVideo);
+    dom.Solve (/*tf*/Tc, /*dt*/dt, /*dtOut*/dtOut, &Setup, &Report, fkey_b.CStr(),RenderVideo,Nproc);
 
     // stage 4: free path /////////////////////////////////////////////////////////////////////////
     String fkey_c(filekey+"_c");
