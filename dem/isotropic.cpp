@@ -501,13 +501,15 @@ int main(int argc, char **argv) try
 
     if (argc!=2) throw new Fatal("This program must be called with one argument: the name of the data input file without the '.inp' suffix.\nExample:\t %s filekey\n",argv[0]);
     String filekey  (argv[1]);
+    size_t Nproc = 1; 
+    if (argc==3) Nproc=atoi(argv[2]);
     String filename (filekey+".inp");
     if (!Util::FileExists(filename)) throw new Fatal("File <%s> not found",filename.CStr());
     ifstream infile(filename.CStr());
     
     double verlet;      // Verlet distance for optimization
     String ptype;       // Particle type 
-    bool   RenderVideo; // Decide is video should be render
+    size_t RenderVideo; // Decide is video should be render
     double fraction;    // Fraction of particles to be generated
     double Kn;          // Normal stiffness
     double Kt;          // Tangential stiffness
@@ -650,7 +652,7 @@ int main(int argc, char **argv) try
     ResetEps  (dom,dat);
     SetTxTest (sigf, peps, depsdt, thf*M_PI/180, alpf*M_PI/180, isfailure, dat, dom);
     dat.tspan = Tf - dom.Time;
-    dom.Solve     (/*tf*/Tf, /*dt*/dt, /*dtOut*/dtOut, &Setup, &Report2, fkey_c.CStr(),RenderVideo);
+    dom.Solve     (/*tf*/Tf, /*dt*/dt, /*dtOut*/dtOut, &Setup, &Report2, fkey_c.CStr(),RenderVideo,Nproc);
     
     
     return 0;
