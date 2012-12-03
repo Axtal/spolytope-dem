@@ -499,7 +499,7 @@ int main(int argc, char **argv) try
 {
     // set the simulation domain ////////////////////////////////////////////////////////////////////////////
 
-    if (argc!=2) throw new Fatal("This program must be called with one argument: the name of the data input file without the '.inp' suffix.\nExample:\t %s filekey\n",argv[0]);
+    if (argc<=2) throw new Fatal("This program must be called with one argument: the name of the data input file without the '.inp' suffix.\nExample:\t %s filekey\n",argv[0]);
     String filekey  (argv[1]);
     size_t Nproc = 1; 
     if (argc==3) Nproc=atoi(argv[2]);
