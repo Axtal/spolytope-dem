@@ -243,6 +243,9 @@ void Report (DEM::Domain & dom, void *UD)
     UserData & dat = (*static_cast<UserData *>(UD));
     // output triaxial test data
     // header
+    String ff;
+    ff.Printf    ("%s_%08d_branchforce",dom.FileKey.CStr(), dom.idx_out);
+    dom.WriteBF (ff.CStr());
     if (dom.idx_out==0)
     {
         String fs;
@@ -353,40 +356,44 @@ void Report2 (DEM::Domain & dom, void *UD)
     UserData & dat = (*static_cast<UserData *>(UD));
     // output triaxial test data
     // header
+    //String ff;
+    //ff.Printf    ("%s_%08d_chains.res",dom.FileKey.CStr(), dom.idx_out);
+    //std::ofstream FF(ff.CStr());
+    //FF <<  Util::_10_6 << "Fx" << Util::_8s << "Fy"  << Util::_8s << "Fz" <<  Util::_8s << "Ftx" << Util::_8s << "Fty" << Util::_8s << "Ftz" 
+       //<<  Util::_10_6 << "x"  << Util::_8s << "y"   << Util::_8s << "z"
+       //<<  Util::_8s   << "Nc" << Util::_8s << "Nsc" << Util::_8s << "Nr" << Util::_8s << "P1" <<  Util::_8s << "P2" <<"\n";
+//
+    //for (size_t i=0; i<dom.CInteractons.Size(); i++)
+    //{
+        //if ((norm(dom.CInteractons[i]->Fnet)>0.0)&&(dom.CInteractons[i]->P1->IsFree()&&dom.CInteractons[i]->P2->IsFree()))
+        //{
+            //FF << Util::_8s << dom.CInteractons[i]->Fnet(0)   << Util::_8s << dom.CInteractons[i]->Fnet(1)   << Util::_8s <<  dom.CInteractons[i]->Fnet(2) 
+               //<< Util::_8s << dom.CInteractons[i]->Ftnet(0)  << Util::_8s << dom.CInteractons[i]->Ftnet(1)  << Util::_8s <<  dom.CInteractons[i]->Ftnet(2) 
+               //<< Util::_8s << dom.CInteractons[i]->Xc(0)     << Util::_8s << dom.CInteractons[i]->Xc(1)     << Util::_8s <<  dom.CInteractons[i]->Xc(2) 
+               //<< Util::_8s << dom.CInteractons[i]->Nc        << Util::_8s << dom.CInteractons[i]->Nsc       << Util::_8s << dom.CInteractons[i]->Nr
+               //<< Util::_8s << dom.CInteractons[i]->P1->Index << Util::_8s << dom.CInteractons[i]->P2->Index << "\n";
+        //}
+    //}
+    //FF.close();
+//
+    //String fv;
+    //fv.Printf    ("%s_%08d_particles.res",dom.FileKey.CStr(), dom.idx_out);
+    //std::ofstream FV(fv.CStr());
+    //FV <<  Util::_10_6 << "PID" << Util::_8s << "vx" << Util::_8s << "vy" << Util::_8s << "vz" << Util::_8s << "x" << Util::_8s << "y" << Util::_8s << "z" << Util::_8s << "R" <<"\n";
+//
+    //for (size_t i=0; i<dom.Particles.Size(); i++)
+    //{
+        //if (dom.Particles[i]->IsFree())
+        //{
+            //FV << Util::_8s << dom.Particles[i]->Index << Util::_8s << dom.Particles[i]->v(0)   << Util::_8s << dom.Particles[i]->v(1) << Util::_8s << dom.Particles[i]->v(2)
+               //<< Util::_8s << dom.Particles[i]->x(0)  << Util::_8s << dom.Particles[i]->x(1)   << Util::_8s << dom.Particles[i]->x(2) << Util::_8s << dom.Particles[i]->Props.R << "\n";
+        //}
+    //}
+    //FV.close();
+    //
     String ff;
-    ff.Printf    ("%s_%08d_chains.res",dom.FileKey.CStr(), dom.idx_out);
-    std::ofstream FF(ff.CStr());
-    FF <<  Util::_10_6 << "Fx" << Util::_8s << "Fy"  << Util::_8s << "Fz" <<  Util::_8s << "Ftx" << Util::_8s << "Fty" << Util::_8s << "Ftz" 
-       <<  Util::_10_6 << "x"  << Util::_8s << "y"   << Util::_8s << "z"
-       <<  Util::_8s   << "Nc" << Util::_8s << "Nsc" << Util::_8s << "Nr" << Util::_8s << "P1" <<  Util::_8s << "P2" <<"\n";
-
-    for (size_t i=0; i<dom.CInteractons.Size(); i++)
-    {
-        if ((norm(dom.CInteractons[i]->Fnet)>0.0)&&(dom.CInteractons[i]->P1->IsFree()&&dom.CInteractons[i]->P2->IsFree()))
-        {
-            FF << Util::_8s << dom.CInteractons[i]->Fnet(0)   << Util::_8s << dom.CInteractons[i]->Fnet(1)   << Util::_8s <<  dom.CInteractons[i]->Fnet(2) 
-               << Util::_8s << dom.CInteractons[i]->Ftnet(0)  << Util::_8s << dom.CInteractons[i]->Ftnet(1)  << Util::_8s <<  dom.CInteractons[i]->Ftnet(2) 
-               << Util::_8s << dom.CInteractons[i]->Xc(0)     << Util::_8s << dom.CInteractons[i]->Xc(1)     << Util::_8s <<  dom.CInteractons[i]->Xc(2) 
-               << Util::_8s << dom.CInteractons[i]->Nc        << Util::_8s << dom.CInteractons[i]->Nsc       << Util::_8s << dom.CInteractons[i]->Nr
-               << Util::_8s << dom.CInteractons[i]->P1->Index << Util::_8s << dom.CInteractons[i]->P2->Index << "\n";
-        }
-    }
-    FF.close();
-
-    String fv;
-    fv.Printf    ("%s_%08d_particles.res",dom.FileKey.CStr(), dom.idx_out);
-    std::ofstream FV(fv.CStr());
-    FV <<  Util::_10_6 << "PID" << Util::_8s << "vx" << Util::_8s << "vy" << Util::_8s << "vz" << Util::_8s << "x" << Util::_8s << "y" << Util::_8s << "z" << Util::_8s << "R" <<"\n";
-
-    for (size_t i=0; i<dom.Particles.Size(); i++)
-    {
-        if (dom.Particles[i]->IsFree())
-        {
-            FV << Util::_8s << dom.Particles[i]->Index << Util::_8s << dom.Particles[i]->v(0)   << Util::_8s << dom.Particles[i]->v(1) << Util::_8s << dom.Particles[i]->v(2)
-               << Util::_8s << dom.Particles[i]->x(0)  << Util::_8s << dom.Particles[i]->x(1)   << Util::_8s << dom.Particles[i]->x(2) << Util::_8s << dom.Particles[i]->Props.R << "\n";
-        }
-    }
-    FV.close();
+    ff.Printf    ("%s_%08d_branchforce",dom.FileKey.CStr(), dom.idx_out);
+    dom.WriteBF (ff.CStr());
 
 
     if (dom.idx_out==0)
