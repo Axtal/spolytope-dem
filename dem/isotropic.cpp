@@ -392,7 +392,7 @@ void Report2 (DEM::Domain & dom, void *UD)
     //FV.close();
     //
     String ff;
-    ff.Printf    ("%s_%08d_branchforce",dom.FileKey.CStr(), dom.idx_out);
+    ff.Printf    ("%s_%04d_branchforce",dom.FileKey.CStr(), dom.idx_out);
     dom.WriteBF (ff.CStr());
 
 
@@ -611,7 +611,14 @@ int main(int argc, char **argv) try
 
     // particle
     if      (ptype=="sphere")  dom.GenSpheres  (-1, Lx, nx, rho, "HCP", seed, fraction,Rminf);
-    else if (ptype=="voronoi") dom.AddVoroPack (-1, R, Lx,Ly,Lz, nx,ny,nz, rho, false, true, seed, fraction);
+    else if (ptype=="voronoi")
+    {
+        dom.AddVoroPack (-1, R, Lx,Ly,Lz, nx,ny,nz, rho, false, true, seed, fraction);
+        for (size_t i=0;i<dom.Particles.Size();i++)
+        {
+            dom.Particles[i]->Shrink(Rminf);
+        }
+    }
     else if (ptype=="tetra")
     {
         Mesh::Unstructured mesh(/*NDim*/3);
