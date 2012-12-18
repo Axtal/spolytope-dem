@@ -616,7 +616,7 @@ int main(int argc, char **argv) try
         dom.AddVoroPack (-1, R, Lx,Ly,Lz, nx,ny,nz, rho, false, true, seed, fraction);
         for (size_t i=0;i<dom.Particles.Size();i++)
         {
-            dom.Particles[i]->Shrink(Rminf);
+            dom.Particles[i]->Shrink((1.0*rand())/RAND_MAX*(1.0-Rminf) + Rminf);
         }
     }
     else if (ptype=="tetra")
