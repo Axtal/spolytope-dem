@@ -244,7 +244,7 @@ void Report (DEM::Domain & dom, void *UD)
     // output triaxial test data
     // header
     String ff;
-    ff.Printf    ("%s_%08d_branchforce",dom.FileKey.CStr(), dom.idx_out);
+    ff.Printf    ("%s_bf_%04d",dom.FileKey.CStr(), dom.idx_out);
     dom.WriteBF (ff.CStr());
     if (dom.idx_out==0)
     {
@@ -392,7 +392,7 @@ void Report2 (DEM::Domain & dom, void *UD)
     //FV.close();
     //
     String ff;
-    ff.Printf    ("%s_%04d_branchforce",dom.FileKey.CStr(), dom.idx_out);
+    ff.Printf    ("%s_bf_%04d",dom.FileKey.CStr(), dom.idx_out);
     dom.WriteBF (ff.CStr());
 
 
