@@ -7,9 +7,9 @@ a.h5    fileLBM
 1.0   Gmix
 0.16    nu    
 1.0     dt    
-4.0e3   Tf    
-4.0e1   dtOut 
-1.0e0   HeadStep
+5.0e5   Tf    
+5.0e2   dtOut 
+5.0e3   HeadStep
 2.0   rho   
 1.0   ome   
 0.6  Head  

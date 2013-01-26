@@ -105,6 +105,20 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
+dem/CMakeFiles/alex.dir/rule:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/alex.dir/rule
+.PHONY : dem/CMakeFiles/alex.dir/rule
+
+# Convenience name for target.
+alex: dem/CMakeFiles/alex.dir/rule
+.PHONY : alex
+
+# fast build rule for target.
+alex/fast:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/alex.dir/build.make dem/CMakeFiles/alex.dir/build
+.PHONY : alex/fast
+
+# Convenience name for target.
 dem/CMakeFiles/cone.dir/rule:
 	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/cone.dir/rule
 .PHONY : dem/CMakeFiles/cone.dir/rule
@@ -257,6 +271,30 @@ torus: dem/CMakeFiles/torus.dir/rule
 torus/fast:
 	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/torus.dir/build.make dem/CMakeFiles/torus.dir/build
 .PHONY : torus/fast
+
+alex.o: alex.cpp.o
+.PHONY : alex.o
+
+# target to build an object file
+alex.cpp.o:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/alex.dir/build.make dem/CMakeFiles/alex.dir/alex.cpp.o
+.PHONY : alex.cpp.o
+
+alex.i: alex.cpp.i
+.PHONY : alex.i
+
+# target to preprocess a source file
+alex.cpp.i:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/alex.dir/build.make dem/CMakeFiles/alex.dir/alex.cpp.i
+.PHONY : alex.cpp.i
+
+alex.s: alex.cpp.s
+.PHONY : alex.s
+
+# target to generate assembly for a file
+alex.cpp.s:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/alex.dir/build.make dem/CMakeFiles/alex.dir/alex.cpp.s
+.PHONY : alex.cpp.s
 
 cone.o: cone.cpp.o
 .PHONY : cone.o
@@ -528,6 +566,7 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... alex"
 	@echo "... cone"
 	@echo "... david"
 	@echo "... drill"
@@ -541,6 +580,9 @@ help:
 	@echo "... soniattt"
 	@echo "... testvoro"
 	@echo "... torus"
+	@echo "... alex.o"
+	@echo "... alex.i"
+	@echo "... alex.s"
 	@echo "... cone.o"
 	@echo "... cone.i"
 	@echo "... cone.s"

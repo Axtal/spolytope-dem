@@ -27,7 +27,8 @@ SET(PROGS
     torus
     cone
     grinding
-    slope)
+    slope
+    alex)
 
 FOREACH(var ${PROGS})
     ADD_EXECUTABLE        (${var} "${var}.cpp")

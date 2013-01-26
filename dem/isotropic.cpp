@@ -245,7 +245,7 @@ void Report (DEM::Domain & dom, void *UD)
     // header
     String ff;
     ff.Printf    ("%s_bf_%04d",dom.FileKey.CStr(), dom.idx_out);
-    dom.WriteBF (ff.CStr());
+    dom.WriteVTKContacts (ff.CStr());
     if (dom.idx_out==0)
     {
         String fs;
@@ -393,7 +393,7 @@ void Report2 (DEM::Domain & dom, void *UD)
     //
     String ff;
     ff.Printf    ("%s_bf_%04d",dom.FileKey.CStr(), dom.idx_out);
-    dom.WriteBF (ff.CStr());
+    dom.WriteVTKContacts (ff.CStr());
 
 
     if (dom.idx_out==0)
