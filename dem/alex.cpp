@@ -236,6 +236,20 @@ void Setup (DEM::Domain & dom, void * UD)
         dat.Sig(2) = -0.5*(dom.Particles[dat.InitialIndex+4]->F(2)-dom.Particles[dat.InitialIndex+5]->F(2))/area;
     }
     if (update_sig) dat.Sig += dat.dt*dat.DSig/(dat.tspan);
+
+    for (size_t i=0;i<dom.Particles.Size();i++)
+    {
+        if (dom.Particles[i]->IsFree())
+        {
+            dom.Particles[i]->x (2) = 0.0;
+            dom.Particles[i]->xb(2) = 0.0;
+            dom.Particles[i]->v (2) = 0.0;
+            dom.Particles[i]->F (2) = 0.0;
+            dom.Particles[i]->T (0) = 0.0;
+            dom.Particles[i]->T (1) = 0.0;
+        }
+    }
+
 }
 
 void Report (DEM::Domain & dom, void *UD)
@@ -332,7 +346,8 @@ void Report (DEM::Domain & dom, void *UD)
     {
         String ff;
         ff.Printf    ("%s_bf_%04d",dom.FileKey.CStr(), dom.idx_out);
-        dom.WriteBF (ff.CStr());
+        dom.WriteVTKContacts (ff.CStr());
+        dom.WriteBF(ff.CStr());
 
         double R = 0.15*dat.L0(0);
         double volumecontainer = (dom.Particles[dat.InitialIndex  ]->x(0)-dom.Particles[dat.InitialIndex+1]->x(0)-dom.Particles[dat.InitialIndex  ]->Props.R-dom.Particles[dat.InitialIndex+1]->Props.R)*
@@ -728,8 +743,8 @@ int main(int argc, char **argv) try
 
     // properties of particles prior the triaxial test
     Dict B;
+    B.Set( 1,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu ,Beta,Eta,Bn,Bt ,Bm ,     Eps);
     B.Set(-1,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,Mu ,Beta,Eta,Bn,Bt ,Bm ,     Eps);
-    //B.Set(-1,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,0.0,Beta,Eta,Bn,Bt ,Bm ,     Eps);
     B.Set(-2,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,0.0,Beta,Eta,Bn,0.0,0.0,-0.1*Eps);
     B.Set(-3,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,0.0,Beta,Eta,Bn,0.0,0.0,-0.1*Eps);
     B.Set(-4,"Kn Kt Gn Gt Mu Beta Eta Bn Bt Bm Eps",Kn,Kt,Gn,Gt,0.0,Beta,Eta,Bn,0.0,0.0,-0.1*Eps);
