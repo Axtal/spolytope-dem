@@ -1,6 +1,6 @@
 /************************************************************************
  * MechSys - Open Library for Mechanical Systems                        *
- * Copyright (C) 2005 Dorival M. Pedroso, Raúl D. D. Farfan             *
+ * Copyright (C) 2013 Sergio Torres                                     *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
  * it under the terms of the GNU General Public License as published by *
@@ -30,10 +30,12 @@ using std::endl;
 
 struct UserData
 {
-    std::ofstream oss_st;       ///< file for surface tension calculation
-    double          rho0;
-    double          rho1;
-    Vec3_t             g;
+    std::ofstream  oss_st;       ///< file for surface tension calculation
+    double           rho0;
+    double           rho1;
+    Vec3_t              g;
+    Array<Cell *>      c0;
+    Array<Cell *>      c1;
 };
 
 void Setup (LBM::Domain & dom, void * UD)
@@ -43,6 +45,11 @@ void Setup (LBM::Domain & dom, void * UD)
     {
         Cell * c = dom.Lat[0].Cells[i];
         c->BForcef = c->Rho*dat.g;
+    }
+    for (size_t i=0;i<dat.c0.Size();i++)
+    {
+        dat.c0[i]->Initialize(0.999*dat.rho0,OrthoSys::O);
+        dat.c1[i]->Initialize(0.001*dat.rho0,OrthoSys::O);
     }
 }
 
@@ -66,7 +73,7 @@ int main(int argc, char **argv) try
     double rho1  = 0.01;
     double Tf    = 5000.0;
     double dtout = 50.0;
-    double por   = 0.4;
+    double por   = 0.5;
     if (argc>=2)
     {
         Nproc  =atoi(argv[1]);
@@ -164,14 +171,21 @@ int main(int argc, char **argv) try
     {
         Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(0.001*rho1,OrthoSys::O);
         Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(0.999*rho1,OrthoSys::O);
-        for (obsX = 1.5*R;obsX<nx-1.5*R;obsX+=3.0*R)
-        {
-		    if (pow((int)(i)-obsX,2.0) + pow((int)(j)-obsY,2.0) <= pow(R,2.0)) // circle equation
-		    {
-                Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(0.999*rho0,OrthoSys::O);
-                Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(0.001*rho0,OrthoSys::O);
-		    }
-        }
+		if (pow((int)(i)-obsX,2.0) + pow((int)(j)-obsY,2.0) <= pow(R,2.0)) // circle equation
+		{
+            Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(0.999*rho0,OrthoSys::O);
+            Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(0.001*rho0,OrthoSys::O);
+            dat.c0.Push(Dom.Lat[0].GetCell(iVec3_t(i,j,0)));
+            dat.c1.Push(Dom.Lat[1].GetCell(iVec3_t(i,j,0)));
+		}
+        //for (obsX = 1.5*R;obsX<nx-1.5*R;obsX+=3.0*R)
+        //{
+		    //if (pow((int)(i)-obsX,2.0) + pow((int)(j)-obsY,2.0) <= pow(R,2.0)) // circle equation
+		    //{
+                //Dom.Lat[0].GetCell(iVec3_t(i,j,0))->Initialize(0.999*rho0,OrthoSys::O);
+                //Dom.Lat[1].GetCell(iVec3_t(i,j,0))->Initialize(0.001*rho0,OrthoSys::O);
+		    //}
+        //}
     }
 
     // Set parameters

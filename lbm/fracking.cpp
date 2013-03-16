@@ -44,7 +44,6 @@ void Setup(LBM::Domain & dom, void * UD)
     }
 }
 
-
 int main(int argc, char **argv) try
 {
     size_t Nproc = 1; 
@@ -59,7 +58,7 @@ int main(int argc, char **argv) try
     double r2    = 5.0;
     double Kn    = 300.0;
     double Kt    = 300.0;
-    double Gn    = 1.6e-5;
+    double Gn    = 1.0;
     double Gt    = 0.0;
     double Mu    = 0.3;
     double Bn    = 10.0;

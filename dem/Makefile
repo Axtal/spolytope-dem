@@ -217,6 +217,20 @@ isotropic/fast:
 .PHONY : isotropic/fast
 
 # Convenience name for target.
+dem/CMakeFiles/shear.dir/rule:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/shear.dir/rule
+.PHONY : dem/CMakeFiles/shear.dir/rule
+
+# Convenience name for target.
+shear: dem/CMakeFiles/shear.dir/rule
+.PHONY : shear
+
+# fast build rule for target.
+shear/fast:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/shear.dir/build.make dem/CMakeFiles/shear.dir/build
+.PHONY : shear/fast
+
+# Convenience name for target.
 dem/CMakeFiles/slope.dir/rule:
 	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/slope.dir/rule
 .PHONY : dem/CMakeFiles/slope.dir/rule
@@ -464,6 +478,30 @@ isotropic.cpp.s:
 	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/isotropic.dir/build.make dem/CMakeFiles/isotropic.dir/isotropic.cpp.s
 .PHONY : isotropic.cpp.s
 
+shear.o: shear.cpp.o
+.PHONY : shear.o
+
+# target to build an object file
+shear.cpp.o:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/shear.dir/build.make dem/CMakeFiles/shear.dir/shear.cpp.o
+.PHONY : shear.cpp.o
+
+shear.i: shear.cpp.i
+.PHONY : shear.i
+
+# target to preprocess a source file
+shear.cpp.i:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/shear.dir/build.make dem/CMakeFiles/shear.dir/shear.cpp.i
+.PHONY : shear.cpp.i
+
+shear.s: shear.cpp.s
+.PHONY : shear.s
+
+# target to generate assembly for a file
+shear.cpp.s:
+	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/shear.dir/build.make dem/CMakeFiles/shear.dir/shear.cpp.s
+.PHONY : shear.cpp.s
+
 slope.o: slope.cpp.o
 .PHONY : slope.o
 
@@ -576,6 +614,7 @@ help:
 	@echo "... grinding"
 	@echo "... isotropic"
 	@echo "... rebuild_cache"
+	@echo "... shear"
 	@echo "... slope"
 	@echo "... soniattt"
 	@echo "... testvoro"
@@ -604,6 +643,9 @@ help:
 	@echo "... isotropic.o"
 	@echo "... isotropic.i"
 	@echo "... isotropic.s"
+	@echo "... shear.o"
+	@echo "... shear.i"
+	@echo "... shear.s"
 	@echo "... slope.o"
 	@echo "... slope.i"
 	@echo "... slope.s"

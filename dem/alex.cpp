@@ -247,6 +247,7 @@ void Setup (DEM::Domain & dom, void * UD)
             dom.Particles[i]->F (2) = 0.0;
             dom.Particles[i]->T (0) = 0.0;
             dom.Particles[i]->T (1) = 0.0;
+            //dom.Particles[i]->T (2) = 0.0;
         }
     }
 
@@ -715,6 +716,29 @@ int main(int argc, char **argv) try
         dom.GenFromMesh (mesh,/*R*/R,/*rho*/rho,Cohesion,false);
     }
     else if (ptype=="rice") dom.GenRice(-1,Lx,nx,R,rho,seed,fraction);
+    else if (Util::FileExists(ptype)) 
+    {
+         ifstream fp(ptype.CStr());
+         size_t ncol=0;
+         Vec3_t X;
+         while (!fp.eof())
+         {
+             double temp,R;
+             fp >> temp;
+             ncol++;
+             if (ncol!=4)
+             {
+                 X(ncol-1) = temp;
+             }
+             else
+             {
+                 R = temp;
+                 ncol=0;
+                 //std::cout << X << R << std::endl;
+                 dom.AddSphere(-1,X,R,rho);
+             }
+         }
+    }
     else
     {
         dom.Load(ptype.CStr());

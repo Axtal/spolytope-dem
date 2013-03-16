@@ -1,6 +1,6 @@
 ########################################################################
 # MechSys - Open Library for Mechanical Systems                        #
-# Copyright (C) 2005 Dorival M. Pedroso, Raúl D. D. Farfan             #
+# Copyright (C) 2013 Sergio Torres                                     #
 #                                                                      #
 # This program is free software: you can redistribute it and/or modify #
 # it under the terms of the GNU General Public License as published by #
@@ -28,7 +28,8 @@ SET(PROGS
     cone
     grinding
     slope
-    alex)
+    alex
+    shear)
 
 FOREACH(var ${PROGS})
     ADD_EXECUTABLE        (${var} "${var}.cpp")
