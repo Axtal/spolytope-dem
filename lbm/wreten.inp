@@ -1,4 +1,4 @@
-soil2    fileDEM
+soilregular  fileDEM
 a.h5    fileLBM
 1    Render    
 100    N
@@ -7,14 +7,14 @@ a.h5    fileLBM
 1.0   Gmix
 0.16    nu    
 1.0     dt    
-5.0e5   Tf    
-5.0e2   dtOut 
-5.0e3   HeadStep
+5.0e3   Tf    
+5.0e0   dtOut 
+5.0e1   HeadStep
 2.0   rho   
 1.0   ome   
-0.6  Head  
-2.0  Orig
-0      oct
+0.0  Head  
+2.5  Orig
+0      oct is 0 if octahedral plane is used, 1 if a fully directional gradient is imposed and >=2 if a checkerboard bc is used
 0.1   Giso or DPx;  
 0.0    G    or Dpy;    
 0.0    th   or DPz;    

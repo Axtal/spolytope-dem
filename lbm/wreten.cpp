@@ -1,7 +1,6 @@
 /************************************************************************
  * MechSys - Open Library for Mechanical Systems                        *
- * Copyright (C) 2005 Dorival M. Pedroso, Raul Durand                   *
- * Copyright (C) 2009 Sergio Galindo                                    *
+ * Copyright (C) 2009 Sergio Torres                                     *
  *                                                                      *
  * This program is free software: you can redistribute it and/or modify *
  * it under the terms of the GNU General Public License as published by *
@@ -39,6 +38,7 @@ struct UserData
     Array<Cell *>  zmax0;
     Array<Cell *>  zmin1;
     Array<Cell *>  zmax1;
+    size_t         block;       ///< Dimensions of the checkerboard block
     double          Head;       ///< Current hydraulic head
     double          Orig;       ///< Original hydraulic head
     double            Tf;
@@ -65,15 +65,165 @@ void Setup (LBM::Domain & dom, void * UD)
     double rho0max;
     double rho1max;
     
-    if (fabs(dat.Dp(0))>1.0e-12)
+    if (dat.block<2)
+    { 
+        if (fabs(dat.Dp(0))>1.0e-12)
+        {
+            rho0min = 0.999*((rho - dat.rho)*dat.Dp(0) + dat.rho);
+            rho1min = 0.001*((rho - dat.rho)*dat.Dp(0) + dat.rho);
+            rho0max = 0.001*((dat.rho - rho)*dat.Dp(0) + dat.rho);
+            rho1max = 0.999*((dat.rho - rho)*dat.Dp(0) + dat.rho);
+            for (size_t i=0;i<dat.xmin0.Size();i++)
+            {
+                Cell * c = dat.xmin0[i];
+                c->RhoBC = rho0min;
+                c->F[1] = 1.0/3.0*(-2*c->F[0]-4*c->F[10]-4*c->F[12]-4*c->F[14]-c->F[2]-2*c->F[3]-2*c->F[4]-2*c->F[5]-2*c->F[6]-4*c->F[8]+2*c->RhoBC);
+                c->F[7] = 1.0/24.0*(-2*c->F[0]-4*c->F[10]-4*c->F[12]-4*c->F[14]-4*c->F[2]  +c->F[3]-5*c->F[4]  +c->F[5]-5*c->F[6]+20*c->F[8]+2*c->RhoBC);
+                c->F[9] = 1.0/24.0*(-2*c->F[0]+20*c->F[10]-4*c->F[12]-4*c->F[14]-4*c->F[2]+c->F[3]-5*c->F[4]-5*c->F[5]+c->F[6]-4*c->F[8]+2*c->RhoBC);
+                c->F[11]= 1.0/24.0*(-2*c->F[0]-4*c->F[10]+20*c->F[12]-4*c->F[14]-4*c->F[2]-5*c->F[3]+c->F[4]  +c->F[5]-5*c->F[6]-4*c->F[8]+2*c->RhoBC);
+                c->F[13]= 1.0/24.0*(-2*c->F[0]-4*c->F[10]-4 *c->F[12]+20*c->F[14]-4*c->F[2]-5*c->F[3]+  c->F[4]-5*c->F[5]+c->F[6]-4*c->F[8]+2*c->RhoBC);
+                c->Rho = c->VelDen(c->Vel);
+
+                c = dat.xmin1[i];
+                c->RhoBC = rho1min;
+                c->F[1] = 1.0/3.0*(-2*c->F[0]-4*c->F[10]-4*c->F[12]-4*c->F[14]-c->F[2]-2*c->F[3]-2*c->F[4]-2*c->F[5]-2*c->F[6]-4*c->F[8]+2*c->RhoBC);
+                c->F[7] = 1.0/24.0*(-2*c->F[0]-4*c->F[10]-4*c->F[12]-4*c->F[14]-4*c->F[2]  +c->F[3]-5*c->F[4]  +c->F[5]-5*c->F[6]+20*c->F[8]+2*c->RhoBC);
+                c->F[9] = 1.0/24.0*(-2*c->F[0]+20*c->F[10]-4*c->F[12]-4*c->F[14]-4*c->F[2]+c->F[3]-5*c->F[4]-5*c->F[5]+c->F[6]-4*c->F[8]+2*c->RhoBC);
+                c->F[11]= 1.0/24.0*(-2*c->F[0]-4*c->F[10]+20*c->F[12]-4*c->F[14]-4*c->F[2]-5*c->F[3]+c->F[4]  +c->F[5]-5*c->F[6]-4*c->F[8]+2*c->RhoBC);
+                c->F[13]= 1.0/24.0*(-2*c->F[0]-4*c->F[10]-4 *c->F[12]+20*c->F[14]-4*c->F[2]-5*c->F[3]+  c->F[4]-5*c->F[5]+c->F[6]-4*c->F[8]+2*c->RhoBC);
+                c->Rho = c->VelDen(c->Vel);
+
+                c = dat.xmax0[i];
+                c->RhoBC = rho0max;
+                c->F[2] = 1/3.0* (-2*c->F[0]-c->F[1]-2*(2*c->F[11]+2*c->F[13]+c->F[3]+c->F[4]+c->F[5]+c->F[6]+2*c->F[7]+2*c->F[9]-c->RhoBC));
+                c->F[8] = 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] - 4*c->F[13] - 5*c->F[3] + c->F[4] - 5*c->F[5] + c->F[6] +20*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
+                c->F[10]= 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] - 4*c->F[13] - 5*c->F[3] + c->F[4] + c->F[5] - 5*c->F[6] - 4*c->F[7] + 20*c->F[9] + 2*c->RhoBC) ;
+                c->F[12]= 1/24.0*(-2*c->F[0] - 4*c->F[1] + 20*c->F[11] - 4*c->F[13] + c->F[3] - 5*c->F[4] - 5*c->F[5] + c->F[6] -  4*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
+                c->F[14]= 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] + 20*c->F[13] + c->F[3] - 5*c->F[4] + c->F[5] - 5*c->F[6] -  4*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
+                c->Rho = c->VelDen(c->Vel);
+                
+                c = dat.xmax1[i];
+                c->RhoBC = rho1max;
+                c->F[2] = 1/3.0* (-2*c->F[0]-c->F[1]-2*(2*c->F[11]+2*c->F[13]+c->F[3]+c->F[4]+c->F[5]+c->F[6]+2*c->F[7]+2*c->F[9]-c->RhoBC));
+                c->F[8] = 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] - 4*c->F[13] - 5*c->F[3] + c->F[4] - 5*c->F[5] + c->F[6] +20*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
+                c->F[10]= 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] - 4*c->F[13] - 5*c->F[3] + c->F[4] + c->F[5] - 5*c->F[6] - 4*c->F[7] + 20*c->F[9] + 2*c->RhoBC) ;
+                c->F[12]= 1/24.0*(-2*c->F[0] - 4*c->F[1] + 20*c->F[11] - 4*c->F[13] + c->F[3] - 5*c->F[4] - 5*c->F[5] + c->F[6] -  4*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
+                c->F[14]= 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] + 20*c->F[13] + c->F[3] - 5*c->F[4] + c->F[5] - 5*c->F[6] -  4*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
+                c->Rho = c->VelDen(c->Vel);
+            }
+        }
+        if (fabs(dat.Dp(1))>1.0e-12)
+        {
+            rho0min = 0.999*((rho - dat.rho)*dat.Dp(1) + dat.rho);
+            rho1min = 0.001*((rho - dat.rho)*dat.Dp(1) + dat.rho);
+            rho0max = 0.001*((dat.rho - rho)*dat.Dp(1) + dat.rho);
+            rho1max = 0.999*((dat.rho - rho)*dat.Dp(1) + dat.rho);
+            for (size_t i=0;i<dat.ymin0.Size();i++)
+            {
+                Cell * c = dat.ymin0[i];
+                c->RhoBC = rho0min;
+                c->F[3]= 1/3.0*(-2*c->F[0]- 2*c->F[1]- 4*c->F[10]- 4*c->F[11]- 4*c->F[13]- 2*c->F[2]- c->F[4]- 2*c->F[5]- 2*c->F[6]- 4*c->F[8]+ 2*c->RhoBC);
+                c->F[7]= 1/24.0*(-2*c->F[0]+ c->F[1]- 4*c->F[10]- 4*c->F[11]- 4*c->F[13]- 5*c->F[2]- 4*c->F[4]+ c->F[5]-  5*c->F[6]+ 20*c->F[8]+ 2*c->RhoBC);
+                c->F[9]= 1/24.0*(-2*c->F[0]+ c->F[1]+ 20*c->F[10]- 4*c->F[11]- 4*c->F[13]- 5*c->F[2]- 4*c->F[4]- 5*c->F[5]+ c->F[6]- 4*c->F[8]+ 2*c->RhoBC);
+                c->F[12]= 1/24.0*(-2*c->F[0]- 5*c->F[1]- 4*c->F[10]+ 20*c->F[11]- 4*c->F[13]+ c->F[2]- 4*c->F[4]-5*c->F[5]+ c->F[6]- 4*c->F[8]+ 2*c->RhoBC);
+                c->F[14]= 1/24.0*(-2*c->F[0]- 5*c->F[1]- 4*c->F[10]- 4*c->F[11]+ 20*c->F[13]+ c->F[2]- 4*c->F[4]+ c->F[5]-5*c->F[6]- 4*c->F[8]+ 2*c->RhoBC);
+                c->Rho = c->VelDen(c->Vel);
+
+                c = dat.ymin1[i];
+                c->RhoBC = rho1min;
+                c->F[3]= 1/3.0*(-2*c->F[0]- 2*c->F[1]- 4*c->F[10]- 4*c->F[11]- 4*c->F[13]- 2*c->F[2]- c->F[4]- 2*c->F[5]- 2*c->F[6]- 4*c->F[8]+ 2*c->RhoBC);
+                c->F[7]= 1/24.0*(-2*c->F[0]+ c->F[1]- 4*c->F[10]- 4*c->F[11]- 4*c->F[13]- 5*c->F[2]- 4*c->F[4]+ c->F[5]-  5*c->F[6]+ 20*c->F[8]+ 2*c->RhoBC);
+                c->F[9]= 1/24.0*(-2*c->F[0]+ c->F[1]+ 20*c->F[10]- 4*c->F[11]- 4*c->F[13]- 5*c->F[2]- 4*c->F[4]- 5*c->F[5]+ c->F[6]- 4*c->F[8]+ 2*c->RhoBC);
+                c->F[12]= 1/24.0*(-2*c->F[0]- 5*c->F[1]- 4*c->F[10]+ 20*c->F[11]- 4*c->F[13]+ c->F[2]- 4*c->F[4]-5*c->F[5]+ c->F[6]- 4*c->F[8]+ 2*c->RhoBC);
+                c->F[14]= 1/24.0*(-2*c->F[0]- 5*c->F[1]- 4*c->F[10]- 4*c->F[11]+ 20*c->F[13]+ c->F[2]- 4*c->F[4]+ c->F[5]-5*c->F[6]- 4*c->F[8]+ 2*c->RhoBC);
+                c->Rho = c->VelDen(c->Vel);
+
+                c = dat.ymax0[i];
+                c->RhoBC = rho0max;
+                c->F[4]= 1/3.0*(-2*c->F[0]- 2*c->F[1]- 4*c->F[12]- 4*c->F[14]- 2*c->F[2]- c->F[3]- 2*c->F[5]- 2*c->F[6]- 4*c->F[7]- 4*c->F[9]+ 2*c->RhoBC);
+                c->F[8]= 1/24.0*(-2*c->F[0]- 5*c->F[1]- 4*c->F[12]- 4*c->F[14]+ c->F[2]- 4*c->F[3]- 5*c->F[5]+ c->F[6]+  20*c->F[7]- 4*c->F[9]+ 2*c->RhoBC);
+                c->F[10]= 1/24.0*(-2*c->F[0]- 5*c->F[1]- 4*c->F[12]- 4*c->F[14]+ c->F[2]- 4*c->F[3]+ c->F[5]- 5*c->F[6]- 4*c->F[7]+ 20*c->F[9]+ 2*c->RhoBC);
+                c->F[11]= 1/24.0*(-2*c->F[0]+ c->F[1]+ 20*c->F[12]- 4*c->F[14]- 5*c->F[2]- 4*c->F[3]+ c->F[5]- 5*c->F[6]-4*c->F[7]- 4*c->F[9]+ 2*c->RhoBC);
+                c->F[13]= 1/24.0*(-2*c->F[0]+ c->F[1]- 4*c->F[12]+ 20*c->F[14]- 5*c->F[2]- 4*c->F[3]- 5*c->F[5]+ c->F[6]-4*c->F[7]- 4*c->F[9]+ 2*c->RhoBC);
+                c->Rho = c->VelDen(c->Vel);
+
+                c = dat.ymax1[i];
+                c->RhoBC = rho1max;
+                c->F[4]= 1/3.0*(-2*c->F[0]- 2*c->F[1]- 4*c->F[12]- 4*c->F[14]- 2*c->F[2]- c->F[3]- 2*c->F[5]- 2*c->F[6]- 4*c->F[7]- 4*c->F[9]+ 2*c->RhoBC);
+                c->F[8]= 1/24.0*(-2*c->F[0]- 5*c->F[1]- 4*c->F[12]- 4*c->F[14]+ c->F[2]- 4*c->F[3]- 5*c->F[5]+ c->F[6]+  20*c->F[7]- 4*c->F[9]+ 2*c->RhoBC);
+                c->F[10]= 1/24.0*(-2*c->F[0]- 5*c->F[1]- 4*c->F[12]- 4*c->F[14]+ c->F[2]- 4*c->F[3]+ c->F[5]- 5*c->F[6]- 4*c->F[7]+ 20*c->F[9]+ 2*c->RhoBC);
+                c->F[11]= 1/24.0*(-2*c->F[0]+ c->F[1]+ 20*c->F[12]- 4*c->F[14]- 5*c->F[2]- 4*c->F[3]+ c->F[5]- 5*c->F[6]-4*c->F[7]- 4*c->F[9]+ 2*c->RhoBC);
+                c->F[13]= 1/24.0*(-2*c->F[0]+ c->F[1]- 4*c->F[12]+ 20*c->F[14]- 5*c->F[2]- 4*c->F[3]- 5*c->F[5]+ c->F[6]-4*c->F[7]- 4*c->F[9]+ 2*c->RhoBC);
+                c->Rho = c->VelDen(c->Vel);
+            }
+        }
+        if (fabs(dat.Dp(2))>1.0e-12)
+        {
+            rho0min = 0.999*((rho - dat.rho)*dat.Dp(2) + dat.rho);
+            rho1min = 0.001*((rho - dat.rho)*dat.Dp(2) + dat.rho);
+            rho0max = 0.001*((dat.rho - rho)*dat.Dp(2) + dat.rho);
+            rho1max = 0.999*((dat.rho - rho)*dat.Dp(2) + dat.rho);
+            for (size_t i=0;i<dat.zmin0.Size();i++)
+            {
+                Cell * c = dat.zmin0[i];
+                c->RhoBC = rho0min;
+                c->F[5] = 1/3.0*(-2*c->F[0] - 2*c->F[1] - 4*c->F[12] - 4*c->F[13] - 2*c->F[2] - 2*c->F[3] - 2*c->F[4] - c->F[6] -  4*c->F[8] - 4*c->F[9] + 2*c->RhoBC);
+                c->F[7] = 1/24.0*(-2*c->F[0] + c->F[1] - 4*c->F[12] - 4*c->F[13] - 5*c->F[2] + c->F[3] - 5*c->F[4] - 4*c->F[6] +  20*c->F[8] - 4*c->F[9] + 2*c->RhoBC);
+                c->F[10] = 1/24.0*(-2*c->F[0] - 5*c->F[1] - 4*c->F[12] - 4*c->F[13] + c->F[2] - 5*c->F[3] + c->F[4] - 4*c->F[6] - 4*c->F[8] + 20*c->F[9] + 2*c->RhoBC);
+                c->F[11] = 1/24.0*(-2*c->F[0] + c->F[1] + 20*c->F[12] - 4*c->F[13] - 5*c->F[2] - 5*c->F[3] + c->F[4] - 4*c->F[6] - 4*c->F[8] - 4*c->F[9] + 2*c->RhoBC);
+                c->F[14] = 1/24.0*(-2*c->F[0] - 5*c->F[1] - 4*c->F[12] + 20*c->F[13] + c->F[2] + c->F[3] - 5*c->F[4] - 4*c->F[6] - 4*c->F[8] - 4*c->F[9] + 2*c->RhoBC);
+                c->Rho = c->VelDen(c->Vel);
+
+                c = dat.zmin1[i];
+                c->RhoBC = rho1min;
+                c->F[5] = 1/3.0*(-2*c->F[0] - 2*c->F[1] - 4*c->F[12] - 4*c->F[13] - 2*c->F[2] - 2*c->F[3] - 2*c->F[4] - c->F[6] -  4*c->F[8] - 4*c->F[9] + 2*c->RhoBC);
+                c->F[7] = 1/24.0*(-2*c->F[0] + c->F[1] - 4*c->F[12] - 4*c->F[13] - 5*c->F[2] + c->F[3] - 5*c->F[4] - 4*c->F[6] +  20*c->F[8] - 4*c->F[9] + 2*c->RhoBC);
+                c->F[10] = 1/24.0*(-2*c->F[0] - 5*c->F[1] - 4*c->F[12] - 4*c->F[13] + c->F[2] - 5*c->F[3] + c->F[4] - 4*c->F[6] - 4*c->F[8] + 20*c->F[9] + 2*c->RhoBC);
+                c->F[11] = 1/24.0*(-2*c->F[0] + c->F[1] + 20*c->F[12] - 4*c->F[13] - 5*c->F[2] - 5*c->F[3] + c->F[4] - 4*c->F[6] - 4*c->F[8] - 4*c->F[9] + 2*c->RhoBC);
+                c->F[14] = 1/24.0*(-2*c->F[0] - 5*c->F[1] - 4*c->F[12] + 20*c->F[13] + c->F[2] + c->F[3] - 5*c->F[4] - 4*c->F[6] - 4*c->F[8] - 4*c->F[9] + 2*c->RhoBC);
+                c->Rho = c->VelDen(c->Vel);
+
+                c = dat.zmax0[i];
+                c->RhoBC = rho0max;
+                c->F[6]= 1/3.0*(-2*c->F[0]- 2*c->F[1]- 4*c->F[10]- 4*c->F[11]- 4*c->F[14]- 2*c->F[2]- 2*c->F[3]- 2*c->F[4]- c->F[5]- 4*c->F[7]+ 2*c->RhoBC);
+                c->F[8]= 1/24.0*(-2*c->F[0]- 5*c->F[1]- 4*c->F[10]- 4*c->F[11]- 4*c->F[14]+ c->F[2]- 5*c->F[3]+ c->F[4]- 4*c->F[5]+ 20*c->F[7]+ 2*c->RhoBC);
+                c->F[9]= 1/24.0*(-2*c->F[0]+ c->F[1]+ 20*c->F[10]- 4*c->F[11]- 4*c->F[14]- 5*c->F[2]+ c->F[3]- 5*c->F[4]- 4*c->F[5]- 4*c->F[7]+ 2*c->RhoBC);
+                c->F[12]= 1/24.0*(-2*c->F[0]- 5*c->F[1]- 4*c->F[10]+ 20*c->F[11]- 4*c->F[14]+ c->F[2]+ c->F[3]- 5*c->F[4]-4*c->F[5]- 4*c->F[7]+ 2*c->RhoBC);
+                c->F[13]= 1/24.0*(-2*c->F[0]+ c->F[1]- 4*c->F[10]- 4*c->F[11]+ 20*c->F[14]- 5*c->F[2]- 5*c->F[3]+ c->F[4]-4*c->F[5]- 4*c->F[7]+ 2*c->RhoBC);
+                c->Rho = c->VelDen(c->Vel);
+
+                c = dat.zmax1[i];
+                c->RhoBC = rho1max;
+                c->F[6]= 1/3.0*(-2*c->F[0]- 2*c->F[1]- 4*c->F[10]- 4*c->F[11]- 4*c->F[14]- 2*c->F[2]- 2*c->F[3]- 2*c->F[4]- c->F[5]- 4*c->F[7]+ 2*c->RhoBC);
+                c->F[8]= 1/24.0*(-2*c->F[0]- 5*c->F[1]- 4*c->F[10]- 4*c->F[11]- 4*c->F[14]+ c->F[2]- 5*c->F[3]+ c->F[4]- 4*c->F[5]+ 20*c->F[7]+ 2*c->RhoBC);
+                c->F[9]= 1/24.0*(-2*c->F[0]+ c->F[1]+ 20*c->F[10]- 4*c->F[11]- 4*c->F[14]- 5*c->F[2]+ c->F[3]- 5*c->F[4]- 4*c->F[5]- 4*c->F[7]+ 2*c->RhoBC);
+                c->F[12]= 1/24.0*(-2*c->F[0]- 5*c->F[1]- 4*c->F[10]+ 20*c->F[11]- 4*c->F[14]+ c->F[2]+ c->F[3]- 5*c->F[4]-4*c->F[5]- 4*c->F[7]+ 2*c->RhoBC);
+                c->F[13]= 1/24.0*(-2*c->F[0]+ c->F[1]- 4*c->F[10]- 4*c->F[11]+ 20*c->F[14]- 5*c->F[2]- 5*c->F[3]+ c->F[4]-4*c->F[5]- 4*c->F[7]+ 2*c->RhoBC);
+                c->Rho = c->VelDen(c->Vel);
+            }
+        }
+    }
+    else
     {
-        rho0min = 0.999*((rho - dat.rho)*dat.Dp(0) + dat.rho);
-        rho1min = 0.001*((rho - dat.rho)*dat.Dp(0) + dat.rho);
-        rho0max = 0.001*((dat.rho - rho)*dat.Dp(0) + dat.rho);
-        rho1max = 0.999*((dat.rho - rho)*dat.Dp(0) + dat.rho);
         for (size_t i=0;i<dat.xmin0.Size();i++)
         {
             Cell * c = dat.xmin0[i];
+            size_t chkboard = ((c->Index(1)/dat.block)%2 + (c->Index(2)/dat.block)%2)%2;
+            if (chkboard==0)
+            {
+                rho0min = 0.999*rho;
+                rho1min = 0.001*rho;
+                rho0max = 0.001*(2.0*dat.rho - rho);
+                rho1max = 0.999*(2.0*dat.rho - rho);
+            }
+            else if (chkboard==1)
+            {
+                rho0max = 0.999*rho;
+                rho1max = 0.001*rho;
+                rho0min = 0.001*(2.0*dat.rho - rho);
+                rho1min = 0.999*(2.0*dat.rho - rho);
+            }
+
             c->RhoBC = rho0min;
             c->F[1] = 1.0/3.0*(-2*c->F[0]-4*c->F[10]-4*c->F[12]-4*c->F[14]-c->F[2]-2*c->F[3]-2*c->F[4]-2*c->F[5]-2*c->F[6]-4*c->F[8]+2*c->RhoBC);
             c->F[7] = 1.0/24.0*(-2*c->F[0]-4*c->F[10]-4*c->F[12]-4*c->F[14]-4*c->F[2]  +c->F[3]-5*c->F[4]  +c->F[5]-5*c->F[6]+20*c->F[8]+2*c->RhoBC);
@@ -109,16 +259,26 @@ void Setup (LBM::Domain & dom, void * UD)
             c->F[14]= 1/24.0*(-2*c->F[0] - 4*c->F[1] - 4*c->F[11] + 20*c->F[13] + c->F[3] - 5*c->F[4] + c->F[5] - 5*c->F[6] -  4*c->F[7] - 4*c->F[9] + 2*c->RhoBC);
             c->Rho = c->VelDen(c->Vel);
         }
-    }
-    if (fabs(dat.Dp(1))>1.0e-12)
-    {
-        rho0min = 0.999*((rho - dat.rho)*dat.Dp(1) + dat.rho);
-        rho1min = 0.001*((rho - dat.rho)*dat.Dp(1) + dat.rho);
-        rho0max = 0.001*((dat.rho - rho)*dat.Dp(1) + dat.rho);
-        rho1max = 0.999*((dat.rho - rho)*dat.Dp(1) + dat.rho);
+
         for (size_t i=0;i<dat.ymin0.Size();i++)
         {
             Cell * c = dat.ymin0[i];
+            size_t chkboard = ((c->Index(0)/dat.block)%2 + (c->Index(2)/dat.block)%2)%2;
+            if (chkboard==0)
+            {
+                rho0min = 0.999*rho;
+                rho1min = 0.001*rho;
+                rho0max = 0.001*(2.0*dat.rho - rho);
+                rho1max = 0.999*(2.0*dat.rho - rho);
+            }
+            else if (chkboard==1)
+            {
+                rho0max = 0.999*rho;
+                rho1max = 0.001*rho;
+                rho0min = 0.001*(2.0*dat.rho - rho);
+                rho1min = 0.999*(2.0*dat.rho - rho);
+            }
+
             c->RhoBC = rho0min;
             c->F[3]= 1/3.0*(-2*c->F[0]- 2*c->F[1]- 4*c->F[10]- 4*c->F[11]- 4*c->F[13]- 2*c->F[2]- c->F[4]- 2*c->F[5]- 2*c->F[6]- 4*c->F[8]+ 2*c->RhoBC);
             c->F[7]= 1/24.0*(-2*c->F[0]+ c->F[1]- 4*c->F[10]- 4*c->F[11]- 4*c->F[13]- 5*c->F[2]- 4*c->F[4]+ c->F[5]-  5*c->F[6]+ 20*c->F[8]+ 2*c->RhoBC);
@@ -154,16 +314,26 @@ void Setup (LBM::Domain & dom, void * UD)
             c->F[13]= 1/24.0*(-2*c->F[0]+ c->F[1]- 4*c->F[12]+ 20*c->F[14]- 5*c->F[2]- 4*c->F[3]- 5*c->F[5]+ c->F[6]-4*c->F[7]- 4*c->F[9]+ 2*c->RhoBC);
             c->Rho = c->VelDen(c->Vel);
         }
-    }
-    if (fabs(dat.Dp(2))>1.0e-12)
-    {
-        rho0min = 0.999*((rho - dat.rho)*dat.Dp(2) + dat.rho);
-        rho1min = 0.001*((rho - dat.rho)*dat.Dp(2) + dat.rho);
-        rho0max = 0.001*((dat.rho - rho)*dat.Dp(2) + dat.rho);
-        rho1max = 0.999*((dat.rho - rho)*dat.Dp(2) + dat.rho);
+    
         for (size_t i=0;i<dat.zmin0.Size();i++)
         {
             Cell * c = dat.zmin0[i];
+            size_t chkboard = ((c->Index(0)/dat.block)%2 + (c->Index(1)/dat.block)%2)%2;
+            if (chkboard==0)
+            {
+                rho0min = 0.999*rho;
+                rho1min = 0.001*rho;
+                rho0max = 0.001*(2.0*dat.rho - rho);
+                rho1max = 0.999*(2.0*dat.rho - rho);
+            }
+            else if (chkboard==1)
+            {
+                rho0max = 0.999*rho;
+                rho1max = 0.001*rho;
+                rho0min = 0.001*(2.0*dat.rho - rho);
+                rho1min = 0.999*(2.0*dat.rho - rho);
+            }
+
             c->RhoBC = rho0min;
             c->F[5] = 1/3.0*(-2*c->F[0] - 2*c->F[1] - 4*c->F[12] - 4*c->F[13] - 2*c->F[2] - 2*c->F[3] - 2*c->F[4] - c->F[6] -  4*c->F[8] - 4*c->F[9] + 2*c->RhoBC);
             c->F[7] = 1/24.0*(-2*c->F[0] + c->F[1] - 4*c->F[12] - 4*c->F[13] - 5*c->F[2] + c->F[3] - 5*c->F[4] - 4*c->F[6] +  20*c->F[8] - 4*c->F[9] + 2*c->RhoBC);
@@ -281,7 +451,7 @@ int main(int argc, char **argv) try
     double ome      = 2.0;
     double Head     = 500.0;
     double Orig     = 54.0;
-    bool   oct      = true;
+    size_t oct      = 1;
     double DPx      = 1.0;
     double DPy      = 1.0;
     double DPz      = 1.0;
@@ -319,7 +489,8 @@ int main(int argc, char **argv) try
     DemDom.DelParticles(idx);
     Vec3_t Xmin,Xmax;
     DemDom.BoundingBox(Xmin,Xmax);
-    int    bound = -2;
+    //int    bound = -2;
+    int    bound = 0;
     double dx = (Xmax(0)-Xmin(0))/(N-2*bound);
     size_t Ny = (Xmax(1)-Xmin(1))/dx + 2*bound;
     size_t Nz = (Xmax(2)-Xmin(2))/dx + 2*bound;
@@ -348,7 +519,7 @@ int main(int argc, char **argv) try
 
     UserData dat;
     Dom.UserData = &dat;
-    if (oct)
+    if (oct==0)
     {
         double Giso = DPx;
         double Gdev = DPy;
@@ -367,6 +538,7 @@ int main(int argc, char **argv) try
     dat.Head     = Head;
     dat.Dp       = Vec3_t(DPx,DPy,DPz);
     dat.Dp      /= norm(dat.Dp);
+    dat.block    = oct;
 
     Dom.Lat[0].G = 0.0;
     Dom.Lat[0].Gs= Gs0;
@@ -473,26 +645,28 @@ int main(int argc, char **argv) try
         {
             Cell * c0 = Dom.Lat[0].Cells[i];
             Cell * c1 = Dom.Lat[1].Cells[i];
-            if      (c0->Index(0)<=abs(bound))
-            {
-                c0->Initialize(0.999*rho, OrthoSys::O);
-                c1->Initialize(0.001*rho, OrthoSys::O);
-            }
-            else if (c0->Index(1)<=abs(bound))
-            {
-                c0->Initialize(0.999*rho, OrthoSys::O);
-                c1->Initialize(0.001*rho, OrthoSys::O);
-            }
-            else if (c0->Index(2)<=abs(bound))
-            {
-                c0->Initialize(0.999*rho, OrthoSys::O);
-                c1->Initialize(0.001*rho, OrthoSys::O);
-            }
-            else
-            {
-                c1->Initialize(0.999*rho, OrthoSys::O);
-                c0->Initialize(0.001*rho, OrthoSys::O);
-            }
+            c1->Initialize(0.999*rho, OrthoSys::O);
+            c0->Initialize(0.001*rho, OrthoSys::O);
+            //if      (c0->Index(0)<=abs(bound))
+            //{
+                //c0->Initialize(0.999*rho, OrthoSys::O);
+                //c1->Initialize(0.001*rho, OrthoSys::O);
+            //}
+            //else if (c0->Index(1)<=abs(bound))
+            //{
+                //c0->Initialize(0.999*rho, OrthoSys::O);
+                //c1->Initialize(0.001*rho, OrthoSys::O);
+            //}
+            //else if (c0->Index(2)<=abs(bound))
+            //{
+                //c0->Initialize(0.999*rho, OrthoSys::O);
+                //c1->Initialize(0.001*rho, OrthoSys::O);
+            //}
+            //else
+            //{
+                //c1->Initialize(0.999*rho, OrthoSys::O);
+                //c0->Initialize(0.001*rho, OrthoSys::O);
+            //}
         }
     }
 
