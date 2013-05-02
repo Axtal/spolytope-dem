@@ -14,7 +14,7 @@ a.h5    fileLBM
 1.0   ome   
 0.0  Head  
 2.5  Orig
-0      oct is 0 if octahedral plane is used, 1 if a fully directional gradient is imposed and >=2 if a checkerboard bc is used
+50      oct is 0 if octahedral plane is used, 1 if a fully directional gradient is imposed and >=2 if a checkerboard bc is used
 0.1   Giso or DPx;  
-0.0    G    or Dpy;    
+0.1    G    or Dpy;    
 0.0    th   or DPz;    

@@ -606,7 +606,7 @@ int main(int argc, char **argv) try
         Dom.Lat[1].GetCell(iVec3_t(N-1,Ny-1,i))->IsSolid = true;
     }
 
-    
+    bound = 20;
     //Initializing values
     if (Util::FileExists(fileLBM))
     {
@@ -647,6 +647,61 @@ int main(int argc, char **argv) try
             Cell * c1 = Dom.Lat[1].Cells[i];
             c1->Initialize(0.999*rho, OrthoSys::O);
             c0->Initialize(0.001*rho, OrthoSys::O);
+            if (oct<2)
+            {
+                if ((dat.Dp(0)>1.0e-12)&&(c0->Index(0)<N/20))
+                {
+                    c0->Initialize(0.999*rho, OrthoSys::O);
+                    c1->Initialize(0.001*rho, OrthoSys::O);
+                }
+                if ((dat.Dp(1)>1.0e-12)&&(c0->Index(1)<Ny/20))
+                {
+                    c0->Initialize(0.999*rho, OrthoSys::O);
+                    c1->Initialize(0.001*rho, OrthoSys::O);
+                }
+                if ((dat.Dp(2)>1.0e-12)&&(c0->Index(2)<Nz/20))
+                {
+                    c0->Initialize(0.999*rho, OrthoSys::O);
+                    c1->Initialize(0.001*rho, OrthoSys::O);
+                }
+            }
+            else
+            {
+                size_t chkboard = ((c0->Index(1)/dat.block)%2 + (c0->Index(2)/dat.block)%2)%2;
+                if ((chkboard==0)&&(c0->Index(0)<N/20))
+                {
+                    c0->Initialize(0.999*rho, OrthoSys::O);
+                    c1->Initialize(0.001*rho, OrthoSys::O);
+                }
+                else if ((chkboard==1)&&(c0->Index(0)>=19*N/20))
+                {
+                    c0->Initialize(0.999*rho, OrthoSys::O);
+                    c1->Initialize(0.001*rho, OrthoSys::O);
+                }
+                chkboard = ((c0->Index(0)/dat.block)%2 + (c0->Index(2)/dat.block)%2)%2;
+                if ((chkboard==0)&&(c0->Index(1)<Ny/20))
+                {
+                    c0->Initialize(0.999*rho, OrthoSys::O);
+                    c1->Initialize(0.001*rho, OrthoSys::O);
+                }
+                else if ((chkboard==1)&&(c0->Index(1)>=19*Ny/20))
+                {
+                    c0->Initialize(0.999*rho, OrthoSys::O);
+                    c1->Initialize(0.001*rho, OrthoSys::O);
+                }
+                chkboard = ((c0->Index(0)/dat.block)%2 + (c0->Index(1)/dat.block)%2)%2;
+                if ((chkboard==0)&&(c0->Index(2)<Nz/20))
+                {
+                    c0->Initialize(0.999*rho, OrthoSys::O);
+                    c1->Initialize(0.001*rho, OrthoSys::O);
+                }
+                else if ((chkboard==1)&&(c0->Index(2)>=19*Nz/20))
+                {
+                    c0->Initialize(0.999*rho, OrthoSys::O);
+                    c1->Initialize(0.001*rho, OrthoSys::O);
+                }
+            }
+
             //if      (c0->Index(0)<=abs(bound))
             //{
                 //c0->Initialize(0.999*rho, OrthoSys::O);
