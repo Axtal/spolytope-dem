@@ -455,6 +455,8 @@ int main(int argc, char **argv) try
     double DPx      = 1.0;
     double DPy      = 1.0;
     double DPz      = 1.0;
+    int    outlimit = 1;
+    size_t buffer   = 1;
     {
         infile >> fileDEM;   infile.ignore(200,'\n');
         infile >> fileLBM;   infile.ignore(200,'\n');
@@ -476,6 +478,8 @@ int main(int argc, char **argv) try
         infile >> DPx;       infile.ignore(200,'\n');
         infile >> DPy;       infile.ignore(200,'\n');
         infile >> DPz;       infile.ignore(200,'\n');
+        infile >> outlimit;  infile.ignore(200,'\n'); 
+        infile >> buffer;    infile.ignore(200,'\n'); 
     }
     Array<double> nua(2);
     nua[0] = nu;
@@ -490,7 +494,7 @@ int main(int argc, char **argv) try
     Vec3_t Xmin,Xmax;
     DemDom.BoundingBox(Xmin,Xmax);
     //int    bound = -2;
-    int    bound = 0;
+    int    bound = outlimit;
     double dx = (Xmax(0)-Xmin(0))/(N-2*bound);
     size_t Ny = (Xmax(1)-Xmin(1))/dx + 2*bound;
     size_t Nz = (Xmax(2)-Xmin(2))/dx + 2*bound;
@@ -606,7 +610,7 @@ int main(int argc, char **argv) try
         Dom.Lat[1].GetCell(iVec3_t(N-1,Ny-1,i))->IsSolid = true;
     }
 
-    bound = 20;
+    bound = buffer;
     //Initializing values
     if (Util::FileExists(fileLBM))
     {
@@ -649,17 +653,17 @@ int main(int argc, char **argv) try
             c0->Initialize(0.001*rho, OrthoSys::O);
             if (oct<2)
             {
-                if ((dat.Dp(0)>1.0e-12)&&(c0->Index(0)<N/20))
+                if ((dat.Dp(0)>1.0e-12)&&(c0->Index(0)<N/bound))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
-                if ((dat.Dp(1)>1.0e-12)&&(c0->Index(1)<Ny/20))
+                if ((dat.Dp(1)>1.0e-12)&&(c0->Index(1)<Ny/bound))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
-                if ((dat.Dp(2)>1.0e-12)&&(c0->Index(2)<Nz/20))
+                if ((dat.Dp(2)>1.0e-12)&&(c0->Index(2)<Nz/bound))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
@@ -668,34 +672,34 @@ int main(int argc, char **argv) try
             else
             {
                 size_t chkboard = ((c0->Index(1)/dat.block)%2 + (c0->Index(2)/dat.block)%2)%2;
-                if ((chkboard==0)&&(c0->Index(0)<N/20))
+                if ((chkboard==0)&&(c0->Index(0)<N/bound))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
-                else if ((chkboard==1)&&(c0->Index(0)>=19*N/20))
+                else if ((chkboard==1)&&(c0->Index(0)>=(bound-1)*N/bound))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
                 chkboard = ((c0->Index(0)/dat.block)%2 + (c0->Index(2)/dat.block)%2)%2;
-                if ((chkboard==0)&&(c0->Index(1)<Ny/20))
+                if ((chkboard==0)&&(c0->Index(1)<Ny/bound))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
-                else if ((chkboard==1)&&(c0->Index(1)>=19*Ny/20))
+                else if ((chkboard==1)&&(c0->Index(1)>=(bound-1)*Ny/bound))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
                 chkboard = ((c0->Index(0)/dat.block)%2 + (c0->Index(1)/dat.block)%2)%2;
-                if ((chkboard==0)&&(c0->Index(2)<Nz/20))
+                if ((chkboard==0)&&(c0->Index(2)<Nz/bound))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
-                else if ((chkboard==1)&&(c0->Index(2)>=19*Nz/20))
+                else if ((chkboard==1)&&(c0->Index(2)>=(bound-1)*Nz/bound))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
