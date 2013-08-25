@@ -45,7 +45,7 @@ struct UserData
 void Setup(LBM::Domain & dom, void * UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
-    for (size_t i=0;i<dom.Lat[0].Cells.Size();i++)
+    for (size_t i=0;i<dom.Lat[0].Ncells;i++)
     {
         dom.Lat[0].Cells[i]->BForcef = dom.Lat[0].Cells[i]->Rho*dat.g;
     }

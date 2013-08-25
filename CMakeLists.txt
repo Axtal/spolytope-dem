@@ -47,7 +47,7 @@ IF(A_MAKE_PROFILING)
 ENDIF(A_MAKE_PROFILING)
 
 IF(A_MAKE_OPTIMIZED)
-	ADD_DEFINITIONS(-O3)
+	ADD_DEFINITIONS(-Ofast -march=native)
 ENDIF(A_MAKE_OPTIMIZED)
 
 ### DEPENDENCIES ########################################################################################

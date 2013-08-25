@@ -128,7 +128,7 @@ void Report (LBM::Domain & dom, void * UD)
     Vec3_t Flux = OrthoSys::O;
     double M    = 0.0;
     size_t nc   = 0;
-    for (size_t i=0;i<dom.Lat[0].Cells.Size();i++)
+    for (size_t i=0;i<dom.Lat[0].Ncells;i++)
     {
         Cell * c = dom.Lat[0].Cells[i];
         if (c->IsSolid) continue;
@@ -337,7 +337,7 @@ int main(int argc, char **argv) try
 
     //Initializing values
     double rho0 = 1.0;
-    for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
+    for (size_t i=0;i<Dom.Lat[0].Ncells;i++)
     {
         Dom.Lat[0].Cells[i]->Initialize(rho0, OrthoSys::O);
     }

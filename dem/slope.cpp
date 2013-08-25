@@ -126,6 +126,7 @@ int main(int argc, char **argv) try
     d.AddPlane(-6, Vec3_t(Xmax(0)+0.5*sqrt(Amax/10),0.0,0.0), 0.5*sqrt(Amax/10), 1.2*thickness, 1.1*Ly, 1.0, M_PI/2.0, &OrthoSys::e1);
 
 
+
     d.GetParticle(-2,true)->FixVeloc();
     d.GetParticle(-3,true)->FixVeloc();
     d.GetParticle(-4,true)->FixVeloc();

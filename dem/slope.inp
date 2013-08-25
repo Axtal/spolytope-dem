@@ -5,8 +5,8 @@
 0.01           Amax          
 0.1           thickness     
 0             Cohesion
-1.0e4         Kn            
-1.0e4         Kt            
+1.0e5         Kn            
+1.0e5         Kt            
 1.0e6         Bn            
 1.0e6         Bt            
 0.0         Bm            
@@ -14,6 +14,6 @@
 0.0           Gt            
 0.3           Mu            
 0.01          eps           
-9.8           g
+0.98           g
 10.0          Tf
-5.0e-4        dt
+1.0e-6        dt

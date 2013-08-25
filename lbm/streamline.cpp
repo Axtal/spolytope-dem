@@ -76,7 +76,7 @@ int main(int argc, char **argv) try
     H5LTread_dataset_float(file_id,"Density_0" ,Density);
     H5LTread_dataset_float(file_id,"Gamma_0"   ,Gamma  );
     H5LTread_dataset_float(file_id,"Velocity_0",Vvec   );
-    for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
+    for (size_t i=0;i<Dom.Lat[0].Ncells;i++)
     {
         Cell * c = Dom.Lat[0].Cells[i];
         if (Gamma[i]>0.5) c->IsSolid = true;

@@ -392,7 +392,7 @@ void Report (LBM::Domain & dom, void * UD)
     double Sr    = 0.0;
     size_t nw    = 0;
     size_t no    = 0;
-    for (size_t i=0;i<dom.Lat[1].Cells.Size();i++)
+    for (size_t i=0;i<dom.Lat[1].Ncells;i++)
     {
         double wr = dom.Lat[1].Cells[i]->Rho;
         double ar = dom.Lat[0].Cells[i]->Rho;
@@ -409,7 +409,7 @@ void Report (LBM::Domain & dom, void * UD)
             no++;
         }
     }
-    Sr/=(dom.Lat[0].Cells.Size()*(1-dom.Lat[0].SolidFraction()));
+    Sr/=(dom.Lat[0].Ncells*(1-dom.Lat[0].SolidFraction()));
     if (nw>0) water/=nw;
     if (no>0) oil  /=no;
     double rhow = 0.0;
@@ -636,7 +636,7 @@ int main(int argc, char **argv) try
         H5LTread_dataset_float(file_id,"Velocity_0",Vvec0   );
         H5LTread_dataset_float(file_id,"Density_1" ,Density1);
         H5LTread_dataset_float(file_id,"Velocity_1",Vvec1   );
-        for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
+        for (size_t i=0;i<Dom.Lat[0].Ncells;i++)
         {
             Cell * c = Dom.Lat[0].Cells[i];
             Vec3_t V;
@@ -657,7 +657,7 @@ int main(int argc, char **argv) try
     }
     else
     {
-        for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
+        for (size_t i=0;i<Dom.Lat[0].Ncells;i++)
         {
             Cell * c0 = Dom.Lat[0].Cells[i];
             Cell * c1 = Dom.Lat[1].Cells[i];

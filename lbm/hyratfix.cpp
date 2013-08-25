@@ -45,7 +45,7 @@ void Setup(LBM::Domain & dom, void * UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
     //for (size_t j=0;j<dom.Lat.Size();j++)
-    //for (size_t i=0;i<dom.Lat[j].Cells.Size();i++)
+    //for (size_t i=0;i<dom.Lat[j].Ncells;i++)
     //{
         //Cell * c = dom.Lat[j].Cells[i];
         //c->BForcef = c->Density()*dat.g;
@@ -87,7 +87,7 @@ void Report(LBM::Domain & dom, void * UD)
     double Sr    = 0.0;
     size_t nw    = 0;
     Vec3_t Vm    = OrthoSys::O;
-    for (size_t i=0;i<dom.Lat[0].Cells.Size();i++)
+    for (size_t i=0;i<dom.Lat[0].Ncells;i++)
     {
         Cell * c = dom.Lat[0].Cells[i];
         if (c->Rho>1119.185) 
@@ -98,7 +98,7 @@ void Report(LBM::Domain & dom, void * UD)
             Vm += c->Vel*c->Rho;
         }
     }
-    Sr/=(dom.Lat[0].Cells.Size()*(1-dom.Lat[0].SolidFraction()));
+    Sr/=(dom.Lat[0].Ncells*(1-dom.Lat[0].SolidFraction()));
     if (nw>0)
     {
         water/=nw;

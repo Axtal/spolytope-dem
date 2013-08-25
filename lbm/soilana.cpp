@@ -144,7 +144,7 @@ int main(int argc, char **argv) try
 
     Array<size_t> NoSolid;
 
-    for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
+    for (size_t i=0;i<Dom.Lat[0].Ncells;i++)
     {
         Cell * c = Dom.Lat[0].Cells[i];
         bool nei_solid = false;
@@ -202,7 +202,7 @@ int main(int argc, char **argv) try
             H5LTread_dataset_float(file_id,"Velocity_0",Vvec0   );
             H5LTread_dataset_float(file_id,"Density_1" ,Density1);
             H5LTread_dataset_float(file_id,"Velocity_1",Vvec1   );
-            for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
+            for (size_t i=0;i<Dom.Lat[0].Ncells;i++)
             {
                 Cell * c = Dom.Lat[0].Cells[i];
                 Vec3_t V;
@@ -246,7 +246,7 @@ int main(int argc, char **argv) try
 
         double Sr = 0.0;
 
-        for (size_t j=0;j<Dom.Lat[0].Cells.Size();j++)
+        for (size_t j=0;j<Dom.Lat[0].Ncells;j++)
         {
             double wr = Dom.Lat[1].Cells[j]->Rho;
             if (wr>=dthmin)
@@ -255,7 +255,7 @@ int main(int argc, char **argv) try
             }
         }
 
-        Sr/=(Dom.Lat[0].Cells.Size()*(1-Dom.Lat[0].SolidFraction()));
+        Sr/=(Dom.Lat[0].Ncells*(1-Dom.Lat[0].SolidFraction()));
 
         double p1 = 0.0;
         double p2 = 0.0;

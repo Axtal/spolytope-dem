@@ -235,7 +235,7 @@ int main(int argc, char **argv) try
     
     //Initializing values
     double rho0 = 1.0;
-    for (size_t i=0;i<Dom.Lat[0].Cells.Size();i++)
+    for (size_t i=0;i<Dom.Lat[0].Ncells;i++)
     {
         rho0 = 1.0 + (DPz*(nz-Dom.Lat[0].Cells[i]->Index(2)))/nz;
         Dom.Lat[0].Cells[i]->Initialize(rho0, OrthoSys::O);
