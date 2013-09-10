@@ -62,7 +62,6 @@ void Report (DEM::Domain & dom, void * UD)
 {
 }
 
-
 int main(int argc, char **argv) try
 {
     String filekey  (argv[1]);

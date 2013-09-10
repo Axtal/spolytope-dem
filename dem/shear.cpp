@@ -368,7 +368,9 @@ int main(int argc, char **argv) try
     size_t ny;          // ny
     size_t nz;          // nz
     double rho;         // rho
-    double p0;          // Pressure for the isotropic compression
+    double sx;          // x stress
+    double sy;          // y stress
+    double sz;          // z stress
     double gamma;       // Final shear strain
     double T0;          // Time span for the compression
     double Tf;          // Final time for the test
@@ -400,7 +402,9 @@ int main(int argc, char **argv) try
         infile >> ny;           infile.ignore(200,'\n');
         infile >> nz;           infile.ignore(200,'\n');
         infile >> rho;          infile.ignore(200,'\n');
-        infile >> p0;           infile.ignore(200,'\n');
+        infile >> sx;           infile.ignore(200,'\n');
+        infile >> sy;           infile.ignore(200,'\n');
+        infile >> sz;           infile.ignore(200,'\n');
         infile >> gamma;        infile.ignore(200,'\n');
         infile >> T0;           infile.ignore(200,'\n');
         infile >> Tf;           infile.ignore(200,'\n');
@@ -494,7 +498,7 @@ int main(int argc, char **argv) try
     bVec3_t peps(false, false, false); // prescribed strain rates ?
     Vec3_t  depsdt(0.0,0.0,0.0);       // strain rate
 
-    sigf =  Vec3_t(-p0,-p0,-p0);
+    sigf =  Vec3_t(-sx,-sy,-sz);
     if (load) dat.Sig = sigf;
     ResetEps  (dom,dat);
     SetTxTest (sigf, peps, depsdt,0,0,false,dat,dom);

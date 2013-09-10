@@ -48,8 +48,10 @@ void Setup (LBM::Domain & dom, void * UD)
     }
     for (size_t i=0;i<dat.c0.Size();i++)
     {
-        dat.c0[i]->Initialize(0.999*(0.99 + (0.02*rand())/RAND_MAX)*dat.inj,OrthoSys::O);
-        dat.c1[i]->Initialize(0.001*(0.99 + (0.02*rand())/RAND_MAX)*dat.inj,OrthoSys::O);
+        //dat.c0[i]->Initialize(0.999*(0.99 + (0.02*rand())/RAND_MAX)*dat.inj,OrthoSys::O);
+        //dat.c1[i]->Initialize(0.001*(0.99 + (0.02*rand())/RAND_MAX)*dat.inj,OrthoSys::O);
+        dat.c0[i]->Initialize(0.999*dat.inj,OrthoSys::O);
+        dat.c1[i]->Initialize(0.001*dat.inj,OrthoSys::O);
     }
 }
 

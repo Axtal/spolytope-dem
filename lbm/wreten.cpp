@@ -213,13 +213,17 @@ void Setup (LBM::Domain & dom, void * UD)
             {
                 rho0min = 0.999*rho;
                 rho1min = 0.001*rho;
-                rho0max = 0.001*(2.0*dat.rho - rho);
-                rho1max = 0.999*(2.0*dat.rho - rho);
+                //rho0max = 0.001*(2.0*dat.rho - rho);
+                //rho1max = 0.999*(2.0*dat.rho - rho);
+                rho0max = 0.999*rho;
+                rho1max = 0.001*rho;
             }
             else if (chkboard==1)
             {
-                rho0max = 0.999*rho;
-                rho1max = 0.001*rho;
+                //rho0max = 0.999*rho;
+                //rho1max = 0.001*rho;
+                rho0max = 0.001*(2.0*dat.rho - rho);
+                rho1max = 0.999*(2.0*dat.rho - rho);
                 rho0min = 0.001*(2.0*dat.rho - rho);
                 rho1min = 0.999*(2.0*dat.rho - rho);
             }
@@ -272,13 +276,17 @@ void Setup (LBM::Domain & dom, void * UD)
             {
                 rho0min = 0.999*rho;
                 rho1min = 0.001*rho;
-                rho0max = 0.001*(2.0*dat.rho - rho);
-                rho1max = 0.999*(2.0*dat.rho - rho);
+                //rho0max = 0.001*(2.0*dat.rho - rho);
+                //rho1max = 0.999*(2.0*dat.rho - rho);
+                rho0max = 0.999*rho;
+                rho1max = 0.001*rho;
             }
             else if (chkboard==1)
             {
-                rho0max = 0.999*rho;
-                rho1max = 0.001*rho;
+                //rho0max = 0.999*rho;
+                //rho1max = 0.001*rho;
+                rho0max = 0.001*(2.0*dat.rho - rho);
+                rho1max = 0.999*(2.0*dat.rho - rho);
                 rho0min = 0.001*(2.0*dat.rho - rho);
                 rho1min = 0.999*(2.0*dat.rho - rho);
             }
@@ -327,17 +335,23 @@ void Setup (LBM::Domain & dom, void * UD)
         {
             Cell * c = dat.zmin0[i];
             size_t chkboard = ((c->Index(0)/dat.block)%2 + (c->Index(1)/dat.block)%2)%2;
-            if (chkboard==0)
+            //if (chkboard==0)
+            if (chkboard==1)
             {
                 rho0min = 0.999*rho;
                 rho1min = 0.001*rho;
-                rho0max = 0.001*(2.0*dat.rho - rho);
-                rho1max = 0.999*(2.0*dat.rho - rho);
-            }
-            else if (chkboard==1)
-            {
+                //rho0max = 0.001*(2.0*dat.rho - rho);
+                //rho1max = 0.999*(2.0*dat.rho - rho);
                 rho0max = 0.999*rho;
                 rho1max = 0.001*rho;
+            }
+            //else if (chkboard==1)
+            else if (chkboard==0)
+            {
+                //rho0max = 0.999*rho;
+                //rho1max = 0.001*rho;
+                rho0max = 0.001*(2.0*dat.rho - rho);
+                rho1max = 0.999*(2.0*dat.rho - rho);
                 rho0min = 0.001*(2.0*dat.rho - rho);
                 rho1min = 0.999*(2.0*dat.rho - rho);
             }
@@ -689,7 +703,8 @@ int main(int argc, char **argv) try
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
-                else if ((chkboard==1)&&(c0->Index(0)>=(bound-1)*N/bound))
+                //else if ((chkboard==1)&&(c0->Index(0)>=(bound-1)*N/bound))
+                else if ((chkboard==0)&&(c0->Index(0)>=(bound-1)*N/bound))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
@@ -700,13 +715,15 @@ int main(int argc, char **argv) try
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
-                else if ((chkboard==1)&&(c0->Index(1)>=(bound-1)*Ny/bound))
+                //else if ((chkboard==1)&&(c0->Index(1)>=(bound-1)*Ny/bound))
+                else if ((chkboard==0)&&(c0->Index(1)>=(bound-1)*Ny/bound))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
                 chkboard = ((c0->Index(0)/dat.block)%2 + (c0->Index(1)/dat.block)%2)%2;
-                if ((chkboard==0)&&(c0->Index(2)<Nz/bound))
+                //if ((chkboard==0)&&(c0->Index(2)<Nz/bound))
+                if ((chkboard==1)&&(c0->Index(2)<Nz/bound))
                 {
                     c0->Initialize(0.999*rho, OrthoSys::O);
                     c1->Initialize(0.001*rho, OrthoSys::O);
@@ -717,27 +734,6 @@ int main(int argc, char **argv) try
                     c1->Initialize(0.001*rho, OrthoSys::O);
                 }
             }
-
-            //if      (c0->Index(0)<=abs(bound))
-            //{
-                //c0->Initialize(0.999*rho, OrthoSys::O);
-                //c1->Initialize(0.001*rho, OrthoSys::O);
-            //}
-            //else if (c0->Index(1)<=abs(bound))
-            //{
-                //c0->Initialize(0.999*rho, OrthoSys::O);
-                //c1->Initialize(0.001*rho, OrthoSys::O);
-            //}
-            //else if (c0->Index(2)<=abs(bound))
-            //{
-                //c0->Initialize(0.999*rho, OrthoSys::O);
-                //c1->Initialize(0.001*rho, OrthoSys::O);
-            //}
-            //else
-            //{
-                //c1->Initialize(0.999*rho, OrthoSys::O);
-                //c0->Initialize(0.001*rho, OrthoSys::O);
-            //}
         }
     }
 
