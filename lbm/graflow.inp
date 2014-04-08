@@ -1,0 +1,17 @@
+1   Render;
+100    N;    
+10   nx
+10   ny
+10    nz
+1000   seed
+1.0    fraction
+0.0    qin
+0.2    R
+-0.4   por
+0.1   nu;    
+1.0e3   Tf;    
+1.0e1   dtOut;
+0      oct
+0.1   Giso or DPx;  
+0.0    G    or Dpy;    
+0.0    th   or DPz;    

@@ -1,0 +1,13 @@
+1        RenderVideo?
+2000    seed   
+1000     nx   
+1000     ny   
+0.1     nu   
+1.0     dx   
+1.0     dt    
+0.030     vb   
+0.60    por   
+5.0     rc   
+1.0e2   Kn
+1.0e5   Tf
+1.0e3   dtOut

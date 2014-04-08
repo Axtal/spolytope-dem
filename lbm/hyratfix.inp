@@ -1,0 +1,16 @@
+1    Render    
+400    nx    
+600    ny    
+-600.0 Gs
+0.1    nu    
+1.0     dx    
+1.0     dt    
+1.0e5   Tf    
+4.0e2   dtOut 
+1.0   HeadStep
+200.0   rho   
+0.5   ome   
+500.0   Head  
+200.0   Orig  
+0.55    por
+80   seed
