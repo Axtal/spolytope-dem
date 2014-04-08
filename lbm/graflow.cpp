@@ -206,25 +206,25 @@ int main(int argc, char **argv) try
 
     DEM::Domain DemDom;
     DemDom.AddVoroPack(-1,R,10,10,10,nx,ny,nz,1.0,true,false,seed,fraction,Vec3_t(q,q,q));
-    std::ofstream areafile("area.out");
-    for (size_t i=0;i<DemDom.BInteractons.Size();i++)
-    {
-        Vec3_t Area;
-        DemDom.BInteractons[i]->P1->Faces[DemDom.BInteractons[i]->F1]->Normal(Area);
-        Area *= DemDom.BInteractons[i]->Area;
-        areafile << Util::_8s << Area(0) << Util::_8s << Area(1) << Util::_8s << Area(2) << std::endl;
-    }
-    areafile.close();
+    //std::ofstream areafile("area.out");
+    //for (size_t i=0;i<DemDom.BInteractons.Size();i++)
+    //{
+        //Vec3_t Area;
+        //DemDom.BInteractons[i]->P1->Faces[DemDom.BInteractons[i]->F1]->Normal(Area);
+        //Area *= DemDom.BInteractons[i]->Area;
+        //areafile << Util::_8s << Area(0) << Util::_8s << Area(1) << Util::_8s << Area(2) << std::endl;
+    //}
+    //areafile.close();
 
     Vec3_t Inet(OrthoSys::O);
     for (size_t i=0;i<DemDom.Particles.Size();i++)
     {   
-        list<double> II;
+        std::list<double> II;
         II.push_back(DemDom.Particles[i]->I(0));
         II.push_back(DemDom.Particles[i]->I(1));
         II.push_back(DemDom.Particles[i]->I(2));
         II.sort();
-        list<double>::iterator it;
+        std::list<double>::iterator it;
         size_t j = 0;
         for (it = II.begin();it != II.end();it++)
         {
