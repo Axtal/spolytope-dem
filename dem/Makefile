@@ -42,10 +42,10 @@ EQUALS = =
 CMAKE_EDIT_COMMAND = /usr/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/sergio/spolytope-dem
+CMAKE_SOURCE_DIR = /hdd/spolytope-dem
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/sergio/spolytope-dem
+CMAKE_BINARY_DIR = /hdd/spolytope-dem
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -72,14 +72,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/sergio/spolytope-dem && $(CMAKE_COMMAND) -E cmake_progress_start /home/sergio/spolytope-dem/CMakeFiles /home/sergio/spolytope-dem/dem/CMakeFiles/progress.marks
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/sergio/spolytope-dem/CMakeFiles 0
+	cd /hdd/spolytope-dem && $(CMAKE_COMMAND) -E cmake_progress_start /hdd/spolytope-dem/CMakeFiles /hdd/spolytope-dem/dem/CMakeFiles/progress.marks
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /hdd/spolytope-dem/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/clean
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/clean
 .PHONY : clean
 
 # The main clean target
@@ -88,22 +88,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/preinstall
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/preinstall
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/sergio/spolytope-dem && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /hdd/spolytope-dem && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 dem/CMakeFiles/alex.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/alex.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/alex.dir/rule
 .PHONY : dem/CMakeFiles/alex.dir/rule
 
 # Convenience name for target.
@@ -112,12 +112,12 @@ alex: dem/CMakeFiles/alex.dir/rule
 
 # fast build rule for target.
 alex/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/alex.dir/build.make dem/CMakeFiles/alex.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/alex.dir/build.make dem/CMakeFiles/alex.dir/build
 .PHONY : alex/fast
 
 # Convenience name for target.
 dem/CMakeFiles/cone.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/cone.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/cone.dir/rule
 .PHONY : dem/CMakeFiles/cone.dir/rule
 
 # Convenience name for target.
@@ -126,12 +126,12 @@ cone: dem/CMakeFiles/cone.dir/rule
 
 # fast build rule for target.
 cone/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/cone.dir/build.make dem/CMakeFiles/cone.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/cone.dir/build.make dem/CMakeFiles/cone.dir/build
 .PHONY : cone/fast
 
 # Convenience name for target.
 dem/CMakeFiles/david.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/david.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/david.dir/rule
 .PHONY : dem/CMakeFiles/david.dir/rule
 
 # Convenience name for target.
@@ -140,12 +140,12 @@ david: dem/CMakeFiles/david.dir/rule
 
 # fast build rule for target.
 david/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/david.dir/build.make dem/CMakeFiles/david.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/david.dir/build.make dem/CMakeFiles/david.dir/build
 .PHONY : david/fast
 
 # Convenience name for target.
 dem/CMakeFiles/drill.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/drill.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/drill.dir/rule
 .PHONY : dem/CMakeFiles/drill.dir/rule
 
 # Convenience name for target.
@@ -154,12 +154,12 @@ drill: dem/CMakeFiles/drill.dir/rule
 
 # fast build rule for target.
 drill/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/drill.dir/build.make dem/CMakeFiles/drill.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/drill.dir/build.make dem/CMakeFiles/drill.dir/build
 .PHONY : drill/fast
 
 # Convenience name for target.
 dem/CMakeFiles/flocu.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/flocu.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/flocu.dir/rule
 .PHONY : dem/CMakeFiles/flocu.dir/rule
 
 # Convenience name for target.
@@ -168,12 +168,12 @@ flocu: dem/CMakeFiles/flocu.dir/rule
 
 # fast build rule for target.
 flocu/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/flocu.dir/build.make dem/CMakeFiles/flocu.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/flocu.dir/build.make dem/CMakeFiles/flocu.dir/build
 .PHONY : flocu/fast
 
 # Convenience name for target.
 dem/CMakeFiles/fracture.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/fracture.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/fracture.dir/rule
 .PHONY : dem/CMakeFiles/fracture.dir/rule
 
 # Convenience name for target.
@@ -182,12 +182,12 @@ fracture: dem/CMakeFiles/fracture.dir/rule
 
 # fast build rule for target.
 fracture/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/fracture.dir/build.make dem/CMakeFiles/fracture.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/fracture.dir/build.make dem/CMakeFiles/fracture.dir/build
 .PHONY : fracture/fast
 
 # Convenience name for target.
 dem/CMakeFiles/grinding.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/grinding.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/grinding.dir/rule
 .PHONY : dem/CMakeFiles/grinding.dir/rule
 
 # Convenience name for target.
@@ -196,12 +196,12 @@ grinding: dem/CMakeFiles/grinding.dir/rule
 
 # fast build rule for target.
 grinding/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/grinding.dir/build.make dem/CMakeFiles/grinding.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/grinding.dir/build.make dem/CMakeFiles/grinding.dir/build
 .PHONY : grinding/fast
 
 # Convenience name for target.
 dem/CMakeFiles/isotropic.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/isotropic.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/isotropic.dir/rule
 .PHONY : dem/CMakeFiles/isotropic.dir/rule
 
 # Convenience name for target.
@@ -210,12 +210,12 @@ isotropic: dem/CMakeFiles/isotropic.dir/rule
 
 # fast build rule for target.
 isotropic/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/isotropic.dir/build.make dem/CMakeFiles/isotropic.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/isotropic.dir/build.make dem/CMakeFiles/isotropic.dir/build
 .PHONY : isotropic/fast
 
 # Convenience name for target.
 dem/CMakeFiles/shear.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/shear.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/shear.dir/rule
 .PHONY : dem/CMakeFiles/shear.dir/rule
 
 # Convenience name for target.
@@ -224,12 +224,12 @@ shear: dem/CMakeFiles/shear.dir/rule
 
 # fast build rule for target.
 shear/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/shear.dir/build.make dem/CMakeFiles/shear.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/shear.dir/build.make dem/CMakeFiles/shear.dir/build
 .PHONY : shear/fast
 
 # Convenience name for target.
 dem/CMakeFiles/slope.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/slope.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/slope.dir/rule
 .PHONY : dem/CMakeFiles/slope.dir/rule
 
 # Convenience name for target.
@@ -238,12 +238,12 @@ slope: dem/CMakeFiles/slope.dir/rule
 
 # fast build rule for target.
 slope/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/slope.dir/build.make dem/CMakeFiles/slope.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/slope.dir/build.make dem/CMakeFiles/slope.dir/build
 .PHONY : slope/fast
 
 # Convenience name for target.
 dem/CMakeFiles/soniattt.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/soniattt.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/soniattt.dir/rule
 .PHONY : dem/CMakeFiles/soniattt.dir/rule
 
 # Convenience name for target.
@@ -252,12 +252,12 @@ soniattt: dem/CMakeFiles/soniattt.dir/rule
 
 # fast build rule for target.
 soniattt/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/soniattt.dir/build.make dem/CMakeFiles/soniattt.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/soniattt.dir/build.make dem/CMakeFiles/soniattt.dir/build
 .PHONY : soniattt/fast
 
 # Convenience name for target.
 dem/CMakeFiles/testvoro.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/testvoro.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/testvoro.dir/rule
 .PHONY : dem/CMakeFiles/testvoro.dir/rule
 
 # Convenience name for target.
@@ -266,12 +266,12 @@ testvoro: dem/CMakeFiles/testvoro.dir/rule
 
 # fast build rule for target.
 testvoro/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/testvoro.dir/build.make dem/CMakeFiles/testvoro.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/testvoro.dir/build.make dem/CMakeFiles/testvoro.dir/build
 .PHONY : testvoro/fast
 
 # Convenience name for target.
 dem/CMakeFiles/torus.dir/rule:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/torus.dir/rule
+	cd /hdd/spolytope-dem && $(MAKE) -f CMakeFiles/Makefile2 dem/CMakeFiles/torus.dir/rule
 .PHONY : dem/CMakeFiles/torus.dir/rule
 
 # Convenience name for target.
@@ -280,7 +280,7 @@ torus: dem/CMakeFiles/torus.dir/rule
 
 # fast build rule for target.
 torus/fast:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/torus.dir/build.make dem/CMakeFiles/torus.dir/build
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/torus.dir/build.make dem/CMakeFiles/torus.dir/build
 .PHONY : torus/fast
 
 alex.o: alex.cpp.o
@@ -288,7 +288,7 @@ alex.o: alex.cpp.o
 
 # target to build an object file
 alex.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/alex.dir/build.make dem/CMakeFiles/alex.dir/alex.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/alex.dir/build.make dem/CMakeFiles/alex.dir/alex.cpp.o
 .PHONY : alex.cpp.o
 
 alex.i: alex.cpp.i
@@ -296,7 +296,7 @@ alex.i: alex.cpp.i
 
 # target to preprocess a source file
 alex.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/alex.dir/build.make dem/CMakeFiles/alex.dir/alex.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/alex.dir/build.make dem/CMakeFiles/alex.dir/alex.cpp.i
 .PHONY : alex.cpp.i
 
 alex.s: alex.cpp.s
@@ -304,7 +304,7 @@ alex.s: alex.cpp.s
 
 # target to generate assembly for a file
 alex.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/alex.dir/build.make dem/CMakeFiles/alex.dir/alex.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/alex.dir/build.make dem/CMakeFiles/alex.dir/alex.cpp.s
 .PHONY : alex.cpp.s
 
 cone.o: cone.cpp.o
@@ -312,7 +312,7 @@ cone.o: cone.cpp.o
 
 # target to build an object file
 cone.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/cone.dir/build.make dem/CMakeFiles/cone.dir/cone.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/cone.dir/build.make dem/CMakeFiles/cone.dir/cone.cpp.o
 .PHONY : cone.cpp.o
 
 cone.i: cone.cpp.i
@@ -320,7 +320,7 @@ cone.i: cone.cpp.i
 
 # target to preprocess a source file
 cone.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/cone.dir/build.make dem/CMakeFiles/cone.dir/cone.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/cone.dir/build.make dem/CMakeFiles/cone.dir/cone.cpp.i
 .PHONY : cone.cpp.i
 
 cone.s: cone.cpp.s
@@ -328,7 +328,7 @@ cone.s: cone.cpp.s
 
 # target to generate assembly for a file
 cone.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/cone.dir/build.make dem/CMakeFiles/cone.dir/cone.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/cone.dir/build.make dem/CMakeFiles/cone.dir/cone.cpp.s
 .PHONY : cone.cpp.s
 
 david.o: david.cpp.o
@@ -336,7 +336,7 @@ david.o: david.cpp.o
 
 # target to build an object file
 david.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/david.dir/build.make dem/CMakeFiles/david.dir/david.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/david.dir/build.make dem/CMakeFiles/david.dir/david.cpp.o
 .PHONY : david.cpp.o
 
 david.i: david.cpp.i
@@ -344,7 +344,7 @@ david.i: david.cpp.i
 
 # target to preprocess a source file
 david.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/david.dir/build.make dem/CMakeFiles/david.dir/david.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/david.dir/build.make dem/CMakeFiles/david.dir/david.cpp.i
 .PHONY : david.cpp.i
 
 david.s: david.cpp.s
@@ -352,7 +352,7 @@ david.s: david.cpp.s
 
 # target to generate assembly for a file
 david.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/david.dir/build.make dem/CMakeFiles/david.dir/david.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/david.dir/build.make dem/CMakeFiles/david.dir/david.cpp.s
 .PHONY : david.cpp.s
 
 drill.o: drill.cpp.o
@@ -360,7 +360,7 @@ drill.o: drill.cpp.o
 
 # target to build an object file
 drill.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/drill.dir/build.make dem/CMakeFiles/drill.dir/drill.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/drill.dir/build.make dem/CMakeFiles/drill.dir/drill.cpp.o
 .PHONY : drill.cpp.o
 
 drill.i: drill.cpp.i
@@ -368,7 +368,7 @@ drill.i: drill.cpp.i
 
 # target to preprocess a source file
 drill.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/drill.dir/build.make dem/CMakeFiles/drill.dir/drill.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/drill.dir/build.make dem/CMakeFiles/drill.dir/drill.cpp.i
 .PHONY : drill.cpp.i
 
 drill.s: drill.cpp.s
@@ -376,7 +376,7 @@ drill.s: drill.cpp.s
 
 # target to generate assembly for a file
 drill.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/drill.dir/build.make dem/CMakeFiles/drill.dir/drill.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/drill.dir/build.make dem/CMakeFiles/drill.dir/drill.cpp.s
 .PHONY : drill.cpp.s
 
 flocu.o: flocu.cpp.o
@@ -384,7 +384,7 @@ flocu.o: flocu.cpp.o
 
 # target to build an object file
 flocu.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/flocu.dir/build.make dem/CMakeFiles/flocu.dir/flocu.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/flocu.dir/build.make dem/CMakeFiles/flocu.dir/flocu.cpp.o
 .PHONY : flocu.cpp.o
 
 flocu.i: flocu.cpp.i
@@ -392,7 +392,7 @@ flocu.i: flocu.cpp.i
 
 # target to preprocess a source file
 flocu.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/flocu.dir/build.make dem/CMakeFiles/flocu.dir/flocu.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/flocu.dir/build.make dem/CMakeFiles/flocu.dir/flocu.cpp.i
 .PHONY : flocu.cpp.i
 
 flocu.s: flocu.cpp.s
@@ -400,7 +400,7 @@ flocu.s: flocu.cpp.s
 
 # target to generate assembly for a file
 flocu.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/flocu.dir/build.make dem/CMakeFiles/flocu.dir/flocu.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/flocu.dir/build.make dem/CMakeFiles/flocu.dir/flocu.cpp.s
 .PHONY : flocu.cpp.s
 
 fracture.o: fracture.cpp.o
@@ -408,7 +408,7 @@ fracture.o: fracture.cpp.o
 
 # target to build an object file
 fracture.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/fracture.dir/build.make dem/CMakeFiles/fracture.dir/fracture.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/fracture.dir/build.make dem/CMakeFiles/fracture.dir/fracture.cpp.o
 .PHONY : fracture.cpp.o
 
 fracture.i: fracture.cpp.i
@@ -416,7 +416,7 @@ fracture.i: fracture.cpp.i
 
 # target to preprocess a source file
 fracture.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/fracture.dir/build.make dem/CMakeFiles/fracture.dir/fracture.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/fracture.dir/build.make dem/CMakeFiles/fracture.dir/fracture.cpp.i
 .PHONY : fracture.cpp.i
 
 fracture.s: fracture.cpp.s
@@ -424,7 +424,7 @@ fracture.s: fracture.cpp.s
 
 # target to generate assembly for a file
 fracture.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/fracture.dir/build.make dem/CMakeFiles/fracture.dir/fracture.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/fracture.dir/build.make dem/CMakeFiles/fracture.dir/fracture.cpp.s
 .PHONY : fracture.cpp.s
 
 grinding.o: grinding.cpp.o
@@ -432,7 +432,7 @@ grinding.o: grinding.cpp.o
 
 # target to build an object file
 grinding.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/grinding.dir/build.make dem/CMakeFiles/grinding.dir/grinding.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/grinding.dir/build.make dem/CMakeFiles/grinding.dir/grinding.cpp.o
 .PHONY : grinding.cpp.o
 
 grinding.i: grinding.cpp.i
@@ -440,7 +440,7 @@ grinding.i: grinding.cpp.i
 
 # target to preprocess a source file
 grinding.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/grinding.dir/build.make dem/CMakeFiles/grinding.dir/grinding.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/grinding.dir/build.make dem/CMakeFiles/grinding.dir/grinding.cpp.i
 .PHONY : grinding.cpp.i
 
 grinding.s: grinding.cpp.s
@@ -448,7 +448,7 @@ grinding.s: grinding.cpp.s
 
 # target to generate assembly for a file
 grinding.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/grinding.dir/build.make dem/CMakeFiles/grinding.dir/grinding.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/grinding.dir/build.make dem/CMakeFiles/grinding.dir/grinding.cpp.s
 .PHONY : grinding.cpp.s
 
 isotropic.o: isotropic.cpp.o
@@ -456,7 +456,7 @@ isotropic.o: isotropic.cpp.o
 
 # target to build an object file
 isotropic.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/isotropic.dir/build.make dem/CMakeFiles/isotropic.dir/isotropic.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/isotropic.dir/build.make dem/CMakeFiles/isotropic.dir/isotropic.cpp.o
 .PHONY : isotropic.cpp.o
 
 isotropic.i: isotropic.cpp.i
@@ -464,7 +464,7 @@ isotropic.i: isotropic.cpp.i
 
 # target to preprocess a source file
 isotropic.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/isotropic.dir/build.make dem/CMakeFiles/isotropic.dir/isotropic.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/isotropic.dir/build.make dem/CMakeFiles/isotropic.dir/isotropic.cpp.i
 .PHONY : isotropic.cpp.i
 
 isotropic.s: isotropic.cpp.s
@@ -472,7 +472,7 @@ isotropic.s: isotropic.cpp.s
 
 # target to generate assembly for a file
 isotropic.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/isotropic.dir/build.make dem/CMakeFiles/isotropic.dir/isotropic.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/isotropic.dir/build.make dem/CMakeFiles/isotropic.dir/isotropic.cpp.s
 .PHONY : isotropic.cpp.s
 
 shear.o: shear.cpp.o
@@ -480,7 +480,7 @@ shear.o: shear.cpp.o
 
 # target to build an object file
 shear.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/shear.dir/build.make dem/CMakeFiles/shear.dir/shear.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/shear.dir/build.make dem/CMakeFiles/shear.dir/shear.cpp.o
 .PHONY : shear.cpp.o
 
 shear.i: shear.cpp.i
@@ -488,7 +488,7 @@ shear.i: shear.cpp.i
 
 # target to preprocess a source file
 shear.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/shear.dir/build.make dem/CMakeFiles/shear.dir/shear.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/shear.dir/build.make dem/CMakeFiles/shear.dir/shear.cpp.i
 .PHONY : shear.cpp.i
 
 shear.s: shear.cpp.s
@@ -496,7 +496,7 @@ shear.s: shear.cpp.s
 
 # target to generate assembly for a file
 shear.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/shear.dir/build.make dem/CMakeFiles/shear.dir/shear.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/shear.dir/build.make dem/CMakeFiles/shear.dir/shear.cpp.s
 .PHONY : shear.cpp.s
 
 slope.o: slope.cpp.o
@@ -504,7 +504,7 @@ slope.o: slope.cpp.o
 
 # target to build an object file
 slope.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/slope.dir/build.make dem/CMakeFiles/slope.dir/slope.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/slope.dir/build.make dem/CMakeFiles/slope.dir/slope.cpp.o
 .PHONY : slope.cpp.o
 
 slope.i: slope.cpp.i
@@ -512,7 +512,7 @@ slope.i: slope.cpp.i
 
 # target to preprocess a source file
 slope.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/slope.dir/build.make dem/CMakeFiles/slope.dir/slope.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/slope.dir/build.make dem/CMakeFiles/slope.dir/slope.cpp.i
 .PHONY : slope.cpp.i
 
 slope.s: slope.cpp.s
@@ -520,7 +520,7 @@ slope.s: slope.cpp.s
 
 # target to generate assembly for a file
 slope.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/slope.dir/build.make dem/CMakeFiles/slope.dir/slope.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/slope.dir/build.make dem/CMakeFiles/slope.dir/slope.cpp.s
 .PHONY : slope.cpp.s
 
 soniattt.o: soniattt.cpp.o
@@ -528,7 +528,7 @@ soniattt.o: soniattt.cpp.o
 
 # target to build an object file
 soniattt.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/soniattt.dir/build.make dem/CMakeFiles/soniattt.dir/soniattt.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/soniattt.dir/build.make dem/CMakeFiles/soniattt.dir/soniattt.cpp.o
 .PHONY : soniattt.cpp.o
 
 soniattt.i: soniattt.cpp.i
@@ -536,7 +536,7 @@ soniattt.i: soniattt.cpp.i
 
 # target to preprocess a source file
 soniattt.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/soniattt.dir/build.make dem/CMakeFiles/soniattt.dir/soniattt.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/soniattt.dir/build.make dem/CMakeFiles/soniattt.dir/soniattt.cpp.i
 .PHONY : soniattt.cpp.i
 
 soniattt.s: soniattt.cpp.s
@@ -544,7 +544,7 @@ soniattt.s: soniattt.cpp.s
 
 # target to generate assembly for a file
 soniattt.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/soniattt.dir/build.make dem/CMakeFiles/soniattt.dir/soniattt.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/soniattt.dir/build.make dem/CMakeFiles/soniattt.dir/soniattt.cpp.s
 .PHONY : soniattt.cpp.s
 
 testvoro.o: testvoro.cpp.o
@@ -552,7 +552,7 @@ testvoro.o: testvoro.cpp.o
 
 # target to build an object file
 testvoro.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/testvoro.dir/build.make dem/CMakeFiles/testvoro.dir/testvoro.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/testvoro.dir/build.make dem/CMakeFiles/testvoro.dir/testvoro.cpp.o
 .PHONY : testvoro.cpp.o
 
 testvoro.i: testvoro.cpp.i
@@ -560,7 +560,7 @@ testvoro.i: testvoro.cpp.i
 
 # target to preprocess a source file
 testvoro.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/testvoro.dir/build.make dem/CMakeFiles/testvoro.dir/testvoro.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/testvoro.dir/build.make dem/CMakeFiles/testvoro.dir/testvoro.cpp.i
 .PHONY : testvoro.cpp.i
 
 testvoro.s: testvoro.cpp.s
@@ -568,7 +568,7 @@ testvoro.s: testvoro.cpp.s
 
 # target to generate assembly for a file
 testvoro.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/testvoro.dir/build.make dem/CMakeFiles/testvoro.dir/testvoro.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/testvoro.dir/build.make dem/CMakeFiles/testvoro.dir/testvoro.cpp.s
 .PHONY : testvoro.cpp.s
 
 torus.o: torus.cpp.o
@@ -576,7 +576,7 @@ torus.o: torus.cpp.o
 
 # target to build an object file
 torus.cpp.o:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/torus.dir/build.make dem/CMakeFiles/torus.dir/torus.cpp.o
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/torus.dir/build.make dem/CMakeFiles/torus.dir/torus.cpp.o
 .PHONY : torus.cpp.o
 
 torus.i: torus.cpp.i
@@ -584,7 +584,7 @@ torus.i: torus.cpp.i
 
 # target to preprocess a source file
 torus.cpp.i:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/torus.dir/build.make dem/CMakeFiles/torus.dir/torus.cpp.i
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/torus.dir/build.make dem/CMakeFiles/torus.dir/torus.cpp.i
 .PHONY : torus.cpp.i
 
 torus.s: torus.cpp.s
@@ -592,7 +592,7 @@ torus.s: torus.cpp.s
 
 # target to generate assembly for a file
 torus.cpp.s:
-	cd /home/sergio/spolytope-dem && $(MAKE) -f dem/CMakeFiles/torus.dir/build.make dem/CMakeFiles/torus.dir/torus.cpp.s
+	cd /hdd/spolytope-dem && $(MAKE) -f dem/CMakeFiles/torus.dir/build.make dem/CMakeFiles/torus.dir/torus.cpp.s
 .PHONY : torus.cpp.s
 
 # Help Target
@@ -666,6 +666,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/sergio/spolytope-dem && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /hdd/spolytope-dem && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
