@@ -50,10 +50,12 @@ IF(A_MAKE_OPTIMIZED)
 	ADD_DEFINITIONS(-Ofast -march=native)
 ENDIF(A_MAKE_OPTIMIZED)
 
+#message(${SIMS_SOURCE_DIR})
 ### DEPENDENCIES ########################################################################################
 
 # essential dependencies
 INCLUDE (${SIMS_SOURCE_DIR}/FindMECHSYS.cmake)
+#message("idiota " ${MECHSYS_SOURCE_DIR})
 if(MECHSYS_FOUND)
     INCLUDE (${MECHSYS_SOURCE_DIR}/Modules/FindDEPS.cmake)
     if(NOT DEPS_OK)
