@@ -44,10 +44,23 @@ void Setup(LBM::Domain & dom, void * UD)
     }
 }
 
+void Report (LBM::Domain & dom, void *UD)
+{
+    UserData & dat = (*static_cast<UserData *>(UD));
+    if (!dom.Finished) 
+    {
+        String ff;
+        ff.Printf    ("%s_bf_%04d",  dom.FileKey.CStr(), dom.idx_out);
+        dom.WriteBF  (ff.CStr());
+        ff.Printf    ("%s_frac_%04d",dom.FileKey.CStr(), dom.idx_out);
+        dom.WriteFrac(ff.CStr());
+    }
+}
 int main(int argc, char **argv) try
 {
     size_t Nproc = 1; 
     double Amax  = 10.0;
+    size_t N     = 500;
     double nu    = 0.2;
     double Orig  = 1.0;
     double Amp   = 1.0;
@@ -58,7 +71,7 @@ int main(int argc, char **argv) try
     double r2    = 5.0;
     double Kn    = 300.0;
     double Kt    = 300.0;
-    double Gn    = 1.0;
+    double Gn    = -0.2;
     double Gt    = 0.0;
     double Mu    = 0.3;
     double Bn    = 10.0;
@@ -69,24 +82,26 @@ int main(int argc, char **argv) try
     if (argc>=2)
     {
         Nproc  =atoi(argv[ 1]);
-        Amax   =atof(argv[ 2]);
-        Orig   =atof(argv[ 3]);
-        Amp    =atof(argv[ 4]);
-        Tf     =atof(argv[ 5]);
-        dt     =atof(argv[ 6]);
-        Alpha  =atof(argv[ 6]);
+        N      =atoi(argv[ 2]);
+        Amax   =atof(argv[ 3]);
+        Orig   =atof(argv[ 4]);
+        Amp    =atof(argv[ 5]);
+        Tf     =atof(argv[ 6]);
+        dt     =atof(argv[ 7]);
+        Alpha  =atof(argv[ 8]);
     }
 
 
-    size_t nx   = 500, ny = 500, nz = 3;
+    size_t nx   = N, ny = N, nz = 3;
 
     r2 = nx/20;
-    r1 = 0.8*r2;
+    r1 = 0.5*r2;
 
     // Setting top and bottom wall as solid
     LBM::Domain Dom(D3Q15, nu, iVec3_t(nx,ny,nz), 1.0, dt);
     UserData dat;
     Dom.UserData = &dat;
+    Dom.Dilate   = true;
     dat.Tf          = Tf;
     dat.Amp         = Amp;
     dat.Orig        = Orig;
@@ -134,7 +149,7 @@ int main(int argc, char **argv) try
 		}
     }
 
-    Dom.Solve(Tf,0.01*Tf,Setup,NULL,"fracking",true,Nproc);
+    Dom.Solve(Tf,0.01*Tf,&Setup,&Report,"fracking",true,Nproc);
 
 
     return 0;
