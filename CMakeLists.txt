@@ -17,39 +17,7 @@
 ########################################################################
 
 PROJECT                (SIMS)
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6)
-
-# Flags
-OPTION(A_MAKE_VERBOSE       "Show additional messages during compilation/link?" OFF)
-OPTION(A_MAKE_ALL_WARNINGS  "Make with all warnings (-Wall)"                    OFF)
-OPTION(A_MAKE_DEBUG_SYMBOLS "Make with debug symbols (-g)"                      OFF)
-OPTION(A_MAKE_PROFILING     "Make with profiling information (-pg)"             OFF)
-OPTION(A_MAKE_OPTIMIZED     "Make optimized (-O3)"                              ON)
-
-ADD_DEFINITIONS (-fPIC -fmessage-length=0) # Each error message will appear on a single line; no line-wrapping will be done.
-#INCLUDE_DIRECTORIES ($ENV{HOME}/pkg/boost_1_49_0)
-### FLAGS ###############################################################################################
-
-IF(A_MAKE_VERBOSE)
-	SET(CMAKE_VERBOSE_MAKEFILE TRUE)
-ENDIF(A_MAKE_VERBOSE)
-
-IF(A_MAKE_ALL_WARNINGS)
-	ADD_DEFINITIONS(-Wall)
-ENDIF(A_MAKE_ALL_WARNINGS)
-
-IF(A_MAKE_DEBUG_SYMBOLS)
-	ADD_DEFINITIONS(-g)
-ENDIF(A_MAKE_DEBUG_SYMBOLS)
-
-IF(A_MAKE_PROFILING)
-	SET(CMAKE_CXX_FLAGS -pg)
-ENDIF(A_MAKE_PROFILING)
-
-IF(A_MAKE_OPTIMIZED)
-	ADD_DEFINITIONS(-Ofast -march=native)
-ENDIF(A_MAKE_OPTIMIZED)
-
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 #message(${SIMS_SOURCE_DIR})
 ### DEPENDENCIES ########################################################################################
 
