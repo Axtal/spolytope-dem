@@ -1,0 +1,18 @@
+50      Amax        Maximun element area/volume
+200     nx          Number of cells in the x direction 
+200     ny          Number of cells in the y direction 
+10      nz          Number of cells in the z direction 
+0.2     nu          fluid viscosity 
+1.0     Orig        Original pressure/density at the centre
+1.4     Amp         Final pressure/density at the centre
+100     Tf          Final Time 
+0.001   dt          Time Step
+0.02    Alpha       Spheroradius and verlet distance
+10      r2          Radius of the injeciton area
+3000.0  Kn          Normal stiffness
+3000.0  Kt          Tangential stiffness
+-0.2    Gn          Restitution coefficient
+0.3     Mu          Friction coefficient
+100.0   Bn          Normal bonding coefficient
+100.0   Bt          Tangential bonding coefficient
+0.01    Eps         Breaking threshold 

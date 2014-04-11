@@ -56,46 +56,55 @@ void Report (LBM::Domain & dom, void *UD)
         dom.WriteFrac(ff.CStr());
     }
 }
+
 int main(int argc, char **argv) try
 {
-    size_t Nproc = 1; 
+    String filekey  (argv[1]);
+    String filename (filekey+".inp");
+    if (!Util::FileExists(filename)) throw new Fatal("File <%s> not found",filename.CStr());
+    std::ifstream infile(filename.CStr());
+    size_t Nproc = 1;
+    if (argc>=3) Nproc = atoi(argv[2]);
+
     double Amax  = 10.0;
-    size_t N     = 500;
+    size_t nx    = 500;
+    size_t ny    = 500;
+    size_t nz    = 500;
     double nu    = 0.2;
     double Orig  = 1.0;
     double Amp   = 1.0;
     double Tf    = 5000.0;
     double dt    = 1.0;
     double Alpha = 10.0;
-    double r1    = 2.5;
     double r2    = 5.0;
-    double Kn    = 300.0;
-    double Kt    = 300.0;
+    double Kn    = 3000.0;
+    double Kt    = 3000.0;
     double Gn    = -0.2;
-    double Gt    = 0.0;
     double Mu    = 0.3;
     double Bn    = 10.0;
     double Bt    = 10.0;
-    double Bm    = 0.0;
     double Eps   = 0.01;
 
-    if (argc>=2)
-    {
-        Nproc  =atoi(argv[ 1]);
-        N      =atoi(argv[ 2]);
-        Amax   =atof(argv[ 3]);
-        Orig   =atof(argv[ 4]);
-        Amp    =atof(argv[ 5]);
-        Tf     =atof(argv[ 6]);
-        dt     =atof(argv[ 7]);
-        Alpha  =atof(argv[ 8]);
-    }
+    infile >>  Amax ;       infile.ignore(200,'\n');
+    infile >>  nx   ;       infile.ignore(200,'\n');
+    infile >>  ny   ;       infile.ignore(200,'\n');
+    infile >>  nz   ;       infile.ignore(200,'\n');
+    infile >>  nu   ;       infile.ignore(200,'\n');
+    infile >>  Orig ;       infile.ignore(200,'\n');
+    infile >>  Amp  ;       infile.ignore(200,'\n');
+    infile >>  Tf   ;       infile.ignore(200,'\n');
+    infile >>  dt   ;       infile.ignore(200,'\n');
+    infile >>  Alpha;       infile.ignore(200,'\n');
+    infile >>  r2   ;       infile.ignore(200,'\n');
+    infile >>  Kn   ;       infile.ignore(200,'\n');
+    infile >>  Kt   ;       infile.ignore(200,'\n');
+    infile >>  Gn   ;       infile.ignore(200,'\n');
+    infile >>  Mu   ;       infile.ignore(200,'\n');
+    infile >>  Bn   ;       infile.ignore(200,'\n');
+    infile >>  Bt   ;       infile.ignore(200,'\n');
+    infile >>  Eps  ;       infile.ignore(200,'\n');
 
-
-    size_t nx   = N, ny = N, nz = 3;
-
-    r2 = nx/20;
-    r1 = 0.5*r2;
+    double r1 = 0.5*r2;
 
     // Setting top and bottom wall as solid
     LBM::Domain Dom(D3Q15, nu, iVec3_t(nx,ny,nz), 1.0, dt);
@@ -131,11 +140,11 @@ int main(int argc, char **argv) try
     }
 
     mesh.Generate ();
-    Dom.GenFromMesh(mesh,/*spheroradius*/1.0,/*density*/3.0,/*iscohesive*/false,/*montecarlo mass properties*/false,/*thickness*/5.0);
+    Dom.GenFromMesh(mesh,/*spheroradius*/Alpha,/*density*/3.0,/*iscohesive*/true,/*montecarlo mass properties*/false,/*thickness*/double(nz));
     Dom.Center(Vec3_t(0.5*(nx-1),0.5*(ny-1),0.5*(nz-1)));
 	
     Dict B;
-    B.Set(-1,"Bn Bt Bm Gn Gt Eps Kn Kt Mu"   ,Bn,Bt,Bm,Gn,Gt,Eps,Kn,Kt,Mu);
+    B.Set(-1,"Bn Bt Gn Eps Kn Kt Mu"   ,Bn,Bt,Gn,Eps,Kn,Kt,Mu);
     Dom.SetProps(B);
     
     for (size_t i=0; i<nx; ++i)
