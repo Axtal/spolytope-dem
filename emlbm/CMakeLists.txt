@@ -1,6 +1,6 @@
 ########################################################################
 # MechSys - Open Library for Mechanical Systems                        #
-# Copyright (C) 2009 Sergio Torres                                     #
+# Copyright (C) 2005 Dorival M. Pedroso, Raúl D. D. Farfan             #
 #                                                                      #
 # This program is free software: you can redistribute it and/or modify #
 # it under the terms of the GNU General Public License as published by #
@@ -16,25 +16,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>  #
 ########################################################################
 
-PROJECT                (SIMS)
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
-### DEPENDENCIES ########################################################################################
+SET(PROGS
+    pdielectric
+    )
 
-# essential dependencies
-INCLUDE (${SIMS_SOURCE_DIR}/FindMECHSYS.cmake)
-#message("idiota " ${MECHSYS_SOURCE_DIR})
-if(MECHSYS_FOUND)
-    INCLUDE (${MECHSYS_SOURCE_DIR}/Modules/FindDEPS.cmake)
-    if(NOT DEPS_OK)
-#        MESSAGE("Not all dependencies were satisfied")
-    endif(NOT DEPS_OK)
-    INCLUDE_DIRECTORIES (${MECHSYS_INCLUDE_DIRS})
-else(MECHSYS_FOUND)
-    MESSAGE("This project requires MechSys")
-endif(MECHSYS_FOUND)
-
-### SUB DIRECTORIES #####################################################################################
-
-SUBDIRS(dem)
-SUBDIRS(lbm)
-SUBDIRS(emlbm)
+FOREACH(var ${PROGS})
+    ADD_EXECUTABLE        (${var} "${var}.cpp")
+    TARGET_LINK_LIBRARIES (${var} ${LIBS})
+    SET_TARGET_PROPERTIES (${var} PROPERTIES COMPILE_FLAGS "${FLAGS}")
+ENDFOREACH(var)

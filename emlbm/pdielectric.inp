@@ -1,0 +1,10 @@
+soilregular    fileDEM
+1    Render    
+200    N
+5.0    ESol
+5.0e3   Tf    
+5.0e1   dtOut 
+1.0e-4  J0
+2.0   ome   
+10    outlimit
+2    buffer
