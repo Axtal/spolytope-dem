@@ -67,6 +67,9 @@ void Setup (LBM::Domain & dom, void * UD)
 void Report (LBM::Domain & dom, void * UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
+    String ff;
+    ff.Printf    ("%s_bf_%04d",dom.FileKey.CStr(), dom.idx_out);
+    dom.WriteBF(ff.CStr());
 }
 
 
@@ -166,6 +169,7 @@ int main(int argc, char **argv) try
     Dom.GetParticle(-6)->Bdry = true;
     Dom.GetParticle(-7)->Bdry = true;
 
+    //This is where you move the particles
     Vec3_t Xmin,Xmax;
     Dom.BoundingBox(Xmin,Xmax);
     Vec3_t Cen = 0.5*(Xmax-Xmin)+10.0*dx*OrthoSys::e2;
@@ -185,6 +189,7 @@ int main(int argc, char **argv) try
         maxR = std::max(Dom.Particles[i]->Props.R,maxR);
     }
 
+    //Distribute equally the size
     Array<size_t> Big;
     Array<size_t> Small;
     for (size_t i=0;i<Dom.Particles.Size();i++)
@@ -216,15 +221,18 @@ int main(int argc, char **argv) try
             valid = true;
         }
         DEM::Particle * Pa = Dom.Particles[j];
+        Pa->Index  = i;
         TempPar[i] = Pa; 
     }
 
     Dom.Particles.Resize(0);
     Dom.Particles = TempPar;
 
-    Dom.WriteXDMF(filekey.CStr());
 
-    //Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render,Nproc);
+
+    //Dom.WriteXDMF(filekey.CStr());
+
+    Dom.Solve(Tf,dtOut,Setup,Report,filekey.CStr(),Render,Nproc);
     return 0;
 }
 MECHSYS_CATCH

@@ -76,6 +76,8 @@ int main(int argc, char **argv) try
     double Tf    = 5000.0;
     double dt    = 1.0;
     double Alpha = 10.0;
+    double sx    = 10.0;          
+    double sy    = 20.0;          
     double r2    = 5.0;
     double Kn    = 3000.0;
     double Kt    = 3000.0;
@@ -95,6 +97,8 @@ int main(int argc, char **argv) try
     infile >>  Tf   ;       infile.ignore(200,'\n');
     infile >>  dt   ;       infile.ignore(200,'\n');
     infile >>  Alpha;       infile.ignore(200,'\n');
+    infile >>  sx   ;       infile.ignore(200,'\n');
+    infile >>  sy   ;       infile.ignore(200,'\n');
     infile >>  r2   ;       infile.ignore(200,'\n');
     infile >>  Kn   ;       infile.ignore(200,'\n');
     infile >>  Kt   ;       infile.ignore(200,'\n');
@@ -141,17 +145,40 @@ int main(int argc, char **argv) try
 
     mesh.Generate ();
     Dom.GenFromMesh(mesh,/*spheroradius*/Alpha,/*density*/3.0,/*iscohesive*/true,/*montecarlo mass properties*/false,/*thickness*/double(nz));
+    Dom.GenBoundingBox (/*InitialTag*/-2, 0.2*Alpha, /*Cf*/1.2, /*Rho*/3.0);
     Dom.Center(Vec3_t(0.5*(nx-1),0.5*(ny-1),0.5*(nz-1)));
+    Array<int> DeleteTags(2);
+    DeleteTags[0]  = -6;
+    DeleteTags[1]  = -7;
+    Dom.DelParticles(DeleteTags);
 	
     Dict B;
-    B.Set(-1,"Bn Bt Gn Eps Kn Kt Mu"   ,Bn,Bt,Gn,Eps,Kn,Kt,Mu);
+    B.Set(-1,"Bn Bt Gn Eps Kn Kt Mu"   ,Bn,Bt,Gn,Eps,Kn,Kt,Mu );
+    B.Set(-2,"Bn Bt Gn Eps Kn Kt Mu"   ,Bn,Bt,Gn,Eps,Kn,Kt,0.0);
+    B.Set(-3,"Bn Bt Gn Eps Kn Kt Mu"   ,Bn,Bt,Gn,Eps,Kn,Kt,0.0);
+    B.Set(-4,"Bn Bt Gn Eps Kn Kt Mu"   ,Bn,Bt,Gn,Eps,Kn,Kt,0.0);
+    B.Set(-5,"Bn Bt Gn Eps Kn Kt Mu"   ,Bn,Bt,Gn,Eps,Kn,Kt,0.0);
     Dom.SetProps(B);
+
+    Dom.GetParticle(-2)->Ff = -double(ny*nz)*sx*OrthoSys::e0;
+    Dom.GetParticle(-3)->Ff =  double(ny*nz)*sx*OrthoSys::e0;
+    Dom.GetParticle(-4)->Ff = -double(nx*nz)*sy*OrthoSys::e1;
+    Dom.GetParticle(-5)->Ff =  double(nx*nz)*sy*OrthoSys::e1;
+    Dom.GetParticle(-2)->FixVeloc();
+    Dom.GetParticle(-3)->FixVeloc();
+    Dom.GetParticle(-4)->FixVeloc();
+    Dom.GetParticle(-5)->FixVeloc();
+    Dom.GetParticle(-2)->vxf = false;
+    Dom.GetParticle(-3)->vxf = false;
+    Dom.GetParticle(-4)->vyf = false;
+    Dom.GetParticle(-5)->vyf = false;
+
     
     for (size_t i=0; i<nx; ++i)
 	for (size_t j=0; j<ny; ++j)
 	for (size_t k=0; k<nz; ++k)
     {
-        Dom.Lat[0].GetCell(iVec3_t(i,j,k))->Initialize(1.0,OrthoSys::O);
+        Dom.Lat[0].GetCell(iVec3_t(i,j,k))->Initialize(Orig,OrthoSys::O);
 		if (pow((int)(i)-0.5*nx,2.0) + pow((int)(j)-0.5*ny,2.0) <= pow(r1,2.0)) // circle equation
 		{
             dat.Center.Push(Dom.Lat[0].GetCell(iVec3_t(i,j,k)));

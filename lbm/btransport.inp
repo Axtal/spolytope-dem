@@ -1,18 +1,18 @@
-porous.txt        filename with data
-400               nx depending on filename
-600              ny  
+a.txt        filename with data
+200               nx depending on filename
+300              ny  
 0.005               g
 1.0               Gmix; 
  0.48               Gs0;  
 -0.48               Gs1;  
-2                   R;    
+4                   R;    
 30                  spacing;
-4                   Ninj;
-1                    Rmin or scale depending on filename;    
-100                 Rmax or separation depending on filename;
+1                   Ninj;
+4                    Rmin or scale depending on filename;    
+10                 Rmax or separation depending on filename;
 2.0                 rho; 
 1.9              inj; 
 50000.0               Tf;
 500.0                 dtOut;
-0.8                  por or radii scale depending on filename;
+0.7                  por or radii scale depending on filename;
 4000                 seed 

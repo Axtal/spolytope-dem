@@ -65,8 +65,10 @@ void Report (LBM::Domain & dom, void * UD)
     Cell * ou0  = dom.Lat[0].GetCell(iVec3_t(0,0,0));
     Cell * ou1  = dom.Lat[1].GetCell(iVec3_t(0,0,0));
 
-    double Pin   = (in0->Rho + in1->Rho + dom.Gmix*in0->Rho*in1->Rho)/3.0 + (dom.Lat[0].G*pow(dom.Lat[0].Psi(in0->Rho),2.0) + dom.Lat[1].G*pow(dom.Lat[1].Psi(in1->Rho),2.0))/6.0;
-    double Pout  = (ou0->Rho + ou1->Rho + dom.Gmix*ou0->Rho*ou1->Rho)/3.0 + (dom.Lat[0].G*pow(dom.Lat[0].Psi(ou0->Rho),2.0) + dom.Lat[1].G*pow(dom.Lat[1].Psi(ou1->Rho),2.0))/6.0;
+    double Pin   = in0->Cs*in0->Cs*((in0->Rho + in1->Rho + dom.Gmix*in0->Rho*in1->Rho)/3.0 + (dom.Lat[0].G*pow(dom.Lat[0].Psi(in0->Rho),2.0) + dom.Lat[1].G*pow(dom.Lat[1].Psi(in1->Rho),2.0))/6.0);
+    double Pout  = in0->Cs*in0->Cs*((ou0->Rho + ou1->Rho + dom.Gmix*ou0->Rho*ou1->Rho)/3.0 + (dom.Lat[0].G*pow(dom.Lat[0].Psi(ou0->Rho),2.0) + dom.Lat[1].G*pow(dom.Lat[1].Psi(ou1->Rho),2.0))/6.0);
+    //double Pin   = in0->Cs*in0->Cs*(in0->Rho + in1->Rho)/3.0;
+    //double Pout  = in0->Cs*in0->Cs*(ou0->Rho + ou1->Rho)/3.0;
     double R   = 0.5*(min1 - max1);
     
     dat.oss_st << dom.Time << Util::_8s << Pin << Util::_8s << Pout << Util::_8s << R << Util::_8s << R*(Pin-Pout) << std::endl;
@@ -77,6 +79,8 @@ void Report (LBM::Domain & dom, void * UD)
 int main(int argc, char **argv) try
 {
     size_t Nproc = 1; 
+    double dt    = 0.1;
+    double nua   = 0.16;
     double Gmix  = 0.001;
     double G0    = -200.0;
     double G1    = 0.0;
@@ -87,26 +91,29 @@ int main(int argc, char **argv) try
     double dtout = 50.0;
     if (argc>=2)
     {
-        Nproc  =atoi(argv[1]);
-        Gmix   =atof(argv[2]);
-        G0     =atof(argv[3]);
-        G1     =atof(argv[4]);
-        R      =atof(argv[5]);
-        rho0   =atof(argv[6]);
-        rho1   =atof(argv[7]);
-        Tf     =atof(argv[8]);
-        dtout  =atof(argv[9]);
+        Nproc  =atoi(argv[ 1]);
+        dt     =atof(argv[ 2]);
+        nua    =atof(argv[ 3]);
+        Gmix   =atof(argv[ 4]);
+        G0     =atof(argv[ 5]);
+        G1     =atof(argv[ 6]);
+        R      =atof(argv[ 7]);
+        rho0   =atof(argv[ 8]);
+        rho1   =atof(argv[ 9]);
+        Tf     =atof(argv[10]);
+        dtout  =atof(argv[11]);
     }
     Array<double> nu(2);
-    nu[0] = 1.0/6.0;
-    nu[1] = 1.0/6.0;
+    nu[0] = nua;
+    nu[1] = nua;
 
     size_t nx = 200, ny = 200;
 
     // Setting top and bottom wall as solid
-    LBM::Domain Dom(D2Q9, nu, iVec3_t(nx,ny,1), 1.0, 1.0);
+    LBM::Domain Dom(D2Q9, nu, iVec3_t(nx,ny,1), 1.0, dt);
     UserData dat;
     Dom.UserData = &dat;
+    //Dom.Sc = 0.0;
     dat.rho0     = rho0;
     dat.rho1     = rho1;
     int obsX = nx/2, obsY = ny/2;
