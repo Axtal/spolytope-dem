@@ -44,17 +44,23 @@ struct UserData
 void Setup(LBM::Domain & dom, void * UD)
 {
     UserData & dat = (*static_cast<UserData *>(UD));
-    //for (size_t j=0;j<dom.Lat.Size();j++)
-    //for (size_t i=0;i<dom.Lat[j].Ncells;i++)
-    //{
-        //Cell * c = dom.Lat[j].Cells[i];
-        //c->BForcef = c->Density()*dat.g;
-    //}
+    for (size_t j=0;j<dom.Lat.Size();j++)
+#ifdef USE_OMP
+    #pragma omp parallel for schedule (static) num_threads(dom.Nproc)
+#endif
+    for (size_t i=0;i<dom.Lat[j].Ncells;i++)
+    {
+        Cell * c = dom.Lat[j].Cells[i];
+        c->BForcef = c->Density()*dat.g;
+    }
     if (dom.Time>dat.time)
     {
         dat.time += dat.dtOut;
     }
     double rho = dat.Head*sin(dat.ome*dat.time)*sin(dat.ome*dat.time)+dat.Orig;
+#ifdef USE_OMP
+    #pragma omp parallel for schedule (static) num_threads(dom.Nproc)
+#endif
     for (size_t i=0;i<dat.Bottom.Size();i++)
     {
         //dat.Bottom[i]->Initialize(rho,OrthoSys::O);
@@ -68,6 +74,9 @@ void Setup(LBM::Domain & dom, void * UD)
         c->Rho = c->VelDen(c->Vel);
     }
 	// Cells with prescribed density
+#ifdef USE_OMP
+    #pragma omp parallel for schedule (static) num_threads(dom.Nproc)
+#endif
 	for (size_t i=0; i<dat.Top.Size(); ++i)
 	{
 		Cell * c = dat.Top[i];
